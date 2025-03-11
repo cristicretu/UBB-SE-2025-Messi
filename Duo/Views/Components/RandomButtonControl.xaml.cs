@@ -8,11 +8,11 @@ namespace Duo.Views.Components
     {
         private readonly string[] _randomMessages = new string[]
         {
-            "Hello, World!",
-            "Have a nice day!",
-            "WinUI 3 is awesome!",
-            "Random messages are fun!",
-            "This component works!"
+            "Forta Steaua!",
+            "Steaua e numai una",
+            "Steaua Campioana!",
+            "Muie Dinam0",
+            "Muie Rapid"
         };
 
         private readonly Random _random = new Random();
