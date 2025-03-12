@@ -41,13 +41,59 @@ public class DataLink
             sqlConnection.Closed();
         }
     }
-    /*
-    DataLink: 
-    1. ExecuteScalar - single value - Get number of posts by category
-    2. ExecuteReader - dataTable - Reading, Filtering, Searching
-    3. ExecuteNonQuery - Insert, Delete, ... -> CRUD
+    
+    public T ExecuteScalar<T> (string storedProcedure, SqlParameters[] sqlParameters)
+    {
+        try
+        {
+            using (SqlCommand command = CreateCommand(storedProcedure, sqlParameters))
+            {
+                var result = command.ExecuteScalar(storedProcedure, sqlParameters);
+                if (result == DBNull.Value || result == null)
+                {
+                    return (T) Convert.ChangeType(result, T);
+                }
 
-    Repository: 
-    dataLink.ExecuteScalar(storedprocname, params);
-*/
+                return result;
+            }
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Error executing scalar: {ex.Message}");
+        }
+    }
+
+    public DataTable ExecuteReader(string storedProcedure, SqlParameters[] sqlParameters)
+    {
+        try 
+        {
+            using (SqlCommand command = CreateCommand(storedProcedure, sqlParameters))
+            {
+                using (SqlDataReader reader = command.ExecuteReader())
+                {
+                    DataTable dataTable = new DataTable;
+                    dataTable.Load(reader);
+                    return dataTable;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Error executing reader: {ex.Message}");
+        }
+    }
+    
+    public int ExecuteNonQuery(string storedProcedure, SqlParameters[] sqlParameters)
+    {
+        try {
+            using (SqlCommand sqlCommand = SqlCommand(storedProcedure, sqlParameters))
+            {
+                return sqlCommand.ExecuteNonQuery();
+            }
+        }
+        catch (Exception ex)
+        {
+            throw new Exeception($"Error - ExecuteNonQuery: {ex.Message}"); 
+        }
+    }
 }
