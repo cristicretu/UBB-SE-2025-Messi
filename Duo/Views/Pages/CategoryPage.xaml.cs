@@ -45,6 +45,12 @@ namespace Duo.Views.Pages
         
         private void NavigateToPage(string pageTag)
         {
+            // Return early if pageTag is null
+            if (string.IsNullOrEmpty(pageTag))
+            {
+                return;
+            }
+            
             Type? pageType = null;
             
             // Map the tag to the appropriate page type

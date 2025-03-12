@@ -8,7 +8,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-        <NavigationView x:Name="nvSample">
+    <NavigationView x:Name="nvSample">
         <NavigationView.MenuItems>
             <NavigationViewItem Icon="Play" Content="Menu Item1" Tag="SamplePage1" />
             <NavigationViewItem Icon="Save" Content="Menu Item2" Tag="SamplePage2" />
