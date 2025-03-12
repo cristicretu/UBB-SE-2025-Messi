@@ -10,10 +10,7 @@
     mc:Ignorable="d"
     Title="Duo">
 
-    <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="20">
-        <Button x:Name="myButton" Click="myButton_Click">Click Me</Button>
-        
-        <!-- Our new custom component -->
-        <components:RandomButtonControl />
-    </StackPanel>
+    <Grid>
+        <components:CategoryPage />
+    </Grid>
 </Window>
