@@ -10,8 +10,8 @@
     d:DesignHeight="300"
     d:DesignWidth="400">
 
-    <Border Background="White" 
-            BorderBrush="#E0E0E0" 
+    <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" 
+            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" 
             BorderThickness="1" 
             CornerRadius="8" 
             Padding="16" 
@@ -26,12 +26,12 @@
                 <TextBlock Text="{x:Bind Username}" 
                            Grid.Column="0"
                            FontWeight="SemiBold" 
-                           Foreground="#333333"/>
+                           Foreground="{ThemeResource TextFillColorPrimaryBrush}"/>
 
                 <TextBlock Text="{x:Bind Date}" 
                            Grid.Column="1"
                            FontSize="12" 
-                           Foreground="#888888" 
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" 
                            HorizontalAlignment="Right"/>
             </Grid>
 
@@ -39,6 +39,7 @@
                        FontSize="18" 
                        FontWeight="Bold" 
                        TextWrapping="Wrap"
+                       Foreground="{ThemeResource TextFillColorPrimaryBrush}"
                        Margin="0,0,0,8"/>
             
             <!-- Hashtags as pills -->
@@ -51,7 +52,7 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Border Background="#F0F0F0"
+                        <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                                 BorderThickness="0"
                                 CornerRadius="16"
                                 Padding="8,4"
@@ -59,10 +60,10 @@
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="#" 
                                            FontSize="12"
-                                           Foreground="#555555"/>
+                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
                                 <TextBlock Text="{Binding}" 
                                            FontSize="12"
-                                           Foreground="#555555"/>
+                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
                             </StackPanel>
                         </Border>
                     </DataTemplate>
@@ -71,7 +72,7 @@
                        
             <TextBlock Text="{x:Bind ContentText}" 
                        TextWrapping="Wrap" 
-                       Foreground="#555555"
+                       Foreground="{ThemeResource TextFillColorPrimaryBrush}"
                        Margin="0,0,0,8"/>
 
             <Grid>
@@ -82,16 +83,14 @@
                 
                 <Button Content="Like" 
                         Grid.Column="0"
-                        Background="#F0F0F0"
-                        BorderBrush="#E0E0E0"
-                        BorderThickness="1"
+                        Style="{ThemeResource AccentButtonStyle}"
                         CornerRadius="8"
                         Padding="12,4"/>
                 
                 <TextBlock Text="{x:Bind LikeCount}" 
                            Grid.Column="1"
                            FontSize="12" 
-                           Foreground="#888888" 
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" 
                            VerticalAlignment="Center"
                            Margin="8,0,0,0"/>
             </Grid>
