@@ -41,7 +41,7 @@ public class DataLink
             sqlConnection.Closed();
         }
     }
-    
+    /*
     DataLink: 
     1. ExecuteScalar - single value - Get number of posts by category
     2. ExecuteReader - dataTable - Reading, Filtering, Searching
@@ -49,4 +49,5 @@ public class DataLink
 
     Repository: 
     dataLink.ExecuteScalar(storedprocname, params);
+*/
 }

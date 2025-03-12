@@ -40,6 +40,11 @@
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.1742" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.6.250205002" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Data\Queries\Comment\DeleteComment\" />
+    <Folder Include="Data\Queries\Comment\GetAll\" />
+    <Folder Include="Data\Queries\Comment\Update\" />
+  </ItemGroup>
 
   <!--
     Defining the "HasPackageAndPublishMenuAddedByProject" property here allows the Solution
