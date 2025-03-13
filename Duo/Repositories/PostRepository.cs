@@ -69,7 +69,7 @@ public class PostRepository
         
         if (dataTable.Rows.Count > 0)
         {
-            DataRow row = dataTable.Rows[0];
+            DtaRow row = dataTable.Rows[0];
             return new Post
             {
                 Id = Convert.ToInt32(row["Id"]),
@@ -84,5 +84,37 @@ public class PostRepository
         }
         
         return null;
+    }
+
+    public List<Post> GetByCategory(int categoryId, int page, int pageSize)
+    {
+        int offset = (page - 1) * pageSize;
+
+        SqlParameter[] parameters = new SqlParameter[]
+        {
+            new SqlParameter("CategoryID", categoryId),
+            new SqlParameter("PageSize", pageSize), 
+            new SqlParameter("Offset", offset)
+        };
+
+        DataTable dataTable = dataLink.ExecuteReader("GetPostsByCategory", parameters);
+        List<Post> posts = new List<Post>();
+
+        foreach(DataRow row in dataTable.Rows)
+        {
+            posts.Add(new Post
+            {
+                Id = Convert.ToInt32(row["Id"]),
+                Title = Convert.ToString(row["Title"]) ?? string.Empty,
+                Description = Convert.ToString(row["Description"]) ?? string.Empty,
+                UserID = Convert.ToInt32(row["UserID"]),
+                CategoryID = Convert.ToInt32(row["CategoryID"]),
+                CreatedAt = Convert.ToDateTime(row["CreatedAt"]),
+                UpdatedAt = Convert.ToDateTime(row["UpdatedAt"]),
+                LikeCount = Convert.ToInt32(row["LikeCount"])
+            });
+        }
+
+        return posts;
     }
 }
