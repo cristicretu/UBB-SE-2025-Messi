@@ -8,10 +8,32 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <Grid>
-        <TextBlock Text="Category Page" 
-                   HorizontalAlignment="Center" 
-                   VerticalAlignment="Center"
-                   FontSize="24"/>
-    </Grid>
+    <NavigationView x:Name="NavigationView"
+        Height="Auto"
+        PaneDisplayMode="Left"
+        PaneTitle="Duo"
+        IsTabStop="False"
+        ExpandedModeThresholdWidth="400"
+        SelectionChanged="NavigationView_SelectionChanged">
+
+        <NavigationView.MenuItems>
+            <NavigationViewItemHeader Content="Courses Header" />
+            <NavigationViewItem Content="Courses" Icon="Library" ToolTipService.ToolTip="Courses" Tag="CoursesParent">
+            </NavigationViewItem> 
+            <NavigationViewItem Content="Quiz" Icon="Help" ToolTipService.ToolTip="Quiz" Tag="QuizParent">
+            </NavigationViewItem>
+            <NavigationViewItem Content="Community" Icon="Folder" ToolTipService.ToolTip="Community" Tag="CommunityParent">
+                <NavigationViewItem.MenuItems>
+                    <NavigationViewItem Content="general-discussion" Icon="Message" ToolTipService.ToolTip="General Discussion" Tag="general-discussion"/>
+                    <NavigationViewItem Content="lesson-help" Icon="Help" ToolTipService.ToolTip="Lesson Help" Tag="lesson-help"/>
+                    <NavigationViewItem Content="off-topic" Icon="OutlineStar" ToolTipService.ToolTip="Off-Topic" Tag="off-topic"/>
+                    <NavigationViewItem Content="discovery" Icon="Find" ToolTipService.ToolTip="Discovery" Tag="discovery"/>
+                    <NavigationViewItem Content="announcements" Icon="Message" ToolTipService.ToolTip="Announcements" Tag="announcements"/>
+                </NavigationViewItem.MenuItems>
+            </NavigationViewItem>
+        </NavigationView.MenuItems>
+
+        <Frame x:Name="contentFrame" />
+    </NavigationView>
+
 </Page>

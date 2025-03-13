@@ -7,13 +7,11 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:components="using:Duo.Views.Components"
+    xmlns:pages="using:Duo.Views.Pages"
     mc:Ignorable="d"
     Title="Duo">
 
-    <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="20">
-        <Button x:Name="myButton" Click="myButton_Click">Click Me</Button>
-        
-        <!-- Our new custom component -->
-        <components:RandomButtonControl />
-    </StackPanel>
+    <Grid>
+        <pages:CategoryPage />
+    </Grid>
 </Window>

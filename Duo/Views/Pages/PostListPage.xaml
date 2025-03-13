@@ -9,7 +9,7 @@
     mc:Ignorable="d">
 
     <Grid>
-        <TextBlock Text="Post List Page" 
+        <TextBlock Text="{x:Bind CategoryName, Mode=OneWay}" 
                    HorizontalAlignment="Center" 
                    VerticalAlignment="Center"
                    FontSize="24"/>
