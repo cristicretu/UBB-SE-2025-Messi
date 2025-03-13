@@ -43,7 +43,7 @@ namespace Duo.Services
         }
 
         // Post validation
-        public static bool ValidatePost(string content, string title = null)
+        public static bool ValidatePost(string content, string? title = null)
         {
             // Content should not be null or empty
             ValidateNotNullOrEmpty(content, nameof(content));
@@ -79,14 +79,14 @@ namespace Duo.Services
             ValidateNotNullOrEmpty(hashtag, nameof(hashtag));
             
             // Hashtag should not be empty after removing #
-            ValidateCondition(!string.IsNullOrEmpty(tag), "Hashtag cannot be just a # symbol.");
+            ValidateCondition(!string.IsNullOrEmpty(hashtag), "Hashtag cannot be just a # symbol.");
             
             // Hashtag should only contain alphanumeric characters
-            ValidateCondition(Regex.IsMatch(tag, @"^[a-zA-Z0-9]+$"), 
+            ValidateCondition(Regex.IsMatch(hashtag, @"^[a-zA-Z0-9]+$"), 
                 "Hashtag can only contain letters and numbers.");
             
             // Hashtag should not exceed 30 characters
-            ValidateRange(tag.Length, 1, 30, "Hashtag length");
+            ValidateRange(hashtag.Length, 1, 30, "Hashtag length");
             
             return true;
         }
