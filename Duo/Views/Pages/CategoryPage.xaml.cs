@@ -13,15 +13,15 @@ namespace Duo.Views.Pages
             {
                 this.InitializeComponent();
 
-                // // Ensure frame starts on a default page
-                // try
-                // {
-                //     contentFrame.Navigate(typeof(MainPage));
-                // }
-                // catch (Exception ex)
-                // {
-                //     Debug.WriteLine($"Initial navigation failed: {ex.Message}");
-                // }
+                // Ensure frame starts on a default page
+                try
+                {
+                    contentFrame.Navigate(typeof(MainPage));
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Initial navigation failed: {ex.Message}");
+                }
             }
             catch (Exception ex)
             {
