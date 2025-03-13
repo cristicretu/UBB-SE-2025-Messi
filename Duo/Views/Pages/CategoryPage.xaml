@@ -16,7 +16,6 @@
         ExpandedModeThresholdWidth="400"
         SelectionChanged="NavigationView_SelectionChanged">
 
-
         <NavigationView.MenuItems>
             <NavigationViewItemHeader Content="Courses Header" />
             <NavigationViewItem Content="Courses" Icon="Library" ToolTipService.ToolTip="Courses" Tag="CoursesParent">
@@ -25,8 +24,11 @@
             </NavigationViewItem>
             <NavigationViewItem Content="Community" Icon="Folder" ToolTipService.ToolTip="Community" Tag="CommunityParent">
                 <NavigationViewItem.MenuItems>
-                    <NavigationViewItem Content="Announcement" Icon="Message" ToolTipService.ToolTip="Announcement" Tag="AnnouncementPage"/>
-                    <NavigationViewItem Content="General" Icon="Globe" ToolTipService.ToolTip="General" Tag="GeneralPage"/>
+                    <NavigationViewItem Content="general-discussion" Icon="Message" ToolTipService.ToolTip="General Discussion" Tag="general-discussion"/>
+                    <NavigationViewItem Content="lesson-help" Icon="Help" ToolTipService.ToolTip="Lesson Help" Tag="lesson-help"/>
+                    <NavigationViewItem Content="off-topic" Icon="OutlineStar" ToolTipService.ToolTip="Off-Topic" Tag="off-topic"/>
+                    <NavigationViewItem Content="discovery" Icon="Find" ToolTipService.ToolTip="Discovery" Tag="discovery"/>
+                    <NavigationViewItem Content="announcements" Icon="Message" ToolTipService.ToolTip="Announcements" Tag="announcements"/>
                 </NavigationViewItem.MenuItems>
             </NavigationViewItem>
         </NavigationView.MenuItems>
