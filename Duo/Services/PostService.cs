@@ -8,6 +8,7 @@ public class PostsService
 
     public PostsService(PostRepository postRepository) {
         this.postRepository = postRepository;
+        this.searchService = new SearchService();
     }
 
     public List<Post> SearchPostsByKeyword(string keyword)
