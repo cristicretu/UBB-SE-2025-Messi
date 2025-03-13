@@ -11,30 +11,23 @@
     <NavigationView x:Name="NavigationView"
         Height="Auto"
         PaneDisplayMode="Left"
-        PaneTitle="Browse Duo"
+        PaneTitle="Duo"
         IsTabStop="False"
         ExpandedModeThresholdWidth="400"
         SelectionChanged="NavigationView_SelectionChanged">
 
-        <NavigationView.AutoSuggestBox> 
-            <AutoSuggestBox QueryIcon="Find" AutomationProperties.Name="Search" /> 
-        </NavigationView.AutoSuggestBox>
 
         <NavigationView.MenuItems>
             <NavigationViewItemHeader Content="Courses Header" />
             <NavigationViewItem Content="Courses" Icon="Library" ToolTipService.ToolTip="Courses" Tag="CoursesParent">
-                 <!-- <NavigationViewItem.MenuItems>
-                    <NavigationViewItem Content="Beginner Course" Icon="Play" ToolTipService.ToolTip="Beginner Course" Tag="BeginnerCoursePage"/>
-                    <NavigationViewItem Content="Intermediary Course" Icon="ProgressRingDots" ToolTipService.ToolTip="Intermediary Course" Tag="IntermediaryCoursePage"/>
-                    <NavigationViewItem Content="Advanced Course" Icon="FavoriteStar" ToolTipService.ToolTip="Advanced Course" Tag="AdvancedCoursePage"/>
-                </NavigationViewItem.MenuItems> -->
             </NavigationViewItem> 
             <NavigationViewItem Content="Quiz" Icon="Help" ToolTipService.ToolTip="Quiz" Tag="QuizParent">
-                <!-- <NavigationViewItem.MenuItems>
-                    <NavigationViewItem Content="Beginner Quiz" Icon="Play" ToolTipService.ToolTip="Beginner Quiz" Tag="BeginnerQuizPage"/>
-                    <NavigationViewItem Content="Intermediary Quiz" Icon="ProgressRingDots" ToolTipService.ToolTip="Intermediary Quiz" Tag="IntermediaryQuizPage"/>
-                    <NavigationViewItem Content="Advanced Quiz" Icon="FavoriteStar" ToolTipService.ToolTip="Advanced Quiz" Tag="AdvancedQuizPage"/>
-                </NavigationViewItem.MenuItems> -->
+            </NavigationViewItem>
+            <NavigationViewItem Content="Community" Icon="Folder" ToolTipService.ToolTip="Community" Tag="CommunityParent">
+                <NavigationViewItem.MenuItems>
+                    <NavigationViewItem Content="Announcement" Icon="Message" ToolTipService.ToolTip="Announcement" Tag="AnnouncementPage"/>
+                    <NavigationViewItem Content="General" Icon="Globe" ToolTipService.ToolTip="General" Tag="GeneralPage"/>
+                </NavigationViewItem.MenuItems>
             </NavigationViewItem>
         </NavigationView.MenuItems>
 
