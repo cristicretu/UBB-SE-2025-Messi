@@ -1,6 +1,8 @@
 using System;
 using System.Data;
 using Microsoft.Data.SqlClient;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 public class PostRepository
 {
@@ -69,7 +71,7 @@ public class PostRepository
         
         if (dataTable.Rows.Count > 0)
         {
-            DtaRow row = dataTable.Rows[0];
+            DataRow row = dataTable.Rows[0];
             return new Post
             {
                 Id = Convert.ToInt32(row["Id"]),
@@ -86,7 +88,7 @@ public class PostRepository
         return null;
     }
 
-    public List<Post> GetByCategory(int categoryId, int page, int pageSize)
+    public Collection<Post> GetByCategory(int categoryId, int page, int pageSize)
     {
         int offset = (page - 1) * pageSize;
 
@@ -115,6 +117,6 @@ public class PostRepository
             });
         }
 
-        return posts;
+        return new Collection<Post>(posts);
     }
 }
