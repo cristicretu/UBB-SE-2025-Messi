@@ -42,64 +42,14 @@ namespace Duo.Services
             return true;
         }
 
-        // Username validation
-        public static bool ValidateUsername(string username)
-        {
-            // Username should not be null or empty
-            ValidateNotNullOrEmpty(username, nameof(username));
-            
-            // Username should be between 3 and 20 characters
-            ValidateRange(username.Length, 3, 20, "Username length");
-            
-            // Username should only contain alphanumeric characters and underscores
-            ValidateCondition(Regex.IsMatch(username, @"^[a-zA-Z0-9_]+$"), 
-                "Username can only contain letters, numbers, and underscores.");
-            
-            return true;
-        }
-
-        // Password validation
-        public static bool ValidatePassword(string password)
-        {
-            // Password should not be null or empty
-            ValidateNotNullOrEmpty(password, nameof(password));
-            
-            // Password should be at least 8 characters
-            ValidateCondition(password.Length >= 8, 
-                "Password must be at least 8 characters long.");
-            
-            // Password should contain at least one uppercase letter, one lowercase letter, and one digit
-            ValidateCondition(Regex.IsMatch(password, @"[A-Z]"), 
-                "Password must contain at least one uppercase letter.");
-            ValidateCondition(Regex.IsMatch(password, @"[a-z]"), 
-                "Password must contain at least one lowercase letter.");
-            ValidateCondition(Regex.IsMatch(password, @"[0-9]"), 
-                "Password must contain at least one digit.");
-            
-            return true;
-        }
-
-        // Email validation
-        public static bool ValidateEmail(string email)
-        {
-            // Email should not be null or empty
-            ValidateNotNullOrEmpty(email, nameof(email));
-            
-            // Email should match a basic email pattern
-            ValidateCondition(Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"), 
-                "Email format is invalid.");
-            
-            return true;
-        }
-
         // Post validation
         public static bool ValidatePost(string content, string title = null)
         {
             // Content should not be null or empty
             ValidateNotNullOrEmpty(content, nameof(content));
             
-            // Content should not exceed 5000 characters
-            ValidateRange(content.Length, 1, 5000, "Post content length");
+            // Content should not exceed 4000 characters
+            ValidateRange(content.Length, 1, 4000, "Post content length");
             
             // If title is provided, validate it
             if (title != null)
@@ -128,9 +78,6 @@ namespace Duo.Services
             // Hashtag should not be null or empty
             ValidateNotNullOrEmpty(hashtag, nameof(hashtag));
             
-            // Remove # if present at the beginning
-            string tag = hashtag.StartsWith("#") ? hashtag.Substring(1) : hashtag;
-            
             // Hashtag should not be empty after removing #
             ValidateCondition(!string.IsNullOrEmpty(tag), "Hashtag cannot be just a # symbol.");
             
@@ -140,16 +87,6 @@ namespace Duo.Services
             
             // Hashtag should not exceed 30 characters
             ValidateRange(tag.Length, 1, 30, "Hashtag length");
-            
-            return true;
-        }
-
-        // Login validation
-        public static bool ValidateLogin(string username, string password)
-        {
-            // Validate username and password
-            ValidateUsername(username);
-            ValidatePassword(password);
             
             return true;
         }
