@@ -16,8 +16,35 @@ public class SearchService
 
         foreach (var str in strings)
         {
-            double levenScore = LevenshteinSimilarity(query, str.ToLower());
+            string strLower = str.ToLower();
 
+            if (strLower.Contains(query))
+            {
+                matches.Add((str, 0.9));
+                continue;
+            }
+
+            if (query.Contains(strLower))
+            {
+                matches.Add((str, 0.8));
+                continue;
+            }
+
+            if (str.Contains(" "))
+            {
+                string[] words = strLower.Split(' ');
+                foreach (var word in words)
+                {
+                    if (word.Contains(query) || query.Contains(word))
+                    {
+                        double wordScore = 0.7;
+                        matches.Add((str, wordScore));
+                        continue;
+                    }
+                }
+            }
+
+            double levenScore = LevenshteinSimilarity(query, strLower);
             if (levenScore >= threshold)
             {
                 matches.Add((str, levenScore));
@@ -25,6 +52,8 @@ public class SearchService
         }
 
         return matches
+            .GroupBy(m => m.Text)
+            .Select(g => g.OrderByDescending(m => m.Score).First())
             .OrderByDescending(m => m.Score)
             .Select(m => m.Text)
             .ToList();
@@ -43,7 +72,7 @@ public class SearchService
         {
             for(int j = 1; j <= target.Length; j++)
             {
-                int cost = (source[i = 1] == target[j - 1]) ? 0 : 1;
+                int cost = (source[i - 1] == target[j - 1]) ? 0 : 1;
 
                 distance[i, j] = Math.Min(
                     Math.Min(
