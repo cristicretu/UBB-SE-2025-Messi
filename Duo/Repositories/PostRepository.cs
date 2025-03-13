@@ -4,11 +4,11 @@ using Microsoft.Data.SqlClient;
 
 public class PostRepository
 {
-    private readonly DataLink _dataLink;
+    private readonly DataLink dataLink;
     
     public PostRepository(DataLink dataLink)
     {
-        _dataLink = dataLink;
+        this.dataLink = dataLink;
     }
     
     public int CreatePost(Post post)
@@ -25,7 +25,7 @@ public class PostRepository
         };
         try
         {
-            int? result = _dataLink.ExecuteScalar<int>("CreatePost", parameters);
+            int? result = dataLink.ExecuteScalar<int>("CreatePost", parameters);
             return result ?? 0;
         }
         catch (SqlException ex)
@@ -40,7 +40,7 @@ public class PostRepository
         {
             new SqlParameter("@Id", id)
         };
-        _dataLink.ExecuteNonQuery("DeletePost", parameters);
+        dataLink.ExecuteNonQuery("DeletePost", parameters);
     }
     
     public void UpdatePost(Post post)
@@ -55,7 +55,7 @@ public class PostRepository
             new SqlParameter("@UpdatedAt", post.UpdatedAt),
             new SqlParameter("@LikeCount", post.LikeCount)
         };
-        _dataLink.ExecuteNonQuery("UpdatePost", parameters);
+        dataLink.ExecuteNonQuery("UpdatePost", parameters);
     }
     
     public Post? GetPostById(int id)
@@ -65,7 +65,7 @@ public class PostRepository
             new SqlParameter("@Id", id)
         };
         
-        DataTable dataTable = _dataLink.ExecuteReader("GetPostById", parameters);
+        DataTable dataTable = dataLink.ExecuteReader("GetPostById", parameters);
         
         if (dataTable.Rows.Count > 0)
         {
