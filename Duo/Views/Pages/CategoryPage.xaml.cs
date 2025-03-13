@@ -1,7 +1,7 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System;
-using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Duo.Views.Pages
 {
@@ -9,75 +9,76 @@ namespace Duo.Views.Pages
     {
         public CategoryPage()
         {
-            this.InitializeComponent();
-            
-            // Set initial page when component loads
-            contentFrame.Navigate(typeof(Page)); // Navigate to a default page
-            
-            // Subscribe to NavigationView events
-            nvSample.ItemInvoked += NvSample_ItemInvoked;
-            nvSample.BackRequested += NvSample_BackRequested;
-        }
-        
-        private void NvSample_ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
-        {
-            if (args.IsSettingsInvoked)
+            try
             {
-                // Handle settings navigation if needed
-                // contentFrame.Navigate(typeof(SettingsPage));
-                return;
+                this.InitializeComponent();
+
+                // // Ensure frame starts on a default page
+                // try
+                // {
+                //     contentFrame.Navigate(typeof(MainPage));
+                // }
+                // catch (Exception ex)
+                // {
+                //     Debug.WriteLine($"Initial navigation failed: {ex.Message}");
+                // }
             }
-            
-            // Get the tag of the selected item
-            var tag = args.InvokedItemContainer?.Tag?.ToString();
-            
-            // Navigate based on the tag
-            NavigateToPage(tag);
-        }
-        
-        private void NvSample_BackRequested(NavigationView sender, NavigationViewBackRequestedEventArgs args)
-        {
-            if (contentFrame.CanGoBack)
+            catch (Exception ex)
             {
-                contentFrame.GoBack();
+                Debug.WriteLine($"Page initialization failed: {ex.Message}");
             }
         }
-        
+
+        private void NavigationView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
+        {
+            try
+            {
+                if (args.SelectedItem is NavigationViewItem selectedItem)
+                {
+                    var tag = selectedItem.Tag?.ToString();
+
+                    if (string.IsNullOrEmpty(tag))
+                        return;
+
+                    // Ignore parent items
+                    if (selectedItem.MenuItems.Count > 0)
+                    {
+                        Debug.WriteLine($"Parent item '{selectedItem.Content}' selected. No navigation performed.");
+                        return;
+                    }
+
+                    Debug.WriteLine($"Navigating to page with tag: {tag}");
+                    NavigateToPage(tag);
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Selection changed error: {ex.Message}");
+            }
+        }
+
         private void NavigateToPage(string pageTag)
         {
-            // Return early if pageTag is null
-            if (string.IsNullOrEmpty(pageTag))
+            try
             {
-                return;
-            }
-            
-            Type? pageType = null;
-            
-            // Map the tag to the appropriate page type
-            switch (pageTag)
-            {
-                case "SamplePage1":
-                    // pageType = typeof(SamplePage1);
-                    break;
-                case "SamplePage2":
-                    // pageType = typeof(SamplePage2);
-                    break;
-                case "SamplePage3":
-                    // pageType = typeof(SamplePage3);
-                    break;
-                case "SamplePage4":
-                    // pageType = typeof(SamplePage4);
-                    break;
-                default:
-                    // Default page if no match is found
-                    // pageType = typeof(DefaultPage);
-                    break;
-            }
-            
-            // Navigate to the page if a type was set
-            if (pageType != null)
-            {
+                // TODO implement navigation to different pages based on tag
+                Type pageType = pageTag switch
+                {
+                    "BeginnerPage" => typeof(MainPage),
+                    "IntermediaryPage" => typeof(MainPage),
+                    "AdvancedPage" => typeof(MainPage),
+                    "BeginnerQuizPage" => typeof(MainPage),
+                    "IntermediaryQuizPage" => typeof(MainPage),
+                    "AdvancedQuizPage" => typeof(MainPage),
+                    _ => typeof(MainPage)
+                };
+
                 contentFrame.Navigate(pageType);
+                Debug.WriteLine($"Navigated to {pageType.Name}");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Navigation error: {ex.Message}");
             }
         }
     }
