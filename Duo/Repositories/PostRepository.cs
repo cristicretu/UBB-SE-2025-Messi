@@ -119,4 +119,62 @@ public class PostRepository
 
         return new Collection<Post>(posts);
     }
+
+    public List<string> GetAllPostTitles()
+    {
+        var titles = new List<string>();
+
+        try 
+        {
+            DataTable dataTable = dataLink.ExecuteReader("GetAllPostTitles", null);
+
+            foreach (DataRow row in dataTable.Rows)
+            {
+                titles.Add(row["Title"].ToString());
+            }
+
+            return titles;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error getting post titles: {ex.Message}");
+            return titles;
+        }
+    }
+
+    public List<Post> GetByTitle(string title)
+    {
+        SqlParameter[] parameters = new SqlParameter[]
+        {
+            new SqlParameter("@Title", title)
+        };
+        
+        try
+        {
+            DataTable dataTable = dataLink.ExecuteReader("GetPostsByTitle", parameters);
+            List<Post> posts = new List<Post>();
+            
+            foreach(DataRow row in dataTable.Rows)
+            {
+                posts.Add(new Post
+                {
+                    Id = Convert.ToInt32(row["Id"]),
+                    Title = Convert.ToString(row["Title"]) ?? string.Empty,
+                    Description = Convert.ToString(row["Description"]) ?? string.Empty,
+                    UserID = Convert.ToInt32(row["UserID"]),
+                    CategoryID = Convert.ToInt32(row["CategoryID"]),
+                    CreatedAt = Convert.ToDateTime(row["CreatedAt"]),
+                    UpdatedAt = Convert.ToDateTime(row["UpdatedAt"]),
+                    LikeCount = Convert.ToInt32(row["LikeCount"])
+                });
+            }
+            
+            return posts;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error getting posts by title: {ex.Message}");
+            return new List<Post>();
+        }
+    }
 }
