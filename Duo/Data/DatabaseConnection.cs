@@ -4,22 +4,21 @@ using System;
 using System.Data;
 
 public class DataLink
-{   
+{  
     private SqlConnection sqlConnection;
     private readonly string connectionString;
 
     public DataLink(IConfiguration configuration)
     {
-        string localDataSource = configuration["LocalDataSource"];
-        connectionString = "DataSource=" + localDataSource +
-                        "Initial Catalog=ISS_Duo; " +
-                        "IntegratedSecurity=True" +
+        string? localDataSource = configuration["LocalDataSource"];
+        connectionString = "Data Source=" + localDataSource + ";" +
+                        "Initial Catalog=ISS_Duo;" +
+                        "Integrated Security=True;" +
                         "TrustServerCertificate=True";
-
-        try 
+        try
         {
-            sqlConnection = new sqlConnection(connectionString);
-        } 
+            sqlConnection = new SqlConnection(connectionString);
+        }
         catch (Exception ex)
         {
             throw new Exception($"Error initializing SQL connection: {ex.Message}");
@@ -28,7 +27,7 @@ public class DataLink
 
     public void OpenConnection()
     {
-        if(sqlConnection.State != ConnectionState.Open) 
+        if(sqlConnection.State != ConnectionState.Open)
         {
             sqlConnection.Open();
         }
@@ -36,42 +35,62 @@ public class DataLink
 
     public void CloseConnection()
     {
-        if(sqlConnection.State != ConnectionState.Closed) 
+        if(sqlConnection.State != ConnectionState.Closed)
         {
-            sqlConnection.Closed();
+            sqlConnection.Close();
         }
     }
-    
-    public T ExecuteScalar<T> (string storedProcedure, SqlParameters[] sqlParameters)
+   
+    public T? ExecuteScalar<T>(string storedProcedure, SqlParameter[]? sqlParameters = null)
     {
         try
         {
-            using (SqlCommand command = CreateCommand(storedProcedure, sqlParameters))
+            OpenConnection();
+            using (SqlCommand command = new SqlCommand(storedProcedure, sqlConnection))
             {
-                var result = command.ExecuteScalar(storedProcedure, sqlParameters);
+                command.CommandType = CommandType.StoredProcedure;
+               
+                if (sqlParameters != null)
+                {
+                    command.Parameters.AddRange(sqlParameters);
+                }
+               
+                var result = command.ExecuteScalar();
                 if (result == DBNull.Value || result == null)
                 {
-                    return (T) Convert.ChangeType(result, T);
+                    return default;
                 }
-
-                return result;
+               
+                return (T)Convert.ChangeType(result, typeof(T));
             }
         }
         catch (Exception ex)
         {
-            throw new Exception($"Error executing scalar: {ex.Message}");
+            throw new Exception($"Error - ExecutingScalar: {ex.Message}");
+        }
+        finally
+        {
+            CloseConnection();
         }
     }
 
-    public DataTable ExecuteReader(string storedProcedure, SqlParameters[] sqlParameters)
+    public DataTable ExecuteReader(string storedProcedure, SqlParameter[]? sqlParameters = null)
     {
-        try 
+        try
         {
-            using (SqlCommand command = CreateCommand(storedProcedure, sqlParameters))
+            OpenConnection();
+            using (SqlCommand command = new SqlCommand(storedProcedure, sqlConnection))
             {
+                command.CommandType = CommandType.StoredProcedure;
+               
+                if (sqlParameters != null)
+                {
+                    command.Parameters.AddRange(sqlParameters);
+                }
+               
                 using (SqlDataReader reader = command.ExecuteReader())
                 {
-                    DataTable dataTable = new DataTable;
+                    DataTable dataTable = new DataTable();
                     dataTable.Load(reader);
                     return dataTable;
                 }
@@ -79,21 +98,38 @@ public class DataLink
         }
         catch (Exception ex)
         {
-            throw new Exception($"Error executing reader: {ex.Message}");
+            throw new Exception($"Error - ExecuteReader: {ex.Message}");
+        }
+        finally
+        {
+            CloseConnection();
         }
     }
-    
-    public int ExecuteNonQuery(string storedProcedure, SqlParameters[] sqlParameters)
+
+    public int ExecuteNonQuery(string storedProcedure, SqlParameter[]? sqlParameters = null)
     {
-        try {
-            using (SqlCommand sqlCommand = SqlCommand(storedProcedure, sqlParameters))
+        try 
+        {
+            OpenConnection();
+            using (SqlCommand command = new SqlCommand(storedProcedure, sqlConnection))
             {
-                return sqlCommand.ExecuteNonQuery();
+                command.CommandType = CommandType.StoredProcedure;
+               
+                if (sqlParameters != null)
+                {
+                    command.Parameters.AddRange(sqlParameters);
+                }
+               
+                return command.ExecuteNonQuery();
             }
         }
         catch (Exception ex)
         {
-            throw new Exeception($"Error - ExecuteNonQuery: {ex.Message}"); 
+            throw new Exception($"Error - ExecuteNonQuery: {ex.Message}");
+        }
+        finally
+        {
+            CloseConnection();
         }
     }
 }

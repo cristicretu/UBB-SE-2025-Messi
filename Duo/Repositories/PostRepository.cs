@@ -1,16 +1,16 @@
 using System;
+using System.Data;
 using Microsoft.Data.SqlClient;
-
 
 public class PostRepository
 {
     private readonly DataLink _dataLink;
-
+    
     public PostRepository(DataLink dataLink)
     {
         _dataLink = dataLink;
     }
-
+    
     public int CreatePost(Post post)
     {
         SqlParameter[] parameters = new SqlParameter[]
@@ -23,28 +23,26 @@ public class PostRepository
             new SqlParameter("@UpdatedAt", post.UpdatedAt),
             new SqlParameter("@LikeCount", post.LikeCount)
         };
-
         try
         {
-            _dataLink.ExecuteScalar("CreatePost", parameters);
+            int? result = _dataLink.ExecuteScalar<int>("CreatePost", parameters);
+            return result ?? 0;
         }
         catch (SqlException ex)
         {
             throw new Exception(ex.Message);
         }
-        return 0;
     }
-
+    
     public void DeletePost(int id)
     {
         SqlParameter[] parameters = new SqlParameter[]
         {
             new SqlParameter("@Id", id)
         };
-
         _dataLink.ExecuteNonQuery("DeletePost", parameters);
     }
-
+    
     public void UpdatePost(Post post)
     {
         SqlParameter[] parameters = new SqlParameter[]
@@ -57,34 +55,34 @@ public class PostRepository
             new SqlParameter("@UpdatedAt", post.UpdatedAt),
             new SqlParameter("@LikeCount", post.LikeCount)
         };
-
         _dataLink.ExecuteNonQuery("UpdatePost", parameters);
     }
-
-    public Post GetPostById(int id)
+    
+    public Post? GetPostById(int id)
     {
         SqlParameter[] parameters = new SqlParameter[]
         {
             new SqlParameter("@Id", id)
         };
-
-        using (SqlDataReader reader = _dataLink.ExecuteReader("GetPostById", parameters))
+        
+        DataTable dataTable = _dataLink.ExecuteReader("GetPostById", parameters);
+        
+        if (dataTable.Rows.Count > 0)
         {
-            if (reader.Read())
+            DataRow row = dataTable.Rows[0];
+            return new Post
             {
-                return new Post
-                {
-                    Id = reader.GetInt32(0),
-                    Title = reader.GetString(1),
-                    Description = reader.GetString(2),
-                    UserID = reader.GetInt32(3),
-                    CategoryID = reader.GetInt32(4),
-                    CreatedAt = reader.GetDateTime(5),
-                    UpdatedAt = reader.GetDateTime(6),
-                    LikeCount = reader.GetInt32(7)
-                };
-            }
-            return null; 
+                Id = Convert.ToInt32(row["Id"]),
+                Title = Convert.ToString(row["Title"]) ?? string.Empty,
+                Description = Convert.ToString(row["Description"]) ?? string.Empty,
+                UserID = Convert.ToInt32(row["UserID"]),
+                CategoryID = Convert.ToInt32(row["CategoryID"]),
+                CreatedAt = Convert.ToDateTime(row["CreatedAt"]),
+                UpdatedAt = Convert.ToDateTime(row["UpdatedAt"]),
+                LikeCount = Convert.ToInt32(row["LikeCount"])
+            };
         }
+        
+        return null;
     }
 }
