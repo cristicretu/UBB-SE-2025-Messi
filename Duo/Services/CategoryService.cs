@@ -31,8 +31,9 @@ public class CategoryService
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error fetching category '{name}': {ex.Message}");
+            Console.WriteLine(ex.Message);
             return null;
         }
     }
+
 }

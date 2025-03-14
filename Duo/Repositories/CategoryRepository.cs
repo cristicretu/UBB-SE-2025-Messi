@@ -30,18 +30,30 @@ public class CategoryRepository
 
     public Category GetCategoryByName(string name)
     {
-        Category category = null;
-        SqlParameter[] parameters = new SqlParameter[]
+        try
         {
+            SqlParameter[] parameters = new SqlParameter[]
+            {
             new SqlParameter("@Name", name)
-        };
-        var dataTable = _dataLink.ExecuteReader("GetCategoryByName", parameters);
+            };
+            var dataTable = _dataLink.ExecuteReader("GetCategoryByName", parameters);
 
-        DataRow row = dataTable.Rows[0];
-        return new Category(
-            Convert.ToInt32(row["Id"]),
-            row["Name"] != DBNull.Value ? row["Name"].ToString() : ""
-        );
+            if (dataTable.Rows.Count == 0)
+            {
+                throw new Exception($"Category '{name}' not found.");
+            }
+
+            DataRow row = dataTable.Rows[0];
+            return new Category(
+                Convert.ToInt32(row["Id"]),
+                row["Name"] != DBNull.Value ? row["Name"].ToString() : ""
+            );
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Error fetching category '{name}': {ex.Message}");
+        }
     }
+
 
 }

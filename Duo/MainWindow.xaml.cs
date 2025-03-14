@@ -25,6 +25,7 @@ namespace Duo
     /// </summary>
     public sealed partial class MainWindow : Window
     {
+
         public MainWindow()
         {
             this.InitializeComponent();
