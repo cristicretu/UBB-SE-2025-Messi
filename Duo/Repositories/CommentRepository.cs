@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics;
 using Microsoft.Data.SqlClient;
 
@@ -9,21 +10,29 @@ public class CommentRepository
 
     public CommentRepository(DataLink dataLink)
     {
-        _dataLink = dataLink;
+        _dataLink = dataLink ?? throw new ArgumentNullException(nameof(dataLink));
     }
 
-public Comment GetCommentById(int id)
+    public Comment GetCommentById(int id)
     {
+        if (id <= 0) throw new ArgumentException("Invalid comment ID", nameof(id));
+
         SqlParameter[] parameters = new SqlParameter[]
         {
-        new SqlParameter("@CommentID", id)
+            new SqlParameter("@CommentID", id)
         };
 
+        DataTable? dataTable = null;
         try
         {
-            var dataTable = _dataLink.ExecuteReader("GetCommentByID", parameters);
-            var row = dataTable.Rows[0];
+            dataTable = _dataLink.ExecuteReader("GetCommentByID", parameters);
+            if (dataTable.Rows.Count == 0)
+                throw new Exception("Comment not found");
 
+            if (dataTable.Columns.Count < 8)
+                throw new Exception("Invalid data structure returned from database");
+
+            var row = dataTable.Rows[0];
             return new Comment(
                 Convert.ToInt32(row[0]),
                 row[1]?.ToString() ?? string.Empty,
@@ -39,19 +48,30 @@ public Comment GetCommentById(int id)
         {
             throw new Exception(ex.Message);
         }
+        finally
+        {
+            dataTable?.Dispose();
+        }
     }
 
     public List<Comment> GetCommentsByPostId(int postId)
     {
+        if (postId <= 0) throw new ArgumentException("Invalid post ID", nameof(postId));
+
         List<Comment> comments = new List<Comment>();
         SqlParameter[] parameters = new SqlParameter[]
         {
             new SqlParameter("@PostID", postId)
         };
+
+        DataTable? dataTable = null;
         try
         {
-            var dataTable = _dataLink.ExecuteReader("GetCommentsByPostID", parameters);
-            foreach (System.Data.DataRow row in dataTable.Rows)
+            dataTable = _dataLink.ExecuteReader("GetCommentsByPostID", parameters);
+            if (dataTable.Columns.Count < 8)
+                throw new Exception("Invalid data structure returned from database");
+
+            foreach (DataRow row in dataTable.Rows)
             {
                 Comment comment = new Comment(
                     Convert.ToInt32(row[0]),
@@ -71,21 +91,34 @@ public Comment GetCommentById(int id)
         {
             throw new Exception(ex.Message);
         }
+        finally
+        {
+            dataTable?.Dispose();
+        }
     }
 
-public Comment CreateComment(Comment comment)
+    public Comment CreateComment(Comment comment)
     {
+        if (comment == null) throw new ArgumentNullException(nameof(comment));
+        if (string.IsNullOrEmpty(comment.Content)) throw new ArgumentException("Content cannot be empty");
+        if (comment.UserId <= 0) throw new ArgumentException("Invalid user ID");
+        if (comment.PostId <= 0) throw new ArgumentException("Invalid post ID");
+
         SqlParameter[] parameters = new SqlParameter[]
         {
             new SqlParameter("@Content", comment.Content),
             new SqlParameter("@UserID", comment.UserId),
             new SqlParameter("@PostID", comment.PostId),
-            new SqlParameter("@ParentCommentID", comment.ParentCommentId),
+            new SqlParameter("@ParentCommentID", (object?)comment.ParentCommentId ?? DBNull.Value),
             new SqlParameter("@Level", comment.Level)
         };
+
         try
         {
             int? result = _dataLink.ExecuteScalar<int>("CreateComment", parameters);
+            if (result == null)
+                throw new Exception("Failed to create comment");
+
             comment.Id = result.Value;
             return comment;
         }
@@ -97,10 +130,13 @@ public Comment CreateComment(Comment comment)
 
     public bool DeleteComment(int id)
     {
+        if (id <= 0) throw new ArgumentException("Invalid comment ID", nameof(id));
+
         SqlParameter[] parameters = new SqlParameter[]
         {
             new SqlParameter("@CommentID", id)
         };
+
         try
         {
             _dataLink.ExecuteNonQuery("DeleteComment", parameters);
@@ -114,11 +150,16 @@ public Comment CreateComment(Comment comment)
 
     public bool UpdateComment(Comment comment)
     {
+        if (comment == null) throw new ArgumentNullException(nameof(comment));
+        if (comment.Id <= 0) throw new ArgumentException("Invalid comment ID");
+        if (string.IsNullOrEmpty(comment.Content)) throw new ArgumentException("Content cannot be empty");
+
         SqlParameter[] parameters = new SqlParameter[]
         {
             new SqlParameter("@CommentID", comment.Id),
             new SqlParameter("@NewContent", comment.Content),
         };
+
         try
         {
             _dataLink.ExecuteNonQuery("UpdateComment", parameters);
@@ -132,17 +173,22 @@ public Comment CreateComment(Comment comment)
 
     public List<Comment> GetReplies(int parentCommentId)
     {
+        if (parentCommentId <= 0) throw new ArgumentException("Invalid parent comment ID", nameof(parentCommentId));
+
         List<Comment> comments = new List<Comment>();
         SqlParameter[] parameters = new SqlParameter[]
         {
             new SqlParameter("@ParentCommentID", parentCommentId)
         };
 
+        DataTable? dataTable = null;
         try
         {
-            var dataTable = _dataLink.ExecuteReader("GetReplies", parameters);
+            dataTable = _dataLink.ExecuteReader("GetReplies", parameters);
+            if (dataTable.Columns.Count < 8)
+                throw new Exception("Invalid data structure returned from database");
 
-            foreach (System.Data.DataRow row in dataTable.Rows)
+            foreach (DataRow row in dataTable.Rows)
             {
                 Comment comment = new Comment(
                     Convert.ToInt32(row[0]),
@@ -162,14 +208,21 @@ public Comment CreateComment(Comment comment)
         {
             throw new Exception(ex.Message);
         }
+        finally
+        {
+            dataTable?.Dispose();
+        }
     }
 
-    public bool IncrementLikeCount(int parentCommentId)
+    public bool IncrementLikeCount(int commentId)
     {
+        if (commentId <= 0) throw new ArgumentException("Invalid comment ID", nameof(commentId));
+
         SqlParameter[] parameters = new SqlParameter[]
         {
-            new SqlParameter("@CommentID", parentCommentId)
+            new SqlParameter("@CommentID", commentId)
         };
+
         try
         {
             _dataLink.ExecuteNonQuery("IncrementLikeCount", parameters);
@@ -180,5 +233,4 @@ public Comment CreateComment(Comment comment)
             throw new Exception(ex.Message);
         }
     }
-
 }
