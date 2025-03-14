@@ -1,6 +1,7 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System;
+using Duo.Helpers;
 
 namespace Duo.Views
 {
@@ -15,6 +16,10 @@ namespace Duo.Views
             // login on enter 
             UsernameTextBox.KeyDown += (sender, e) => 
             {
+                DebounceHelper.Debounce(() => {
+                   Console.WriteLine("Current text is: " + UsernameTextBox.Text);
+                }, 200);
+
                 if (e.Key == Windows.System.VirtualKey.Enter)
                 {
                     AttemptLogin();
