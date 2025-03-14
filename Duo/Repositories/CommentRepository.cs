@@ -19,8 +19,6 @@ public class CommentRepository
             new SqlParameter("@UserID", comment.UserId),
             new SqlParameter("@PostID", comment.PostId),
             new SqlParameter("@ParentCommentID", comment.ParentCommentId),
-            new SqlParameter("@CreatedAt", comment.CreatedAt),
-            new SqlParameter("@LikeCount", comment.LikeCount),
             new SqlParameter("@Level", comment.Level)
         };
         try
@@ -38,7 +36,7 @@ public class CommentRepository
     {
         SqlParameter[] parameters = new SqlParameter[]
         {
-            new SqlParameter("@Id", id)
+            new SqlParameter("@CommentID", id)
         };
         _dataLink.ExecuteNonQuery("DeleteComment", parameters);
     }
@@ -47,8 +45,8 @@ public class CommentRepository
     {
         SqlParameter[] parameters = new SqlParameter[]
         {
-            new SqlParameter("@Id", comment.Id),
-            new SqlParameter("@Content", comment.Content),
+            new SqlParameter("@CommentID", comment.Id),
+            new SqlParameter("@NewContent", comment.Content),
         };
         _dataLink.ExecuteNonQuery("UpdateComment", parameters);
     }
