@@ -4,16 +4,16 @@ using System.Collections.Generic;
 
 namespace Duo.Views.Components
 {
-    public sealed partial class PostLikeButton : UserControl
+    public sealed partial class LikeButton : UserControl
     {
-        public PostLikeButton()
+        public LikeButton()
         {
             this.InitializeComponent();
         }
 
         // Like Count Property
         public static readonly DependencyProperty LikeCountProperty =
-            DependencyProperty.Register(nameof(LikeCount), typeof(int), typeof(PostLikeButton), new PropertyMetadata(0));
+            DependencyProperty.Register(nameof(LikeCount), typeof(int), typeof(LikeButton), new PropertyMetadata(0));
 
         public int LikeCount
         {

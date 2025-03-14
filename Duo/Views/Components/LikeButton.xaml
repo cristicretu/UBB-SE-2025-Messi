@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <UserControl
-    x:Class="Duo.Views.Components.PostLikeButton"
+    x:Class="Duo.Views.Components.LikeButton"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:Duo.Views.Components"
@@ -14,7 +14,7 @@
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
-        <Button x:Name="LikeButton"
+        <Button x:Name="likeButton"
                 Content="Like"
                 Grid.Column="0"
                 Style="{ThemeResource AccentButtonStyle}"
