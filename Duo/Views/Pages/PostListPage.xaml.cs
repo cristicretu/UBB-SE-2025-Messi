@@ -133,7 +133,8 @@ namespace Duo.Views.Pages
             bool hashtagMatch = true;
             if (selectedHashtags.Count > 0)
             {
-                hashtagMatch = selectedHashtags.Any(tag => post.Hashtags.Contains(tag));
+                // Ensure all selected hashtags are present in the post
+                hashtagMatch = selectedHashtags.All(tag => post.Hashtags.Contains(tag));
             }
             
             return titleMatch && hashtagMatch;
