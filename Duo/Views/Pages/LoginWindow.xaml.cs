@@ -30,7 +30,35 @@ namespace Duo.Views
 
         private void LoginButton_Click(object sender, RoutedEventArgs e)
         {
+            ErrorTextBlock.Visibility = Visibility.Collapsed;
+            
+            string errorMessage = IsLoginValid(UsernameTextBox.Text);
+            if (!string.IsNullOrEmpty(errorMessage))
+            {
+                ShowError(errorMessage);
+                return;
+            }
+            
             AttemptLogin();
+        }
+
+        private void ShowError(string message)
+        {
+            ErrorTextBlock.Text = message;
+            ErrorTextBlock.Visibility = Visibility.Visible;
+        }
+
+        private string IsLoginValid(string username)
+        {
+            try 
+            {
+                ValidationHelper.ValidateUsername(username);
+                return null; 
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
         }
 
         private void AttemptLogin()
@@ -38,7 +66,6 @@ namespace Duo.Views
             
             LoginSuccessful?.Invoke(this, EventArgs.Empty);
             
-            // close the window
             this.Close();
         }
     }
