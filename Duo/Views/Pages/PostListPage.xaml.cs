@@ -5,6 +5,9 @@ using System.Linq; // Ensure this is included for LINQ operations
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
 using System;
+using System.Globalization;
+using System.Text;
+using Duo.Helpers;
 
 namespace Duo.Views.Pages
 {
@@ -14,6 +17,11 @@ namespace Duo.Views.Pages
         public string Title { get; set; }
         public string Content { get; set; }
         public List<string> Hashtags { get; set; } = new List<string>();
+        
+        // Additional properties for PostComponent
+        public string Username { get; set; } = "u/username";
+        public string Date { get; set; } = "2h ago";
+        public int LikeCount { get; set; } = 0;
 
         public MockPost()
         {
@@ -27,6 +35,18 @@ namespace Duo.Views.Pages
             {
                 Hashtags.AddRange(hashtags);
             }
+            
+            // Set random like count between 0 and 100
+            Random rand = new Random();
+            LikeCount = rand.Next(0, 100);
+            
+            // Set random username from a predefined list
+            string[] usernames = { "u/techguru", "u/designmaster", "u/codewhiz", "u/newsjunkie", "u/sciencefan" };
+            Username = usernames[rand.Next(0, usernames.Length)];
+            
+            // Set random date from a predefined list
+            string[] dates = { "2h ago", "3h ago", "Yesterday", "2 days ago", "Last week" };
+            Date = dates[rand.Next(0, dates.Length)];
         }
     }
 
@@ -36,6 +56,7 @@ namespace Duo.Views.Pages
         public ObservableCollection<MockPost> postsFiltered { get; private set; } = new ObservableCollection<MockPost>();
         private HashSet<string> selectedHashtags = new HashSet<string>();
         private Dictionary<string, Button> hashtagButtons = new Dictionary<string, Button>();
+        private string categoryName = "General Discussion"; 
 
         public PostListPage()
         {
@@ -64,6 +85,17 @@ namespace Duo.Views.Pages
                 {
                     hashtagButtons[tag] = button;
                 }
+            }
+        }
+        
+        protected override void OnNavigatedTo(NavigationEventArgs e)
+        {
+            base.OnNavigatedTo(e);
+            
+            if (e.Parameter is string category && !string.IsNullOrEmpty(category))
+            {
+                categoryName = Utils.ConvertKebabCaseToTitleCase(category);
+                CategoryTitle.Text = categoryName;
             }
         }
         

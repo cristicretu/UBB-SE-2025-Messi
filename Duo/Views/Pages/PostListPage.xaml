@@ -116,122 +116,173 @@
         </Style>
     </Page.Resources>
 
-    <Grid Margin="16">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
-
-        <!-- Title Search -->
-        <StackPanel Grid.Row="0" Margin="0,0,0,12">
-            <TextBlock Text="Search by Title" 
-                       Margin="0,0,0,4" 
-                       FontWeight="SemiBold" />
-            <TextBox 
-                x:Name="FilterByTitle" 
-                PlaceholderText="Enter title keywords..."
-                TextChanged="OnFilterChanged"
-                BorderThickness="0,0,0,1"
-                Background="{ThemeResource SystemControlBackgroundAltHighBrush}"/>
-        </StackPanel>
-        
-        <!-- Hashtags ScrollViewer -->
-        <Grid Grid.Row="1" Margin="0,0,0,12">
+    <ScrollViewer VerticalScrollMode="Auto" 
+                  VerticalScrollBarVisibility="Auto"
+                  HorizontalScrollMode="Disabled"
+                  HorizontalScrollBarVisibility="Disabled">
+                  
+        <Grid Margin="16">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            
-            <TextBlock Text="Filter by Hashtags" 
-                       Grid.Row="0"
-                       Margin="0,0,0,4" 
-                       FontWeight="SemiBold"/>
-                       
-            <ScrollViewer Grid.Row="1"
-                Height="60"
-                ZoomMode="Disabled"
-                IsTabStop="True"
-                IsVerticalScrollChainingEnabled="True"
-                HorizontalScrollMode="Enabled" 
-                HorizontalScrollBarVisibility="Auto"
-                VerticalScrollMode="Disabled" 
-                VerticalScrollBarVisibility="Disabled"
-                Background="{ThemeResource SystemControlBackgroundAltHighBrush}"
-                BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}"
-                Padding="0,6">
+
+            <Grid Grid.Row="0" Margin="0,0,0,20">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
                 
-                <!-- Hashtags container -->
-                <ItemsControl x:Name="HashtagsContainer">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <StackPanel Orientation="Horizontal" Spacing="8"/>
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.Items>
-                        <Button Content="#technology" Click="Hashtag_Click" Tag="technology" Style="{StaticResource HashtagButtonStyle}"/>
-                        <Button Content="#design" Click="Hashtag_Click" Tag="design" Style="{StaticResource HashtagButtonStyle}"/>
-                        <Button Content="#programming" Click="Hashtag_Click" Tag="programming" Style="{StaticResource HashtagButtonStyle}"/>
-                        <Button Content="#news" Click="Hashtag_Click" Tag="news" Style="{StaticResource HashtagButtonStyle}"/>
-                        <Button Content="#science" Click="Hashtag_Click" Tag="science" Style="{StaticResource HashtagButtonStyle}"/>
-                        <Button Content="#art" Click="Hashtag_Click" Tag="art" Style="{StaticResource HashtagButtonStyle}"/>
-                        <Button Content="#music" Click="Hashtag_Click" Tag="music" Style="{StaticResource HashtagButtonStyle}"/>
-                        <Button Content="#health" Click="Hashtag_Click" Tag="health" Style="{StaticResource HashtagButtonStyle}"/>
-                        <Button Content="#education" Click="Hashtag_Click" Tag="education" Style="{StaticResource HashtagButtonStyle}"/>
-                        <Button Content="#travel" Click="Hashtag_Click" Tag="travel" Style="{StaticResource HashtagButtonStyle}"/>
-                        <Button Content="#food" Click="Hashtag_Click" Tag="food" Style="{StaticResource HashtagButtonStyle}"/>
-                        <Button Content="#sports" Click="Hashtag_Click" Tag="sports" Style="{StaticResource HashtagButtonStyle}"/>
-                    </ItemsControl.Items>
-                </ItemsControl>
-            </ScrollViewer>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <TextBlock Grid.Row="0" Grid.Column="0" 
+                        x:Name="CategoryTitle"
+                        Text="General Discussion" 
+                        Style="{StaticResource TitleTextBlockStyle}"
+                        FontSize="28"
+                        FontWeight="Bold" 
+                        VerticalAlignment="Center"
+                        Margin="0,0,0,12"/>
+                        
+                <Button Grid.Row="0" Grid.Column="1" 
+                        Content="+ Create Post" 
+                        Style="{StaticResource AccentButtonStyle}"
+                        CornerRadius="20"
+                        Padding="16,8"
+                        VerticalAlignment="Center"
+                        Margin="0,0,0,12"/>
+                
+                <!-- Border to separate header from content -->
+                <Border Grid.Row="1" Grid.ColumnSpan="2"
+                        BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}" 
+                        BorderThickness="0,0,0,1" 
+                        Margin="0,0,0,8"/>
+            </Grid>
+
+            <!-- Title Search -->
+            <StackPanel Grid.Row="1" Margin="0,0,0,12">
+                <TextBlock Text="Search by Title" 
+                          Margin="0,0,0,4" 
+                          FontWeight="SemiBold" />
+                <TextBox 
+                    x:Name="FilterByTitle" 
+                    PlaceholderText="Enter title keywords..."
+                    TextChanged="OnFilterChanged"
+                    BorderThickness="0,0,0,1"
+                    Background="{ThemeResource SystemControlBackgroundAltHighBrush}"/>
+            </StackPanel>
+            
+            <!-- Hashtags ScrollViewer -->
+            <Grid Grid.Row="2" Margin="0,0,0,12">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                
+                <TextBlock Text="Filter by Hashtags" 
+                          Grid.Row="0"
+                          Margin="0,0,0,4" 
+                          FontWeight="SemiBold"/>
+                          
+                <ScrollViewer Grid.Row="1"
+                    Height="60"
+                    ZoomMode="Disabled"
+                    IsTabStop="True"
+                    IsVerticalScrollChainingEnabled="True"
+                    HorizontalScrollMode="Enabled" 
+                    HorizontalScrollBarVisibility="Auto"
+                    VerticalScrollMode="Disabled" 
+                    VerticalScrollBarVisibility="Disabled"
+                    Background="{ThemeResource SystemControlBackgroundAltHighBrush}"
+                    BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}"
+                    Padding="0,6">
+                    
+                    <!-- Hashtags container -->
+                    <ItemsControl x:Name="HashtagsContainer">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" Spacing="8"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.Items>
+                            <Button Content="#technology" Click="Hashtag_Click" Tag="technology" Style="{StaticResource HashtagButtonStyle}"/>
+                            <Button Content="#design" Click="Hashtag_Click" Tag="design" Style="{StaticResource HashtagButtonStyle}"/>
+                            <Button Content="#programming" Click="Hashtag_Click" Tag="programming" Style="{StaticResource HashtagButtonStyle}"/>
+                            <Button Content="#news" Click="Hashtag_Click" Tag="news" Style="{StaticResource HashtagButtonStyle}"/>
+                            <Button Content="#science" Click="Hashtag_Click" Tag="science" Style="{StaticResource HashtagButtonStyle}"/>
+                            <Button Content="#art" Click="Hashtag_Click" Tag="art" Style="{StaticResource HashtagButtonStyle}"/>
+                            <Button Content="#music" Click="Hashtag_Click" Tag="music" Style="{StaticResource HashtagButtonStyle}"/>
+                            <Button Content="#health" Click="Hashtag_Click" Tag="health" Style="{StaticResource HashtagButtonStyle}"/>
+                            <Button Content="#education" Click="Hashtag_Click" Tag="education" Style="{StaticResource HashtagButtonStyle}"/>
+                            <Button Content="#travel" Click="Hashtag_Click" Tag="travel" Style="{StaticResource HashtagButtonStyle}"/>
+                            <Button Content="#food" Click="Hashtag_Click" Tag="food" Style="{StaticResource HashtagButtonStyle}"/>
+                            <Button Content="#sports" Click="Hashtag_Click" Tag="sports" Style="{StaticResource HashtagButtonStyle}"/>
+                        </ItemsControl.Items>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Grid>
+
+            <!-- ListView for displaying filtered posts -->
+            <ListView
+                x:Name="FilteredListView"
+                Grid.Row="3"
+                ItemsSource="{x:Bind postsFiltered}"
+                SelectionMode="Single"
+                ShowsScrollingPlaceholders="True"
+                BorderThickness="0"
+                Margin="0,0,0,16"
+                Padding="0"
+                Background="Transparent"
+                IsItemClickEnabled="True">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <components:PostComponent 
+                            Username="{Binding Username}"
+                            Date="{Binding Date}"
+                            Title="{Binding Title}"
+                            ContentText="{Binding Content}"
+                            Hashtags="{Binding Hashtags}"
+                            LikeCount="{Binding LikeCount}"/>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                        <Setter Property="Margin" Value="0,4"/>
+                        <Setter Property="Padding" Value="0"/>
+                        <Setter Property="Background" Value="Transparent"/>
+                        <Setter Property="BorderThickness" Value="0"/>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="ListViewItem">
+                                    <ContentPresenter x:Name="ContentPresenter"
+                                                    ContentTransitions="{TemplateBinding ContentTransitions}"
+                                                    Content="{TemplateBinding Content}"
+                                                    HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                    VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                    Margin="{TemplateBinding Padding}"/>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </ListView.ItemContainerStyle>
+            </ListView>
+
+            <!-- Pagination control -->
+            <PipsPager 
+                x:Name="PostsPager"
+                Grid.Row="4"
+                HorizontalAlignment="Center"
+                NumberOfPages="5"
+                Orientation="Horizontal"
+                PreviousButtonVisibility="Visible"
+                NextButtonVisibility="Visible" />
         </Grid>
-
-        <!-- ListView for displaying filtered posts -->
-        <ListView
-            x:Name="FilteredListView"
-            Grid.Row="2"
-            ItemsSource="{x:Bind postsFiltered}"
-            SelectionMode="Single"
-            ShowsScrollingPlaceholders="True"
-            BorderThickness="1"
-            Margin="0,0,0,16"
-            Padding="6"
-            Background="{ThemeResource SystemControlBackgroundAltHighBrush}"
-            CornerRadius="4">
-            <ListView.ItemTemplate>
-                <DataTemplate x:DataType="local:MockPost">
-                    <StackPanel Margin="0,8,0,12" Padding="8">
-                        <TextBlock Text="{x:Bind Title}" 
-                                   FontWeight="SemiBold" 
-                                   FontSize="16"/>
-                        <TextBlock Text="{x:Bind Content}" 
-                                   TextWrapping="Wrap" 
-                                   Margin="0,4,0,0"
-                                   Opacity="0.87"/>
-                    </StackPanel>
-                </DataTemplate>
-            </ListView.ItemTemplate>
-            <ListView.ItemContainerStyle>
-                <Style TargetType="ListViewItem">
-                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                    <Setter Property="Margin" Value="0,4"/>
-                    <Setter Property="Padding" Value="6"/>
-                    <Setter Property="Background" Value="{ThemeResource SystemControlBackgroundChromeMediumLowBrush}"/>
-                    <Setter Property="BorderThickness" Value="0"/>
-                    <Setter Property="CornerRadius" Value="4"/>
-                </Style>
-            </ListView.ItemContainerStyle>
-        </ListView>
-
-        <!-- Pagination control -->
-        <PipsPager 
-            x:Name="PostsPager"
-            Grid.Row="3"
-            HorizontalAlignment="Center"
-            NumberOfPages="5"
-            Orientation="Horizontal"
-            PreviousButtonVisibility="Visible"
-            NextButtonVisibility="Visible" />
-    </Grid>
+    </ScrollViewer>
 </Page>
