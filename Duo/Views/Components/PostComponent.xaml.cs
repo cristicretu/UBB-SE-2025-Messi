@@ -1,6 +1,8 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using System;
 using System.Collections.Generic;
+using Duo.Helpers;
 
 namespace Duo.Views.Components
 {
@@ -18,7 +20,15 @@ namespace Duo.Views.Components
 
         // Date Property
         public static readonly DependencyProperty DateProperty =
-            DependencyProperty.Register(nameof(Date), typeof(string), typeof(PostComponent), new PropertyMetadata("2025-03-12"));
+            DependencyProperty.Register(nameof(Date), typeof(string), typeof(PostComponent), new PropertyMetadata(GetDefaultDate()));
+
+        private static string GetDefaultDate()
+        {
+            DateTime result;
+            DateTimeHelper.TryParseDateTime("2025-03-14 05:14:23", out result);
+            result = DateTimeHelper.ConvertUtcToLocal(result);
+            return DateTimeHelper.GetRelativeTime(result);
+        }
 
         public string Date
         {
