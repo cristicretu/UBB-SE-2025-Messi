@@ -36,6 +36,11 @@ namespace Duo.Views.Pages
         public ObservableCollection<MockPost> postsFiltered { get; private set; } = new ObservableCollection<MockPost>();
         private HashSet<string> selectedHashtags = new HashSet<string>();
         private Dictionary<string, Button> hashtagButtons = new Dictionary<string, Button>();
+        
+        // Pagination properties
+        private const int ItemsPerPage = 5;
+        private List<MockPost> currentFilteredPosts = new List<MockPost>();
+        private int totalPages = 1;
 
         public PostListPage()
         {
@@ -47,12 +52,24 @@ namespace Duo.Views.Pages
             allPosts.Add(new MockPost("UI/UX Design Principles", "A guide to modern UI/UX design principles.", "design", "art"));
             allPosts.Add(new MockPost("Latest Science Discoveries", "Recent breakthroughs in science.", "science", "news"));
             allPosts.Add(new MockPost("Healthy Eating Habits", "Tips for maintaining a healthy diet.", "health", "food"));
+            allPosts.Add(new MockPost("Travel Destinations 2025", "Explore the top travel destinations for 2023.", "travel", "vacation"));
+            allPosts.Add(new MockPost("Photography Tips", "Improve your photography skills with these tips.", "photography", "art"));
+            allPosts.Add(new MockPost("Music Production Techniques", "Learn advanced music production techniques.", "music", "audio"));
+            allPosts.Add(new MockPost("Fitness Workouts", "Effective workouts for staying in shape.", "fitness", "health"));
+            allPosts.Add(new MockPost("Movie Reviews", "Reviews of the latest movies.", "movies", "entertainment"));
+            allPosts.Add(new MockPost("Book Recommendations", "Discover new books to read.", "books", "reading"));
+            allPosts.Add(new MockPost("Productivity Hacks", "Boost your productivity with these tips.", "productivity", "work"));
+            allPosts.Add(new MockPost("Gaming News", "The latest updates in the gaming world.", "gaming", "entertainment"));
+            allPosts.Add(new MockPost("Home Decor Ideas", "Creative ideas for home decor.", "home", "decor"));
             
             // Initialize filtered posts with all posts
             foreach (var post in allPosts)
             {
                 postsFiltered.Add(post);
             }
+            
+            // Calculate initial pagination
+            UpdatePagination(allPosts.ToList());
             
             // Set up pagination
             PostsPager.SelectedIndexChanged += PostsPager_SelectedIndexChanged;
@@ -69,8 +86,8 @@ namespace Duo.Views.Pages
         
         private void PostsPager_SelectedIndexChanged(PipsPager sender, PipsPagerSelectedIndexChangedEventArgs args)
         {
-            // Handle pagination - this would be implemented with actual paging logic
-            // For now, we're just displaying all posts
+            // Load the appropriate page of items
+            LoadPageItems(sender.SelectedPageIndex);
         }
 
         private void OnFilterChanged(object sender, TextChangedEventArgs args)
@@ -101,7 +118,12 @@ namespace Duo.Views.Pages
         private void ApplyFilters()
         {
             var filtered = allPosts.Where(Filter).ToList();
-            UpdateFilteredPosts(filtered);
+            
+            // Update pagination based on filtered results
+            UpdatePagination(filtered);
+            
+            // Load the first page of filtered results
+            LoadPageItems(0);
         }
 
         private bool Filter(MockPost post)
@@ -117,14 +139,38 @@ namespace Duo.Views.Pages
             return titleMatch && hashtagMatch;
         }
 
-        private void UpdateFilteredPosts(IEnumerable<MockPost> filteredData)
+        private void UpdatePagination(List<MockPost> filteredData)
         {
-            // Clear and repopulate the filtered list
+            // Store the current filtered posts
+            currentFilteredPosts = filteredData;
+            
+            // Calculate total pages
+            totalPages = (int)Math.Ceiling(filteredData.Count / (double)ItemsPerPage);
+            
+            // Ensure at least one page
+            if (totalPages == 0)
+                totalPages = 1;
+            
+            // Update PipsPager
+            PostsPager.NumberOfPages = totalPages;
+            
+            // Reset to first page
+            PostsPager.SelectedPageIndex = 0;
+        }
+
+        private void LoadPageItems(int pageIndex)
+        {
+            // Clear the current items
             postsFiltered.Clear();
             
-            foreach (var post in filteredData)
+            // Calculate start and end indices
+            int startIndex = pageIndex * ItemsPerPage;
+            int endIndex = Math.Min(startIndex + ItemsPerPage, currentFilteredPosts.Count);
+            
+            // Add items for the current page
+            for (int i = startIndex; i < endIndex; i++)
             {
-                postsFiltered.Add(post);
+                postsFiltered.Add(currentFilteredPosts[i]);
             }
         }
 
