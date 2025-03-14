@@ -5,7 +5,7 @@ namespace Duo.Views.Pages
 {
     public sealed partial class PostListPage : Page
     {
-        private string _categoryName;
+        private string _categoryName = string.Empty;
         public string CategoryName
         {
             get => _categoryName;

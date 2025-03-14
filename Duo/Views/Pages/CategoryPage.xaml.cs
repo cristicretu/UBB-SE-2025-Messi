@@ -94,5 +94,36 @@ namespace Duo.Views.Pages
                 Debug.WriteLine($"Navigation error: {ex.Message}");
             }
         }
+
+        private void NavigateToPage(string tag)
+        {
+            try
+            {
+                Type? pageType = null;
+                
+                switch (tag)
+                {
+                    case "MainPage":
+                        pageType = typeof(MainPage);
+                        break;
+                    case "LoginPage":
+                        pageType = typeof(LoginPage);
+                        break;
+                    case "SearchPage":
+                        pageType = typeof(SearchPage);
+                        break;
+                    default:
+                        Debug.WriteLine($"Unknown page tag: {tag}");
+                        return;
+                }
+
+                contentFrame.Navigate(pageType);
+                Debug.WriteLine($"Navigated to page: {tag}");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Navigation error: {ex.Message}");
+            }
+        }
     }
 }
