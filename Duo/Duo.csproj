@@ -47,6 +47,8 @@
   <ItemGroup>
     <Folder Include="Data\Queries\Comment\DeleteComment\" />
     <Folder Include="Data\Queries\Comment\GetAll\" />
+    <Folder Include="Data\Queries\Comment\GetCommentByID\" />
+    <Folder Include="Data\Queries\Comment\IncrementLikeCount\" />
     <Folder Include="Data\Queries\Comment\Update\" />
   </ItemGroup>
   <ItemGroup>
