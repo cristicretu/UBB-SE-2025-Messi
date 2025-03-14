@@ -127,5 +127,23 @@ namespace Duo.Views.Pages
                 postsFiltered.Add(post);
             }
         }
+
+        private void ClearHashtags_Click(object sender, RoutedEventArgs e)
+        {
+            // Reset all selected hashtags
+            foreach (var tag in selectedHashtags.ToList())
+            {
+                if (hashtagButtons.TryGetValue(tag, out Button button))
+                {
+                    button.Style = Resources["HashtagButtonStyle"] as Style;
+                }
+            }
+            
+            // Clear the selected hashtags collection
+            selectedHashtags.Clear();
+            
+            // Apply filters to update the list
+            ApplyFilters();
+        }
     }
 }
