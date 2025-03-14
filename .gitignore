@@ -366,5 +366,4 @@ onnx-models
 
 .idea
 
-./Duo/appsettings.json
 /Duo/appsettings.json
