@@ -90,5 +90,22 @@ namespace Duo.Helpers
             
             return true;
         }
+
+        public static bool ValidateUsername(string username)
+        {
+            ValidateNotNullOrEmpty(username, nameof(username));
+
+            // Username should not exceed 30 characters
+            ValidateRange(username.Length, 1, 30, "Username length");
+
+            // Username should only contain alphanumeric characters
+            ValidateCondition(Regex.IsMatch(username, @"^[a-zA-Z0-9]+$"), 
+                "Username can only contain letters and numbers.");
+
+            // Username should not contain spaces
+            ValidateCondition(!username.Contains(" "), "Username cannot contain spaces.");
+            
+            return true;
+        }
     }
 }
