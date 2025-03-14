@@ -45,6 +45,7 @@
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.6.250205002" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Data\Queries\Category\GetByName\" />
     <Folder Include="Data\Queries\Comment\DeleteComment\" />
     <Folder Include="Data\Queries\Comment\GetAll\" />
     <Folder Include="Data\Queries\Comment\Update\" />
