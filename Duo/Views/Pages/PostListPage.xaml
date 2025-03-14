@@ -10,12 +10,64 @@
     mc:Ignorable="d">
 
     <Grid>
-        <TextBlock Text="{x:Bind CategoryName, Mode=OneWay}" 
-                   HorizontalAlignment="Center" 
-                   VerticalAlignment="Center"
-                   FontSize="24"/>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
 
-        <components:PostComponent />
-       
+        <!-- Filtering controls -->
+        <StackPanel Grid.Row="0" Grid.Column="0" Width="200" Margin="12">
+            <TextBlock Margin="8,8,8,4" Style="{ThemeResource BaseTextBlockStyle}">Filter by...</TextBlock>
+            <TextBox 
+                x:Name="FilterByTitle" 
+                Width="150" 
+                Header="Title" 
+                Margin="8"
+                HorizontalAlignment="Left" 
+                TextChanged="OnFilterChanged" />
+            <TextBox 
+                x:Name="FilterByContent" 
+                Width="150" 
+                Header="Content" 
+                Margin="8"
+                HorizontalAlignment="Left" 
+                TextChanged="OnFilterChanged" />
+        </StackPanel>
+
+        <!-- ListView for displaying filtered posts -->
+        <ListView
+            x:Name="FilteredListView"
+            Grid.Row="0" Grid.RowSpan="2" Grid.Column="1"
+            ItemsSource="{x:Bind postsFiltered}"
+            SelectionMode="Single"
+            ShowsScrollingPlaceholders="True"
+            Margin="12"
+            BorderThickness="1"
+            BorderBrush="{ThemeResource SystemControlForegroundBaseMediumLowBrush}">
+            <ListView.ItemTemplate>
+                <DataTemplate x:DataType="local:MockPost">
+                    <StackPanel Margin="0,8">
+                        <TextBlock Text="{x:Bind Title}" FontWeight="Bold"/>
+                        <TextBlock Text="{x:Bind Content}" TextWrapping="Wrap"/>
+                    </StackPanel>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+
+        <!-- Pagination control -->
+        <PipsPager 
+            x:Name="PostsPager"
+            Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+            HorizontalAlignment="Center"
+            Margin="0,8,0,12"
+            NumberOfPages="5"
+            Orientation="Horizontal"
+            PreviousButtonVisibility="Visible"
+            NextButtonVisibility="Visible" />
     </Grid>
 </Page>
