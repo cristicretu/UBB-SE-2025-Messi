@@ -2,6 +2,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Duo.Helpers;
 
 namespace Duo.Views.Components
@@ -10,7 +11,8 @@ namespace Duo.Views.Components
     {
         // Username Property
         public static readonly DependencyProperty UsernameProperty =
-            DependencyProperty.Register(nameof(Username), typeof(string), typeof(PostComponent), new PropertyMetadata("u/username"));
+            DependencyProperty.Register(nameof(Username), typeof(string), typeof(PostComponent), 
+            new PropertyMetadata(string.Empty, OnPropertyChanged));
 
         public string Username
         {
@@ -18,27 +20,32 @@ namespace Duo.Views.Components
             set { SetValue(UsernameProperty, value); }
         }
 
-        // Date Property
-        public static readonly DependencyProperty DateProperty =
-            DependencyProperty.Register(nameof(Date), typeof(string), typeof(PostComponent), new PropertyMetadata(GetDefaultDate()));
+        // UTC Date Property
+        public static readonly DependencyProperty UtcDateProperty =
+            DependencyProperty.Register(nameof(UtcDate), typeof(string), typeof(PostComponent), 
+            new PropertyMetadata(string.Empty, OnUtcDateChanged));
 
-        private static string GetDefaultDate()
+        public string UtcDate
         {
-            DateTime result;
-            DateTimeHelper.TryParseDateTime("2025-03-14 05:14:23", out result);
-            result = DateTimeHelper.ConvertUtcToLocal(result);
-            return DateTimeHelper.GetRelativeTime(result);
+            get { return (string)GetValue(UtcDateProperty); }
+            set { SetValue(UtcDateProperty, value); }
         }
 
-        public string Date
+        // Formatted Date Property
+        public static readonly DependencyProperty FormattedDateProperty =
+            DependencyProperty.Register(nameof(FormattedDate), typeof(string), typeof(PostComponent), 
+            new PropertyMetadata(string.Empty));
+
+        public string FormattedDate
         {
-            get { return (string)GetValue(DateProperty); }
-            set { SetValue(DateProperty, value); }
+            get { return (string)GetValue(FormattedDateProperty); }
+            private set { SetValue(FormattedDateProperty, value); }
         }
 
         // Title Property
         public static readonly DependencyProperty TitleProperty =
-            DependencyProperty.Register(nameof(Title), typeof(string), typeof(PostComponent), new PropertyMetadata("No hardware errors detected - what could it be?"));
+            DependencyProperty.Register(nameof(Title), typeof(string), typeof(PostComponent), 
+            new PropertyMetadata(string.Empty, OnPropertyChanged));
 
         public string Title
         {
@@ -49,7 +56,7 @@ namespace Duo.Views.Components
         // Hashtags Property
         public static readonly DependencyProperty HashtagsProperty =
             DependencyProperty.Register(nameof(Hashtags), typeof(List<string>), typeof(PostComponent), 
-            new PropertyMetadata(new List<string> { "Apple", "MacBook", "M1Max", "Hardware", "Tech" }));
+            new PropertyMetadata(new List<string>(), OnPropertyChanged));
 
         public List<string> Hashtags
         {
@@ -57,9 +64,10 @@ namespace Duo.Views.Components
             set { SetValue(HashtagsProperty, value); }
         }
 
-        // Content Property
+        // Full Content Property
         public static readonly DependencyProperty ContentTextProperty =
-            DependencyProperty.Register(nameof(ContentText), typeof(string), typeof(PostComponent), new PropertyMetadata("Any Macheads have an idea what could cause the following on a MPB M1 Max with NO hardware issues detected using Apple's \n hardware test tool? \n screen rapidly flickers brightness when under RAM/CPU pressure \n screen turns full black and then back on under same \n login screen goes black, flashes, & resets to the previous after choosing account (e.g. I go from one account, to the account picker, click one account and begin to type in the password — and then it suddenly flashes black, jitters, and resets to the account picker again) \n shutting off w/o battery warning (battery health is good) \n freezes sometimes (way more than I'm used to) \n won't let me switch apps sometimes (while other things are still clickable, the menu bar will change to the app I switched to, but the menu isn't clickable; switching to another app, the menu works again) \n graphics for apps just don't update sometimes \n generally incredibly slow at times (compared to my husband's MPB M1 Max with, admittedly, more RAM)"));
+            DependencyProperty.Register(nameof(ContentText), typeof(string), typeof(PostComponent), 
+            new PropertyMetadata(string.Empty, OnContentTextChanged));
 
         public string ContentText
         {
@@ -67,9 +75,21 @@ namespace Duo.Views.Components
             set { SetValue(ContentTextProperty, value); }
         }
 
+        // Truncated Content Property
+        public static readonly DependencyProperty TruncatedContentProperty =
+            DependencyProperty.Register(nameof(TruncatedContent), typeof(string), typeof(PostComponent), 
+            new PropertyMetadata(string.Empty));
+
+        public string TruncatedContent
+        {
+            get { return (string)GetValue(TruncatedContentProperty); }
+            private set { SetValue(TruncatedContentProperty, value); }
+        }
+
         // Like Count Property
         public static readonly DependencyProperty LikeCountProperty =
-            DependencyProperty.Register(nameof(LikeCount), typeof(int), typeof(PostComponent), new PropertyMetadata(24));
+            DependencyProperty.Register(nameof(LikeCount), typeof(int), typeof(PostComponent), 
+            new PropertyMetadata(0, OnPropertyChanged));
 
         public int LikeCount
         {
@@ -80,6 +100,108 @@ namespace Duo.Views.Components
         public PostComponent()
         {
             this.InitializeComponent();
+            
+            // Initialize properties when loaded
+            this.Loaded += PostComponent_Loaded;
+        }
+
+        private static void OnPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is PostComponent component)
+            {
+                Debug.WriteLine($"Property changed from '{e.OldValue}' to '{e.NewValue}'");
+            }
+        }
+
+        private void PostComponent_Loaded(object sender, RoutedEventArgs e)
+        {
+            Debug.WriteLine("PostComponent loaded with the following values:");
+            Debug.WriteLine($"  Username: {Username}");
+            Debug.WriteLine($"  Title: {Title}");
+            Debug.WriteLine($"  ContentText: {ContentText}");
+            Debug.WriteLine($"  UtcDate: {UtcDate}");
+            Debug.WriteLine($"  Hashtags: {(Hashtags != null ? string.Join(", ", Hashtags) : "null")}");
+            
+            // Re-process content text to ensure truncated content is set
+            if (!string.IsNullOrEmpty(ContentText))
+            {
+                UpdateTruncatedContent(ContentText);
+            }
+            else
+            {
+                Debug.WriteLine("WARNING: ContentText is empty or null");
+            }
+            
+            // Re-process date to ensure formatted date is set
+            if (!string.IsNullOrEmpty(UtcDate))
+            {
+                UpdateFormattedDate(UtcDate);
+            }
+            else
+            {
+                Debug.WriteLine("WARNING: UtcDate is empty or null");
+            }
+        }
+
+        private static void OnUtcDateChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is PostComponent postComponent && e.NewValue is string utcDateString)
+            {
+                Debug.WriteLine($"UtcDate changed to: {utcDateString}");
+                postComponent.UpdateFormattedDate(utcDateString);
+            }
+        }
+
+        private void UpdateFormattedDate(string utcDateString)
+        {
+            if (string.IsNullOrEmpty(utcDateString))
+            {
+                FormattedDate = string.Empty;
+                return;
+            }
+
+            DateTime result;
+            if (DateTimeHelper.TryParseDateTime(utcDateString, out result))
+            {
+                result = DateTimeHelper.ConvertUtcToLocal(result);
+                FormattedDate = DateTimeHelper.GetRelativeTime(result);
+                Debug.WriteLine($"Formatted date: {FormattedDate}");
+            }
+            else
+            {
+                FormattedDate = "Unknown Date";
+                Debug.WriteLine($"Could not parse date: {utcDateString}");
+            }
+        }
+
+        private static void OnContentTextChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is PostComponent postComponent && e.NewValue is string content)
+            {
+                Debug.WriteLine($"ContentText changed to: {content}");
+                postComponent.UpdateTruncatedContent(content);
+            }
+        }
+
+        private void UpdateTruncatedContent(string content)
+        {
+            if (string.IsNullOrEmpty(content))
+            {
+                TruncatedContent = string.Empty;
+                return;
+            }
+
+            // Truncate content to 1000 characters as requested
+            if (content.Length > 1000)
+            {
+                TruncatedContent = content.Substring(0, 1000) + "...";
+            }
+            else
+            {
+                TruncatedContent = content;
+            }
+            
+            Debug.WriteLine($"TruncatedContent set to: {TruncatedContent}");
         }
     }
 }

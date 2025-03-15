@@ -17,6 +17,33 @@
             Padding="16" 
             Margin="0,0,0,12">
         <StackPanel>
+            <!-- Debug Border with all bound properties -->
+            <Border Background="Yellow" Padding="8" BorderBrush="Orange" BorderThickness="1" CornerRadius="4" Margin="0,0,0,8">
+                <StackPanel>
+                    <TextBlock Text="Component Debug:" FontWeight="Bold" Margin="0,0,0,4"/>
+                    <TextBlock>
+                        <Run Text="Username:" FontWeight="SemiBold"/>
+                        <Run Text="{x:Bind Username}"/>
+                    </TextBlock>
+                    <TextBlock>
+                        <Run Text="Title:" FontWeight="SemiBold"/>
+                        <Run Text="{x:Bind Title}"/>
+                    </TextBlock>
+                    <TextBlock>
+                        <Run Text="Date:" FontWeight="SemiBold"/>
+                        <Run Text="{x:Bind FormattedDate}"/>
+                    </TextBlock>
+                    <TextBlock>
+                        <Run Text="Content:" FontWeight="SemiBold"/>
+                        <Run Text="{x:Bind TruncatedContent}"/>
+                    </TextBlock>
+                    <TextBlock>
+                        <Run Text="Likes:" FontWeight="SemiBold"/>
+                        <Run Text="{x:Bind LikeCount}"/>
+                    </TextBlock>
+                </StackPanel>
+            </Border>
+            
             <Grid Margin="0,0,0,8">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
@@ -28,7 +55,7 @@
                            FontWeight="SemiBold" 
                            Foreground="{ThemeResource TextFillColorPrimaryBrush}"/>
 
-                <TextBlock Text="{x:Bind Date}" 
+                <TextBlock Text="{x:Bind FormattedDate}" 
                            Grid.Column="1"
                            FontSize="12" 
                            Foreground="{ThemeResource TextFillColorSecondaryBrush}" 
@@ -70,7 +97,7 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
                        
-            <TextBlock Text="{x:Bind ContentText}" 
+            <TextBlock Text="{x:Bind TruncatedContent}" 
                        TextWrapping="Wrap" 
                        Foreground="{ThemeResource TextFillColorPrimaryBrush}"
                        Margin="0,0,0,8"/>
