@@ -14,6 +14,9 @@ namespace Duo.Views.Pages
         public string Title { get; set; }
         public string Content { get; set; }
         public List<string> Hashtags { get; set; } = new List<string>();
+        public string Username { get; set; } = "u/anonymous"; // Added property for username
+        public string Date { get; set; } = "1 year ago"; // Added property for display date
+        public int LikeCount { get; set; } = 0; // Added property for like count
 
         public MockPost()
         {
@@ -27,6 +30,15 @@ namespace Duo.Views.Pages
             {
                 Hashtags.AddRange(hashtags);
             }
+            
+            // Generate random mock data for demo purposes
+            Random random = new Random();
+            Username = $"u/user{random.Next(100, 999)}";
+            
+            string[] timeOptions = { "2 hours ago", "5 days ago", "2 weeks ago", "1 month ago", "3 months ago" };
+            Date = timeOptions[random.Next(timeOptions.Length)];
+            
+            LikeCount = random.Next(0, 500);
         }
     }
 
