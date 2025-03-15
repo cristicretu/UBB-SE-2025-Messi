@@ -171,7 +171,7 @@ public class CommentRepository
         }
     }
 
-    public List<Comment> GetReplies(int parentCommentId)
+    public List<Comment> GetRepliesByCommentId(int parentCommentId)
     {
         if (parentCommentId <= 0) throw new ArgumentException("Invalid parent comment ID", nameof(parentCommentId));
 
