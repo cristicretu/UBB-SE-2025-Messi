@@ -213,12 +213,12 @@
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
                                 
-                                <TextBlock Text="u/anonymous" 
+                                <TextBlock Text="{x:Bind Username}" 
                                            Grid.Column="0"
                                            FontWeight="SemiBold" 
                                            Foreground="{ThemeResource TextFillColorPrimaryBrush}"/>
 
-                                <TextBlock Text="1 year ago" 
+                                <TextBlock Text="{x:Bind Date}" 
                                            Grid.Column="1"
                                            FontSize="12" 
                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}" 
@@ -277,7 +277,7 @@
                                         CornerRadius="8"
                                         Padding="12,4"/>
                                 
-                                <TextBlock Text="0" 
+                                <TextBlock Text="{x:Bind LikeCount}" 
                                            Grid.Column="1"
                                            FontSize="12" 
                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}" 
