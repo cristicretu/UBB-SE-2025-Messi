@@ -10,12 +10,79 @@
     mc:Ignorable="d">
 
     <Grid>
-        <TextBlock Text="{x:Bind CategoryName, Mode=OneWay}" 
-                   HorizontalAlignment="Center" 
-                   VerticalAlignment="Center"
-                   FontSize="24"/>
-
-        <components:PostComponent />
-       
+        <!-- Center content with max width -->
+        <ScrollViewer HorizontalScrollMode="Disabled" VerticalScrollMode="Auto">
+            <Grid HorizontalAlignment="Center" MaxWidth="900">
+                <!-- Main content column -->
+                <StackPanel Spacing="16" Padding="16,48,16,48">
+                    
+                    <!-- Title row with search -->
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <!-- Title -->
+                        <TextBlock Text="{x:Bind CategoryName, Mode=OneWay}" 
+                                Grid.Column="0"
+                                FontSize="28" 
+                                FontWeight="SemiBold"
+                                VerticalAlignment="Center"/>
+                        
+                        <!-- Search box -->
+                        <AutoSuggestBox x:Name="SearchBox" 
+                                Grid.Column="1"
+                                Width="240"
+                                PlaceholderText="Search posts"
+                                QueryIcon="Find"
+                                TextChanged="SearchBox_TextChanged"
+                                VerticalAlignment="Center"
+                                VerticalContentAlignment="Center"/>
+                    </Grid>
+                    
+                    <!-- Divider -->
+                    <Rectangle Height="1" Fill="Black" Opacity="0.1" Stretch="Fill"/>
+                    
+                    <!-- Filter chips row with horizontal scrolling and drag capability -->
+                    <ScrollViewer x:Name="FilterScrollViewer" 
+                                  HorizontalScrollMode="Enabled" 
+                                  HorizontalScrollBarVisibility="Hidden"
+                                  VerticalScrollMode="Disabled"
+                                  VerticalScrollBarVisibility="Disabled"
+                                  Margin="0,0,0,0">
+                        <ItemsRepeater x:Name="FilterChips" ItemsSource="{x:Bind TagFilters}">
+                            <ItemsRepeater.Layout>
+                                <StackLayout Orientation="Horizontal" Spacing="8"/>
+                            </ItemsRepeater.Layout>
+                            <ItemsRepeater.ItemTemplate>
+                                <DataTemplate x:DataType="x:String">
+                                    <RadioButton 
+                                        Content="{x:Bind}"
+                                        GroupName="TagFilters"
+                                        Checked="FilterChip_Checked"
+                                        IsThreeState="False"
+                                        Style="{StaticResource SegmentedItemRadioButtonStyle}"/>
+                                </DataTemplate>
+                            </ItemsRepeater.ItemTemplate>
+                        </ItemsRepeater>
+                    </ScrollViewer>
+                    
+                    <!-- Post List -->
+                    <StackPanel x:Name="PostList" Spacing="8">
+                        <!-- Sample posts - will be populated dynamically -->
+                        <components:PostComponent />
+                        <Rectangle Height="1" Fill="Black" Opacity="0.1" Stretch="Fill"/>
+                        
+                        <components:PostComponent />
+                        <Rectangle Height="1" Fill="Black" Opacity="0.1" Stretch="Fill"/>
+                        
+                        <components:PostComponent />
+                        <Rectangle Height="1" Fill="Black" Opacity="0.1" Stretch="Fill"/>
+                    </StackPanel>
+                    
+                </StackPanel>
+            </Grid>
+        </ScrollViewer>
     </Grid>
 </Page>

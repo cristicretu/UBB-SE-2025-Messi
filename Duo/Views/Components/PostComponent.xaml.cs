@@ -1,16 +1,21 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using System;
-using System.Collections.Generic;
-using Duo.Helpers;
+using Microsoft.UI.Xaml.Media;
+using Windows.UI;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
+using Microsoft.UI.Xaml.Input;
 
 namespace Duo.Views.Components
 {
-    public sealed partial class PostComponent : UserControl
+    public sealed partial class PostComponent : UserControl, INotifyPropertyChanged
     {
-        // Username Property
+        // Property change notification
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        // Username property
         public static readonly DependencyProperty UsernameProperty =
-            DependencyProperty.Register(nameof(Username), typeof(string), typeof(PostComponent), new PropertyMetadata("u/username"));
+            DependencyProperty.Register("Username", typeof(string), typeof(PostComponent), new PropertyMetadata("u/username"));
 
         public string Username
         {
@@ -18,17 +23,9 @@ namespace Duo.Views.Components
             set { SetValue(UsernameProperty, value); }
         }
 
-        // Date Property
+        // Date property
         public static readonly DependencyProperty DateProperty =
-            DependencyProperty.Register(nameof(Date), typeof(string), typeof(PostComponent), new PropertyMetadata(GetDefaultDate()));
-
-        private static string GetDefaultDate()
-        {
-            DateTime result;
-            DateTimeHelper.TryParseDateTime("2025-03-14 05:14:23", out result);
-            result = DateTimeHelper.ConvertUtcToLocal(result);
-            return DateTimeHelper.GetRelativeTime(result);
-        }
+            DependencyProperty.Register("Date", typeof(string), typeof(PostComponent), new PropertyMetadata("2023-03-12"));
 
         public string Date
         {
@@ -36,9 +33,10 @@ namespace Duo.Views.Components
             set { SetValue(DateProperty, value); }
         }
 
-        // Title Property
+        // Title property
         public static readonly DependencyProperty TitleProperty =
-            DependencyProperty.Register(nameof(Title), typeof(string), typeof(PostComponent), new PropertyMetadata("No hardware errors detected - what could it be?"));
+            DependencyProperty.Register("Title", typeof(string), typeof(PostComponent), 
+                new PropertyMetadata("No hardware errors detected - what could it be?"));
 
         public string Title
         {
@@ -46,20 +44,10 @@ namespace Duo.Views.Components
             set { SetValue(TitleProperty, value); }
         }
 
-        // Hashtags Property
-        public static readonly DependencyProperty HashtagsProperty =
-            DependencyProperty.Register(nameof(Hashtags), typeof(List<string>), typeof(PostComponent), 
-            new PropertyMetadata(new List<string> { "Apple", "MacBook", "M1Max", "Hardware", "Tech" }));
-
-        public List<string> Hashtags
-        {
-            get { return (List<string>)GetValue(HashtagsProperty); }
-            set { SetValue(HashtagsProperty, value); }
-        }
-
-        // Content Property
+        // Content property
         public static readonly DependencyProperty ContentTextProperty =
-            DependencyProperty.Register(nameof(ContentText), typeof(string), typeof(PostComponent), new PropertyMetadata("Any Macheads have an idea what could cause the following on a MPB M1 Max with NO hardware issues detected using Apple's \n hardware test tool? \n screen rapidly flickers brightness when under RAM/CPU pressure \n screen turns full black and then back on under same \n login screen goes black, flashes, & resets to the previous after choosing account (e.g. I go from one account, to the account picker, click one account and begin to type in the password — and then it suddenly flashes black, jitters, and resets to the account picker again) \n shutting off w/o battery warning (battery health is good) \n freezes sometimes (way more than I'm used to) \n won't let me switch apps sometimes (while other things are still clickable, the menu bar will change to the app I switched to, but the menu isn't clickable; switching to another app, the menu works again) \n graphics for apps just don't update sometimes \n generally incredibly slow at times (compared to my husband's MPB M1 Max with, admittedly, more RAM)"));
+            DependencyProperty.Register("ContentText", typeof(string), typeof(PostComponent), 
+                new PropertyMetadata("Any Macheads have an idea what could cause the following on a MPB M1 Max with NO hardware issues detected using Apple's hardware test tool screen rapidly flickers brightness when under RAM/CPU pressure screen turns full black and then back on under sam login screen goes black, flashes, & resets to the previous after choosing account (e.g. I go from one account, to the account picker, click one account and begin to type in the password — and then it suddenly flashes black, jitters, and resets to the account picker again shutting off w/o battery warning (battery health is good) freezes sometimes (way more than I'm used to won't let me switch apps sometimes (while other things are still clickable, the menu bar will change to the app I switched to, but the menu isn't clickable; switching to another app, the menu works again graphics for apps just don't update sometime generally incredibly slow at times (compared to my husband's MPB M1 Max with, admittedly, more RAM)"));
 
         public string ContentText
         {
@@ -67,19 +55,81 @@ namespace Duo.Views.Components
             set { SetValue(ContentTextProperty, value); }
         }
 
-        // Like Count Property
-        public static readonly DependencyProperty LikeCountProperty =
-            DependencyProperty.Register(nameof(LikeCount), typeof(int), typeof(PostComponent), new PropertyMetadata(24));
-
-        public int LikeCount
+        // Likes counter
+        private int _likesCount = 0;
+        public int LikesCount
         {
-            get { return (int)GetValue(LikeCountProperty); }
-            set { SetValue(LikeCountProperty, value); }
+            get => _likesCount;
+            set
+            {
+                if (_likesCount != value)
+                {
+                    _likesCount = value;
+                    NotifyPropertyChanged();
+                    NotifyPropertyChanged(nameof(LikesText));
+                }
+            }
         }
+
+        // Likes text
+        public string LikesText => $"{LikesCount} likes";
+
+        // Is Liked
+        private bool _isLiked = false;
+        public bool IsLiked
+        {
+            get => _isLiked;
+            set
+            {
+                if (_isLiked != value)
+                {
+                    _isLiked = value;
+                    NotifyPropertyChanged();
+                    NotifyPropertyChanged(nameof(HeartColor));
+                }
+            }
+        }
+
+        // Heart color based on like state
+        public SolidColorBrush HeartColor => IsLiked ? 
+            new SolidColorBrush(Color.FromArgb(255, 255, 0, 0)) : 
+            new SolidColorBrush(Color.FromArgb(255, 0, 0, 0));
 
         public PostComponent()
         {
             this.InitializeComponent();
+            this.DataContext = this;
+            
+            // Register pointer events for hover
+            this.PointerEntered += PostComponent_PointerEntered;
+            this.PointerExited += PostComponent_PointerExited;
+        }
+        
+        // Handle pointer entered event
+        private void PostComponent_PointerEntered(object sender, PointerRoutedEventArgs e)
+        {
+            VisualStateManager.GoToState(this, "PointerOver", true);
+        }
+        
+        // Handle pointer exited event
+        private void PostComponent_PointerExited(object sender, PointerRoutedEventArgs e)
+        {
+            VisualStateManager.GoToState(this, "Normal", true);
+        }
+
+        // Handle like button click
+        private void LikeButton_Click(object sender, RoutedEventArgs e)
+        {
+            IsLiked = !IsLiked;
+            
+            // Update like count
+            LikesCount += 1;
+        }
+
+        // Property changed notification
+        private void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

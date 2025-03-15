@@ -9,81 +9,121 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     d:DesignHeight="300"
-    d:DesignWidth="400">
+    d:DesignWidth="800"
+    HorizontalAlignment="Stretch">
 
-    <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" 
-            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" 
-            BorderThickness="1" 
-            CornerRadius="8" 
-            Padding="16" 
-            Margin="0,0,0,12">
-        <StackPanel>
-            <Grid Margin="0,0,0,8">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                
-                <TextBlock Text="{x:Bind Username}" 
-                           Grid.Column="0"
-                           FontWeight="SemiBold" 
-                           Foreground="{ThemeResource TextFillColorPrimaryBrush}"/>
+    <UserControl.Resources>
+        <!-- Styles for the post component -->
+        <Style x:Key="PostBorderStyle" TargetType="Border">
+            <Setter Property="CornerRadius" Value="7" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Transitions">
+                <Setter.Value>
+                    <TransitionCollection>
+                        <ContentThemeTransition />
+                    </TransitionCollection>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
 
-                <TextBlock Text="{x:Bind Date}" 
-                           Grid.Column="1"
-                           FontSize="12" 
-                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" 
-                           HorizontalAlignment="Right"/>
-            </Grid>
+    <Border x:Name="PostBorder" Style="{StaticResource PostBorderStyle}">
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup x:Name="HoverStates">
+                <VisualState x:Name="Normal"/>
+                <VisualState x:Name="PointerOver">
+                    <VisualState.Setters>
+                        <Setter Target="PostBorder.Background" Value="White" />
+                        <Setter Target="PostBorder.BorderBrush" Value="#EEEEEE" />
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+        
+        <StackPanel Padding="16,12,16,12" Spacing="20">
+            <!-- Header Section -->
+            <StackPanel Spacing="10">
+                <!-- Username and Date Row -->
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <TextBlock Text="{x:Bind Username, Mode=OneWay}" 
+                              Grid.Column="0"
+                              FontWeight="SemiBold" 
+                              FontSize="12"
+                              Opacity="0.6"/>
+                    
+                    <TextBlock Text="{x:Bind Date, Mode=OneWay}" 
+                              Grid.Column="1"
+                              FontWeight="SemiBold"
+                              FontSize="10"
+                              Opacity="0.4"/>
+                </Grid>
 
-            <TextBlock Text="{x:Bind Title}" 
-                       FontSize="18" 
-                       FontWeight="Bold" 
-                       TextWrapping="Wrap"
-                       Foreground="{ThemeResource TextFillColorPrimaryBrush}"
-                       Margin="0,0,0,8"/>
-            
-            <!-- Hashtags as pills -->
-            <ItemsControl ItemsSource="{x:Bind Hashtags}"
-                          Margin="0,0,0,8">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <StackPanel Orientation="Horizontal"/>
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                                BorderThickness="0"
-                                CornerRadius="16"
-                                Padding="8,4"
-                                Margin="0,0,6,0">
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="#" 
-                                           FontSize="12"
-                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
-                                <TextBlock Text="{Binding}" 
-                                           FontSize="12"
-                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
-                            </StackPanel>
-                        </Border>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-                       
-            <TextBlock Text="{x:Bind ContentText}" 
-                       TextWrapping="Wrap" 
-                       Foreground="{ThemeResource TextFillColorPrimaryBrush}"
-                       Margin="0,0,0,8"/>
+                <!-- Post Title -->
+                <TextBlock Text="{x:Bind Title, Mode=OneWay}" 
+                          FontWeight="Bold"
+                          FontSize="14"
+                          TextWrapping="Wrap"/>
 
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                
-                <local:LikeButton LikeCount="{x:Bind LikeCount, Mode=TwoWay}" />
-            </Grid>
+                <!-- Tags/Chips -->
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <Border Background="#F0F0F0" 
+                           CornerRadius="10" 
+                           Padding="12,4,12,4">
+                        <TextBlock Text="#apple" 
+                                  FontSize="12"
+                                  Foreground="Black"/>
+                    </Border>
+                    
+                    <Border Background="#F0F0F0" 
+                           CornerRadius="10" 
+                           Padding="12,4,12,4">
+                        <TextBlock Text="#MacBook" 
+                                  FontSize="12"
+                                  Foreground="Black"/>
+                    </Border>
+                    
+                    <Border Background="#F0F0F0" 
+                           CornerRadius="10" 
+                           Padding="12,4,12,4">
+                        <TextBlock Text="#M1Max" 
+                                  FontSize="12"
+                                  Foreground="Black"/>
+                    </Border>
+                </StackPanel>
+            </StackPanel>
+
+            <!-- Post Content -->
+            <TextBlock TextWrapping="Wrap"
+                      FontSize="12"
+                      Text="{x:Bind ContentText, Mode=OneWay}"/>
+
+            <!-- Likes Row -->
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <ToggleButton x:Name="LikeButton" 
+                             Background="Transparent" 
+                             BorderThickness="0" 
+                             Padding="0"
+                             Click="LikeButton_Click"
+                             IsChecked="{x:Bind IsLiked, Mode=TwoWay}">
+                    <StackPanel Orientation="Horizontal" Spacing="4">
+                        <FontIcon x:Name="HeartIcon" 
+                                 Glyph="&#xE00B;" 
+                                 FontSize="16"
+                                 Foreground="{x:Bind HeartColor, Mode=OneWay}"/>
+                    </StackPanel>
+                </ToggleButton>
+                <TextBlock x:Name="LikesCountText" 
+                          Text="{x:Bind LikesText, Mode=OneWay}" 
+                          VerticalAlignment="Center"
+                          FontSize="12"/>
+            </StackPanel>
         </StackPanel>
     </Border>
 </UserControl> 
