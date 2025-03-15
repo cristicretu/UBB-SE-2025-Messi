@@ -61,3 +61,35 @@ CREATE TABLE Comments (
     CONSTRAINT fk_posts FOREIGN KEY (PostID) REFERENCES Posts(Id) on delete no action,
     CONSTRAINT fk_parent_comment FOREIGN KEY (ParentCommentID) REFERENCES Comments(Id) on delete no action
 );
+
+
+<-- Insert section -->
+
+insert into Users values ('Andrei') , ('Ion'), ('Maria')
+
+
+insert into Hashtags values ('a')
+insert into Hashtags values ('Mac')
+
+
+INSERT INTO Posts (Title, Description, UserID, CategoryID) VALUES
+('New Gadget', 'A review of the latest tech gadget.', 1, 1),
+('Paris Trip', 'My amazing trip to Paris and the Eiffel Tower.', 2, 2),
+('Delicious Pizza', 'Tried a new pizza place, it was fantastic!', 3, 3),
+('Coding Tips', 'Some useful tips for beginner programmers.', 1, 1),
+('Mountain Hike', 'Hiking in the beautiful mountains.', 2, 2),
+('Homemade Pasta', 'Making fresh pasta at home.', 3, 3),
+('AI Advancements', 'The latest developments in artificial intelligence.',1,1),
+('Tokyo Adventures', 'Exploring the streets of Tokyo.',2,2),
+('Chocolate Cake','A delicious chocolate cake recipe.',3,3);
+
+
+INSERT INTO Comments (Content, UserID, PostID, ParentCommentID, Level) VALUES
+('Great post!', 1, 1, NULL, 1)
+INSERT INTO Comments (Content, UserID, PostID, ParentCommentID, Level) VALUES
+('I agree!', 2, 1, 1, 2)
+
+INSERT INTO Comments (Content, UserID, PostID, ParentCommentID, Level) VALUES
+('Thanks for sharing!', 3, 2, NULL, 1)
+INSERT INTO Comments (Content, UserID, PostID, ParentCommentID, Level) VALUES
+('This is helpful.',1,3,NULL,1); 
