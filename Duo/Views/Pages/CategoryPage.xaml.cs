@@ -106,9 +106,6 @@ namespace Duo.Views.Pages
                     case "MainPage":
                         pageType = typeof(MainPage);
                         break;
-                    case "LoginPage":
-                        pageType = typeof(LoginPage);
-                        break;
                     case "SearchPage":
                         pageType = typeof(SearchPage);
                         break;

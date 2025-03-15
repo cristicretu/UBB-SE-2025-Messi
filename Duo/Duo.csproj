@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
@@ -48,7 +48,19 @@
     <Folder Include="Data\Queries\Category\GetByName\" />
     <Folder Include="Data\Queries\Comment\DeleteComment\" />
     <Folder Include="Data\Queries\Comment\GetAll\" />
+    <Folder Include="Data\Queries\Comment\GetCommentByID\" />
+    <Folder Include="Data\Queries\Comment\IncrementLikeCount\" />
     <Folder Include="Data\Queries\Comment\Update\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="MainWindow.xaml.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <!--

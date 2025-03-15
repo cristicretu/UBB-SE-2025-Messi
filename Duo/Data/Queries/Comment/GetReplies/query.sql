@@ -1,10 +1,8 @@
-CREATE OR ALTER PROCEDURE GetCommentsByPostID
-    @PostID INT
+CREATE OR ALTER PROCEDURE GetReplies
+    @ParentCommentID INT
 AS
 BEGIN
-    SET NOCOUNT ON;
-
-    WITH CommentHierarchy AS 
+    WITH ReplyHierarchy AS 
     (
         SELECT 
             c.Id AS CommentID,
@@ -16,7 +14,7 @@ BEGIN
             c.Level,
             c.LikeCount
         FROM Comments c
-        WHERE c.PostID = @PostID AND c.ParentCommentID IS NULL
+        WHERE c.ParentCommentID = @ParentCommentID
 
         UNION ALL
 
@@ -30,9 +28,9 @@ BEGIN
             c.Level,
             c.LikeCount
         FROM Comments c
-        INNER JOIN CommentHierarchy ch ON c.ParentCommentID = ch.CommentID
+        INNER JOIN ReplyHierarchy r ON c.ParentCommentID = r.CommentID
         WHERE c.Level <= 3
     )
 
-    SELECT * FROM CommentHierarchy ORDER BY CreatedAt;
+    SELECT * FROM ReplyHierarchy ORDER BY CreatedAt;
 END;

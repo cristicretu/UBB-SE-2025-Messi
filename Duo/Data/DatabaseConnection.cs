@@ -2,6 +2,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Data;
+using System.Diagnostics;
 
 public class DataLink
 {  
@@ -11,6 +12,8 @@ public class DataLink
     public DataLink(IConfiguration configuration)
     {
         string? localDataSource = configuration["LocalDataSource"];
+        string? initialCatalog = configuration["IntialCatalog"];
+
         connectionString = "Data Source=" + localDataSource + ";" +
                    "Initial Catalog=" + initialCatalog + ";" +
                    "Integrated Security=True;" +
