@@ -68,20 +68,77 @@ namespace Duo.Views.Pages
                 postsFiltered.Add(post);
             }
             
+            // Load hashtags dynamically from posts
+            LoadHashtags();
+            
             // Calculate initial pagination
             UpdatePagination(allPosts.ToList());
             
             // Set up pagination
             PostsPager.SelectedIndexChanged += PostsPager_SelectedIndexChanged;
+        }
+        
+        private void LoadHashtags()
+        {
+            // Clear existing items
+            HashtagsContainer.Items.Clear();
+            hashtagButtons.Clear();
             
-            // Store references to hashtag buttons
-            foreach (var item in HashtagsContainer.Items)
+            // Get all distinct hashtags from posts
+            HashSet<string> distinctHashtags = new HashSet<string>();
+            foreach (var post in allPosts)
             {
-                if (item is Button button && button.Tag is string tag)
+                foreach (var hashtag in post.Hashtags)
                 {
-                    hashtagButtons[tag] = button;
+                    distinctHashtags.Add(hashtag);
                 }
             }
+            
+            // Sort hashtags alphabetically
+            var sortedHashtags = distinctHashtags.OrderBy(h => h).ToList();
+            
+            // Create a button for each hashtag
+            foreach (var hashtag in sortedHashtags)
+            {
+                Button button = new Button
+                {
+                    Content = "#" + hashtag,
+                    Tag = hashtag,
+                    Style = Resources["HashtagButtonStyle"] as Style
+                };
+                
+                button.Click += Hashtag_Click;
+                HashtagsContainer.Items.Add(button);
+                hashtagButtons[hashtag] = button;
+            }
+            
+            // // Add the Clear Hashtags button to the parent grid if needed
+            // if (ClearHashtagsButton == null)
+            // {
+            //     ClearHashtagsButton = new Button
+            //     {
+            //         Content = "Clear Hashtags",
+            //         FontSize = 12,
+            //         VerticalAlignment = VerticalAlignment.Center,
+            //         Margin = new Thickness(12, 0, 0, 0),
+            //         Padding = new Thickness(12, 6, 12, 6),
+            //         Background = new SolidColorBrush(Colors.Transparent),
+            //         BorderBrush = (Brush)Resources["SystemControlForegroundBaseLowBrush"],
+            //         BorderThickness = new Thickness(1),
+            //         CornerRadius = new CornerRadius(4)
+            //     };
+                
+            //     ClearHashtagsButton.Click += ClearHashtags_Click;
+                
+            //     // Add to the parent grid
+            //     Grid parentGrid = HashtagsContainer.Parent as Grid;
+            //     if (parentGrid != null)
+            //     {
+            //         Grid.SetRow(ClearHashtagsButton, 0);
+            //         Grid.SetColumn(ClearHashtagsButton, 1);
+            //         parentGrid.Children.Add(ClearHashtagsButton);
+            //     }
+            // }
         }
         
         private void PostsPager_SelectedIndexChanged(PipsPager sender, PipsPagerSelectedIndexChangedEventArgs args)

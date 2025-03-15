@@ -192,20 +192,7 @@
                             <StackPanel Orientation="Horizontal" Spacing="8"/>
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
-                    <ItemsControl.Items>
-                        <Button Content="#technology" Click="Hashtag_Click" Tag="technology" Style="{StaticResource HashtagButtonStyle}"/>
-                        <Button Content="#design" Click="Hashtag_Click" Tag="design" Style="{StaticResource HashtagButtonStyle}"/>
-                        <Button Content="#programming" Click="Hashtag_Click" Tag="programming" Style="{StaticResource HashtagButtonStyle}"/>
-                        <Button Content="#news" Click="Hashtag_Click" Tag="news" Style="{StaticResource HashtagButtonStyle}"/>
-                        <Button Content="#science" Click="Hashtag_Click" Tag="science" Style="{StaticResource HashtagButtonStyle}"/>
-                        <Button Content="#art" Click="Hashtag_Click" Tag="art" Style="{StaticResource HashtagButtonStyle}"/>
-                        <Button Content="#music" Click="Hashtag_Click" Tag="music" Style="{StaticResource HashtagButtonStyle}"/>
-                        <Button Content="#health" Click="Hashtag_Click" Tag="health" Style="{StaticResource HashtagButtonStyle}"/>
-                        <Button Content="#education" Click="Hashtag_Click" Tag="education" Style="{StaticResource HashtagButtonStyle}"/>
-                        <Button Content="#travel" Click="Hashtag_Click" Tag="travel" Style="{StaticResource HashtagButtonStyle}"/>
-                        <Button Content="#food" Click="Hashtag_Click" Tag="food" Style="{StaticResource HashtagButtonStyle}"/>
-                        <Button Content="#sports" Click="Hashtag_Click" Tag="sports" Style="{StaticResource HashtagButtonStyle}"/>
-                    </ItemsControl.Items>
+                    <!-- Buttons will be added dynamically in code -->
                 </ItemsControl>
             </ScrollViewer>
         </Grid>
