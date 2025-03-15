@@ -11,7 +11,10 @@ public class DataLink
     public DataLink(IConfiguration configuration)
     {
         string? localDataSource = configuration["LocalDataSource"];
-        connectionString = "Data Source=NANU\\SQLEXPRESS;Initial Catalog=IssDraft;Integrated Security=True;TrustServerCertificate=True;";
+        connectionString = "Data Source=" + localDataSource + ";" +
+                   "Initial Catalog=" + initialCatalog + ";" +
+                   "Integrated Security=True;" +
+                   "TrustServerCertificate=True";
         try
         {
             sqlConnection = new SqlConnection(connectionString);
