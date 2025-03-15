@@ -41,6 +41,9 @@ namespace Duo.Views.Pages
         private const int ItemsPerPage = 5;
         private List<MockPost> currentFilteredPosts = new List<MockPost>();
         private int totalPages = 1;
+        
+        // Property to store the category name
+        private string category = "Posts";
 
         public PostListPage()
         {
@@ -78,12 +81,28 @@ namespace Duo.Views.Pages
             PostsPager.SelectedIndexChanged += PostsPager_SelectedIndexChanged;
         }
         
+        // Override OnNavigatedTo to receive the category name parameter
+        protected override void OnNavigatedTo(NavigationEventArgs e)
+        {
+            base.OnNavigatedTo(e);
+            
+            // Check if we received a category name parameter
+            if (e.Parameter is string category && !string.IsNullOrEmpty(category))
+            {
+                this.category = category;
+                
+                // Update the page title with the category name
+                PageTitle.Text = this.category;
+            }
+        }
+        
         private void LoadHashtags()
         {
             // Clear existing items
             HashtagsContainer.Items.Clear();
             hashtagButtons.Clear();
-            
+            selectedHashtags.Clear();
+
             // Get all distinct hashtags from posts
             HashSet<string> distinctHashtags = new HashSet<string>();
             foreach (var post in allPosts)
@@ -97,14 +116,19 @@ namespace Duo.Views.Pages
             // Sort hashtags alphabetically
             var sortedHashtags = distinctHashtags.OrderBy(h => h).ToList();
             
+            // Add "All" hashtag at the beginning
+            sortedHashtags.Insert(0, "All");
+            
             // Create a button for each hashtag
             foreach (var hashtag in sortedHashtags)
             {
                 Button button = new Button
                 {
-                    Content = "#" + hashtag,
+                    Content = hashtag == "All" ? "All" : $"#{hashtag}",
                     Tag = hashtag,
-                    Style = Resources["HashtagButtonStyle"] as Style
+                    Style = hashtag == "All" ? 
+                        Resources["SelectedHashtagButtonStyle"] as Style : 
+                        Resources["HashtagButtonStyle"] as Style
                 };
                 
                 button.Click += Hashtag_Click;
@@ -112,33 +136,8 @@ namespace Duo.Views.Pages
                 hashtagButtons[hashtag] = button;
             }
             
-            // // Add the Clear Hashtags button to the parent grid if needed
-            // if (ClearHashtagsButton == null)
-            // {
-            //     ClearHashtagsButton = new Button
-            //     {
-            //         Content = "Clear Hashtags",
-            //         FontSize = 12,
-            //         VerticalAlignment = VerticalAlignment.Center,
-            //         Margin = new Thickness(12, 0, 0, 0),
-            //         Padding = new Thickness(12, 6, 12, 6),
-            //         Background = new SolidColorBrush(Colors.Transparent),
-            //         BorderBrush = (Brush)Resources["SystemControlForegroundBaseLowBrush"],
-            //         BorderThickness = new Thickness(1),
-            //         CornerRadius = new CornerRadius(4)
-            //     };
-                
-            //     ClearHashtagsButton.Click += ClearHashtags_Click;
-                
-            //     // Add to the parent grid
-            //     Grid parentGrid = HashtagsContainer.Parent as Grid;
-            //     if (parentGrid != null)
-            //     {
-            //         Grid.SetRow(ClearHashtagsButton, 0);
-            //         Grid.SetColumn(ClearHashtagsButton, 1);
-            //         parentGrid.Children.Add(ClearHashtagsButton);
-            //     }
-            // }
+            // Set "All" as the default selected hashtag
+            selectedHashtags.Add("All");
         }
         
         private void PostsPager_SelectedIndexChanged(PipsPager sender, PipsPagerSelectedIndexChangedEventArgs args)
@@ -156,16 +155,54 @@ namespace Duo.Views.Pages
         {
             if (sender is Button button && button.Tag is string hashtag)
             {
-                // Toggle hashtag selection
-                if (selectedHashtags.Contains(hashtag))
+                // Special handling for "All" hashtag
+                if (hashtag == "All")
                 {
-                    selectedHashtags.Remove(hashtag);
-                    button.Style = Resources["HashtagButtonStyle"] as Style;
+                    // If "All" is clicked, deactivate all other hashtags
+                    foreach (var tag in selectedHashtags.ToList())
+                    {
+                        if (tag != "All" && hashtagButtons.TryGetValue(tag, out Button tagButton))
+                        {
+                            tagButton.Style = Resources["HashtagButtonStyle"] as Style;
+                        }
+                    }
+                    
+                    // Clear selected hashtags
+                    selectedHashtags.Clear();
+                    
+                    // Activate "All" hashtag
+                    selectedHashtags.Add("All");
+                    button.Style = Resources["SelectedHashtagButtonStyle"] as Style;
                 }
                 else
                 {
-                    selectedHashtags.Add(hashtag);
-                    button.Style = Resources["SelectedHashtagButtonStyle"] as Style;
+                    // For other hashtags, toggle their selection
+                    if (selectedHashtags.Contains(hashtag))
+                    {
+                        // Deactivate this hashtag
+                        selectedHashtags.Remove(hashtag);
+                        button.Style = Resources["HashtagButtonStyle"] as Style;
+                        
+                        // If no hashtags are selected, activate "All"
+                        if (selectedHashtags.Count == 0 && hashtagButtons.TryGetValue("All", out Button allButton))
+                        {
+                            selectedHashtags.Add("All");
+                            allButton.Style = Resources["SelectedHashtagButtonStyle"] as Style;
+                        }
+                    }
+                    else
+                    {
+                        // Activate this hashtag
+                        selectedHashtags.Add(hashtag);
+                        button.Style = Resources["SelectedHashtagButtonStyle"] as Style;
+                        
+                        // Deactivate "All" hashtag
+                        if (selectedHashtags.Contains("All") && hashtagButtons.TryGetValue("All", out Button allButton))
+                        {
+                            selectedHashtags.Remove("All");
+                            allButton.Style = Resources["HashtagButtonStyle"] as Style;
+                        }
+                    }
                 }
                 
                 ApplyFilters();
@@ -190,8 +227,16 @@ namespace Duo.Views.Pages
             bool hashtagMatch = true;
             if (selectedHashtags.Count > 0)
             {
-                // Ensure all selected hashtags are present in the post
-                hashtagMatch = selectedHashtags.All(tag => post.Hashtags.Contains(tag));
+                // If "All" is selected, show all posts (no hashtag filtering)
+                if (selectedHashtags.Contains("All"))
+                {
+                    hashtagMatch = true;
+                }
+                else
+                {
+                    // Ensure all selected hashtags are present in the post
+                    hashtagMatch = selectedHashtags.All(tag => post.Hashtags.Contains(tag));
+                }
             }
             
             return titleMatch && hashtagMatch;
