@@ -15,18 +15,32 @@ public class CategoryRepository
     public List<Category> GetCategories()
     {
         List<Category> categories = new List<Category>();
-        var dataTable = _dataLink.ExecuteReader("GetCategories");
+        DataTable dataTable = null;
 
-        foreach (DataRow row in dataTable.Rows)  
+        try
         {
-            categories.Add(new Category(
-                Convert.ToInt32(row["Id"]),  
-                row["Name"] != DBNull.Value ? row["Name"].ToString() : ""  
-            ));
+            dataTable = _dataLink.ExecuteReader("GetCategories");
+
+            foreach (DataRow row in dataTable.Rows)
+            {
+                categories.Add(new Category(
+                    Convert.ToInt32(row["Id"]),
+                    row["Name"] != DBNull.Value ? row["Name"].ToString() : ""
+                ));
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error retrieving categories: {ex.Message}");
+        }
+        finally
+        {
+            dataTable?.Dispose();
         }
 
         return categories;
     }
+
 
     public Category GetCategoryByName(string name)
     {
