@@ -120,25 +120,49 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Title -->
+        <TextBlock Grid.Row="0" Grid.Column="0" 
+            Text="Title" 
+            FontSize="24"
+            FontWeight="SemiBold" 
+            Padding="0,0,0,12"
+            VerticalAlignment="Center"
+            Margin="2,0,0,0"/>
+
         <!-- Title Search -->
-        <StackPanel Grid.Row="0" Margin="0,0,0,12">
-            <TextBlock Text="Search by Title" 
-                       Margin="0,0,0,4" 
-                       FontWeight="SemiBold" />
-            <TextBox 
-                x:Name="FilterByTitle" 
-                PlaceholderText="Enter title keywords..."
-                TextChanged="OnFilterChanged"
-                BorderThickness="0,0,0,1"
-                Background="{ThemeResource SystemControlBackgroundAltHighBrush}"/>
-        </StackPanel>
+        <TextBox Grid.Row="0" Grid.Column="1" 
+            x:Name="FilterByTitle" 
+            PlaceholderText="Search"
+            MinWidth="200"
+            Width="300"
+            TextChanged="OnFilterChanged"
+            BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}"
+            CornerRadius="4"
+            Margin="0,0,0,12"
+            FontSize="14"
+            BorderThickness="1,1,1,1"
+            VerticalAlignment="Center"
+            Background="{ThemeResource SystemControlBackgroundAltHighBrush}"/>
+
+        <!-- Horizontal Line -->
+        <Rectangle Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" 
+                  Height="1" 
+                  Margin="0,0,0,6"
+                  Fill="{ThemeResource SystemControlForegroundBaseLowBrush}" 
+                  HorizontalAlignment="Stretch"/>
         
         <!-- Hashtags ScrollViewer -->
-        <Grid Grid.Row="1" Margin="0,0,0,12">
+        <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="2,0,0,6">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -147,13 +171,8 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            
-            <TextBlock Text="Filter by Hashtags" 
-                       Grid.Row="0" Grid.Column="0"
-                       Margin="0,0,0,4" 
-                       FontWeight="SemiBold"/>
                        
-            <ScrollViewer Grid.Row="1" Grid.Column="0"
+            <ScrollViewer Grid.Row="2" Grid.Column="0"
                 Height="60"
                 ZoomMode="Disabled"
                 IsTabStop="True"
@@ -189,33 +208,18 @@
                     </ItemsControl.Items>
                 </ItemsControl>
             </ScrollViewer>
-            
-            <!-- Clear Hashtags Button -->
-            <Button x:Name="ClearHashtagsButton"
-                    Grid.Row="1" Grid.Column="1"
-                    Content="Clear Hashtags"
-                    FontSize="12"
-                    Click="ClearHashtags_Click"
-                    VerticalAlignment="Center"
-                    Margin="12,0,0,0"
-                    Padding="12,6"
-                    Background="Transparent"
-                    BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}"
-                    BorderThickness="1"
-                    CornerRadius="4">
-            </Button>
         </Grid>
 
         <!-- ListView for displaying filtered posts -->
     <ListView
         x:Name="FilteredListView"
-        Grid.Row="2"
+        Grid.Row="3"
+        Grid.ColumnSpan="2"
         ItemsSource="{x:Bind postsFiltered}"
         SelectionMode="Single"
         ShowsScrollingPlaceholders="True"
         BorderThickness="1"
-        Margin="0,0,0,16"
-        Padding="6"
+        Margin="0,0,0,0"
         Background="{ThemeResource SystemControlBackgroundAltHighBrush}"
         CornerRadius="4">
             <ListView.ItemTemplate>
@@ -246,7 +250,7 @@
     <!-- Pagination control -->
     <PipsPager 
         x:Name="PostsPager"
-        Grid.Row="3"
+        Grid.Row="4"
         HorizontalAlignment="Center"
         NumberOfPages="1"
         Orientation="Horizontal"
