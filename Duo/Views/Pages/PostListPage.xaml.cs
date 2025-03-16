@@ -12,8 +12,8 @@ namespace Duo.Views.Pages
     // MockPost class to represent a post until we have a real Post class
     public class MockPost
     {
-        public string Title { get; set; }
-        public string Content { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string Content { get; set; } = string.Empty;
         public List<string> Hashtags { get; set; } = new List<string>();
         public string Username { get; set; } = "u/anonymous"; // Added property for username
         public string Date { get; set; } = "1 year ago"; // Added property for display date
@@ -299,20 +299,17 @@ namespace Duo.Views.Pages
 
         private void ClearHashtags_Click(object sender, RoutedEventArgs e)
         {
-            // Reset all selected hashtags
-            foreach (var tag in selectedHashtags.ToList())
-            {
-                if (hashtagButtons.TryGetValue(tag, out Button button))
-                {
-                    button.Style = Resources["HashtagButtonStyle"] as Style;
-                }
-            }
-            
-            // Clear the selected hashtags collection
-            selectedHashtags.Clear();
-            
-            // Apply filters to update the list
+            ClearHashtagSelection();
             ApplyFilters();
+        }
+        
+        private void FilteredListView_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            if (e.ClickedItem is MockPost clickedPost)
+            {
+                // Navigate to post detail page with the clicked post as parameter
+                Frame.Navigate(typeof(PostDetailPage), clickedPost);
+            }
         }
 
         private void SetupHashtagDragScrolling()
@@ -359,6 +356,36 @@ namespace Duo.Views.Pages
                 _isDragging = false;
                 HashtagsScrollViewer.ReleasePointerCapture(e.Pointer);
                 e.Handled = true;
+            }
+        }
+
+        private void ClearHashtagSelection()
+        {
+            // Reset all selected hashtags
+            foreach (var tag in selectedHashtags.ToList())
+            {
+                if (hashtagButtons.TryGetValue(tag, out Button button))
+                {
+                    var style = Resources["HashtagButtonStyle"] as Style;
+                    if (style != null)
+                    {
+                        button.Style = style;
+                    }
+                }
+            }
+            
+            // Clear the selected hashtags collection
+            selectedHashtags.Clear();
+            
+            // Set "All" as selected
+            if (hashtagButtons.TryGetValue("All", out Button allButton))
+            {
+                selectedHashtags.Add("All");
+                var style = Resources["SelectedHashtagButtonStyle"] as Style;
+                if (style != null)
+                {
+                    allButton.Style = style;
+                }
             }
         }
     }
