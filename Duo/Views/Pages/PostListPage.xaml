@@ -104,7 +104,7 @@
         </Style>
     </Page.Resources>
 
-    <Grid Margin="16">
+    <Grid Margin="16" MaxWidth="1024" HorizontalAlignment="Center">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
