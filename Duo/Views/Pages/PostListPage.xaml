@@ -110,7 +110,6 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <Grid.ColumnDefinitions>
@@ -183,59 +182,60 @@
             </ScrollViewer>
         </Grid>
 
-    <ListView
-        x:Name="FilteredListView"
-        Grid.Row="3"
-        Grid.Column="0"
-        Grid.ColumnSpan="2"
-        ItemsSource="{x:Bind postsFiltered}"
-        SelectionMode="Single"
-        ShowsScrollingPlaceholders="True"
-        BorderThickness="1"
-        Margin="0,0,0,16"
-        Padding="0"
-        Background="Transparent"
-        HorizontalContentAlignment="Stretch"
-        HorizontalAlignment="Stretch"
-        VerticalAlignment="Stretch"
-        >
-            <ListView.ItemTemplate>
-                <DataTemplate x:DataType="local:MockPost">
-                    <StackPanel>
-                        <components:Post 
-                            Username="{x:Bind Username}"
-                            Date="{x:Bind Date}"
-                            Title="{x:Bind Title}"
-                            Hashtags="{x:Bind Hashtags}"
-                            Content="{x:Bind Content}"
-                            LikeCount="{x:Bind LikeCount}"/>
-                        <Rectangle Height="1" Fill="{ThemeResource SystemControlForegroundBaseLowBrush}" Opacity="0.2" HorizontalAlignment="Stretch" Margin="0,4,0,4"/>
-                    </StackPanel>
-                </DataTemplate>
-            </ListView.ItemTemplate>
-            <ListView.ItemContainerStyle>
-                <Style TargetType="ListViewItem">
-                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                    <Setter Property="BorderThickness" Value="0"/>
-                    <Setter Property="Padding" Value="0"/>
-                    <Setter Property="Background" Value="Transparent"/>
-                    <Setter Property="BorderBrush" Value="Transparent"/>
-                    <Setter Property="VerticalContentAlignment" Value="Top"/>
-                </Style>
-            </ListView.ItemContainerStyle>
-        </ListView>
+    <ScrollViewer Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" 
+                 VerticalScrollBarVisibility="Auto"
+                 HorizontalScrollBarVisibility="Disabled">
+        <StackPanel>
+            <ListView
+                x:Name="FilteredListView"
+                ItemsSource="{x:Bind postsFiltered}"
+                SelectionMode="Single"
+                ShowsScrollingPlaceholders="True"
+                BorderThickness="1"
+                Margin="0,0,0,16"
+                Padding="0"
+                Background="Transparent"
+                HorizontalContentAlignment="Stretch"
+                HorizontalAlignment="Stretch"
+                >
+                <ListView.ItemTemplate>
+                    <DataTemplate x:DataType="local:MockPost">
+                        <StackPanel>
+                            <components:Post 
+                                Username="{x:Bind Username}"
+                                Date="{x:Bind Date}"
+                                Title="{x:Bind Title}"
+                                Hashtags="{x:Bind Hashtags}"
+                                Content="{x:Bind Content}"
+                                LikeCount="{x:Bind LikeCount}"/>
+                            <Rectangle Height="1" Fill="{ThemeResource SystemControlForegroundBaseLowBrush}" Opacity="0.2" HorizontalAlignment="Stretch" Margin="0,4,0,4"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                        <Setter Property="BorderThickness" Value="0"/>
+                        <Setter Property="Padding" Value="0"/>
+                        <Setter Property="Background" Value="Transparent"/>
+                        <Setter Property="BorderBrush" Value="Transparent"/>
+                        <Setter Property="VerticalContentAlignment" Value="Top"/>
+                    </Style>
+                </ListView.ItemContainerStyle>
+            </ListView>
 
-    <!-- Pagination control -->
-    <PipsPager 
-        x:Name="PostsPager"
-        Grid.Row="4"
-        Grid.Column="0"
-        Grid.ColumnSpan="2"
-        HorizontalAlignment="Center"
-        NumberOfPages="1"
-        Orientation="Horizontal"
-        PreviousButtonVisibility="Visible"
-        NextButtonVisibility="Visible"
-        SelectedPageIndex="0" />
+            <!-- Pagination control -->
+            <PipsPager 
+                x:Name="PostsPager"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Bottom"
+                Margin="0,0,0,16"
+                NumberOfPages="1"
+                Orientation="Horizontal"
+                PreviousButtonVisibility="Visible"
+                NextButtonVisibility="Visible"
+                SelectedPageIndex="0" />
+        </StackPanel>
+    </ScrollViewer>
 </Grid>
 </Page>
