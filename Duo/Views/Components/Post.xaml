@@ -78,19 +78,7 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 
-                <Button Content="Like" 
-                        Grid.Column="0"
-                        Style="{ThemeResource AccentButtonStyle}"
-                        CornerRadius="8"
-                        Padding="12,4"/>
-                
-                <TextBlock Text="{x:Bind LikeCount, Mode=OneWay}" 
-                           Grid.Column="1"
-                           FontSize="12" 
-                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" 
-                           VerticalAlignment="Center"
-                           Margin="8,0,0,0"/>
-                <local:LikeButton LikeCount="{x:Bind LikeCount, Mode=TwoWay}" />
+                <local:LikeButton Grid.Column="0" LikeCount="{x:Bind LikeCount, Mode=TwoWay}" />
             </Grid>
         </StackPanel>
     </Border>

@@ -38,7 +38,7 @@
             </Button.Resources>
             <FontIcon x:Name="heartIcon"
                      Glyph="&#xEB51;"
-                     Foreground="Red"
+                     Foreground="{ThemeResource SystemControlForegroundAccentBrush}"
                      FontSize="20"/>
         </Button>
         
