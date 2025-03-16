@@ -54,17 +54,12 @@ public class CommentService
     {
         try
         {
-            var post = _postRepository.GetPostById(postId);
-
-            if (post == null)
-                throw new Exception("Post not found");
-
-            //var user = _userService.GetCurrentUser();
+            var user = _userService.GetCurrentUser();
             
-            //if (user == null)
-            //    throw new Exception("User not found");
+            if (user == null)
+                throw new Exception("User not found");
 
-            var comment = new Comment(1, content, postId, 1, null, DateTime.Now, 0, 1);
+            var comment = new Comment(1, content, postId, user.Id, null, DateTime.Now, 0, 1);
 
             return _commentRepository.CreateComment(comment);
         }
@@ -83,10 +78,10 @@ public class CommentService
             if (parentComment == null)
                 throw new Exception("Parent comment not found");
 
-            //var user = _userService.GetCurrentUser();
+            var user = _userService.GetCurrentUser();
 
-            //if (user == null)
-            //    throw new Exception("User not found");
+            if (user == null)
+                throw new Exception("User not found");
 
             var comment = new Comment(1, content, parentComment.PostId, 1, parrentCommentId, DateTime.Now, 0, parentComment.Level + 1);
             return _commentRepository.CreateComment(comment);
