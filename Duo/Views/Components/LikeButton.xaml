@@ -41,8 +41,7 @@
             </Button.Resources>
             
             <FontIcon x:Name="heartIcon"
-                     Glyph="&#xE00F;"
-                     FontFamily="Segoe Fluent Icons"
+                     Glyph="&#xEB51;"
                      Foreground="{StaticResource HeartDefaultBrush}"
                      FontSize="20"/>
         </Button>
