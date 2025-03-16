@@ -24,18 +24,23 @@
         
         <Button x:Name="likeButton"
                 Grid.Column="0"
-                Background="Transparent"
-                BorderThickness="0"
-                Padding="8,4"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Center"
                 Click="LikeButton_Click">
-            <!-- Prevent background/foreground changes -->
             <Button.Resources>
                 <ResourceDictionary>
-                    <Style TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+                    <Style TargetType="Button">
                         <Setter Property="Background" Value="Transparent"/>
                         <Setter Property="BorderBrush" Value="Transparent"/>
+                        <Setter Property="BorderThickness" Value="0"/>
+                        <Setter Property="Padding" Value="8,4"/>
+                        <Setter Property="HorizontalAlignment" Value="Center"/>
+                        <Setter Property="VerticalAlignment" Value="Center"/>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="Button">
+                                    <ContentPresenter/>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
                     </Style>
                 </ResourceDictionary>
             </Button.Resources>
