@@ -7,79 +7,127 @@
     xmlns:components="using:Duo.Views.Components"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d">
+    mc:Ignorable="d"
+    HorizontalAlignment="Stretch">
 
-    <Grid Margin="16" MaxWidth="900" HorizontalAlignment="Center">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-
-        <ScrollViewer Grid.Row="0" Grid.RowSpan="4" 
-                    VerticalScrollBarVisibility="Auto"
-                    HorizontalScrollBarVisibility="Disabled">
-            <StackPanel Spacing="20" Padding="0,0,12,0">
-                <Button x:Name="BackButton" Click="BackButton_Click" Margin="0,0,0,8">
-                    <StackPanel Orientation="Horizontal" Spacing="4">
-                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE72B;" FontSize="12"/>
-                        <TextBlock Text="Back" FontSize="14"/>
+    <Grid HorizontalAlignment="Stretch" MaxWidth="900" Margin="16,0,32,0">
+        <ScrollViewer 
+            HorizontalAlignment="Stretch" 
+            HorizontalContentAlignment="Stretch"
+            VerticalScrollBarVisibility="Auto"
+            Padding="0,0,16,0">
+            <StackPanel 
+                HorizontalAlignment="Stretch" 
+                MaxWidth="900"
+                Spacing="0">
+                
+                <!-- Back Button -->
+                <Button 
+                    x:Name="BackButton"
+                    Content="Back"
+                    Click="BackButton_Click"
+                    Margin="0,16,0,16"/>
+                
+                <!-- Main Post Content with Hover Style Always Applied -->
+                <Border 
+                    Background="{ThemeResource SystemControlBackgroundAltHighBrush}" 
+                    BorderBrush="{ThemeResource SystemControlBackgroundListLowBrush}"
+                    BorderThickness="1"
+                    CornerRadius="7" 
+                    Padding="0" 
+                    HorizontalAlignment="Stretch"
+                    Margin="0,0,0,16">
+                    
+                    <StackPanel Padding="16,12,16,12" Spacing="20" HorizontalAlignment="Stretch">
+                        <!-- Header Section -->
+                        <StackPanel Spacing="10" HorizontalAlignment="Stretch">
+                            <!-- Username and Date Row -->
+                            <Grid HorizontalAlignment="Stretch">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                
+                                <TextBlock 
+                                    x:Name="UserTextBlock" 
+                                    Grid.Column="0"
+                                    Text="u/username" 
+                                    FontSize="12" 
+                                    FontWeight="SemiBold"
+                                    Opacity="0.6"/>
+                                
+                                <TextBlock 
+                                    x:Name="DateTextBlock" 
+                                    Grid.Column="1"
+                                    Text="Mar 14" 
+                                    FontSize="10"
+                                    FontWeight="SemiBold"
+                                    Opacity="0.4"/>
+                            </Grid>
+                            
+                            <!-- Post Title -->
+                            <TextBlock 
+                                x:Name="PostTitleTextBlock"
+                                Text="Post Title"
+                                FontWeight="Bold"
+                                FontSize="14"
+                                TextWrapping="Wrap"/>
+                                
+                            <!-- Hashtags/Chips Row -->
+                            <ItemsControl x:Name="HashtagsItemsControl" HorizontalAlignment="Left">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Horizontal" Spacing="8"/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="{ThemeResource SystemControlBackgroundListLowBrush}" 
+                                               CornerRadius="10" 
+                                               Padding="12,1,12,3">
+                                            <TextBlock FontSize="12" 
+                                                       Foreground="{ThemeResource SystemControlForegroundBaseHighBrush}">
+                                                <Run Text="#"/>
+                                                <Run Text="{Binding}"/>
+                                            </TextBlock>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                        
+                        <!-- Post content -->
+                        <TextBlock 
+                            x:Name="ContentTextBlock" 
+                            Text="Post content goes here." 
+                            TextWrapping="Wrap" 
+                            FontSize="14"/>
+                        
+                        <!-- Action buttons -->
+                        <StackPanel Orientation="Horizontal" Spacing="16" HorizontalAlignment="Left">
+                            <components:LikeButton x:Name="LikeButton"/>
+                        </StackPanel>
                     </StackPanel>
-                </Button>
-
-                <StackPanel Spacing="10">
-                    <!-- Post Header -->
-                    <Grid HorizontalAlignment="Stretch">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        
-                        <TextBlock x:Name="PostUsername"
-                                 Grid.Column="0"
-                                 FontWeight="SemiBold" 
-                                 FontSize="14"
-                                 Opacity="0.6"/>
-                        
-                        <TextBlock x:Name="PostDate"
-                                 Grid.Column="1"
-                                 FontSize="12" 
-                                 FontWeight="SemiBold"
-                                 Opacity="0.4"/>
-                    </Grid>
-
-                    <!-- Post Title -->
-                    <TextBlock x:Name="PostTitle"
-                             FontWeight="Bold"
-                             FontSize="24"
-                             TextWrapping="Wrap"
-                             Margin="0,8,0,8"/>
-
-                    <!-- Content -->
-                    <TextBlock x:Name="PostContent"
-                             TextWrapping="Wrap"
-                             FontSize="16"
-                             Margin="0,12,0,20"/>
-
-                    <!-- Comments Section (Placeholder) -->
-                    <TextBlock Text="Comments" 
-                             FontWeight="SemiBold" 
-                             FontSize="18"
-                             Margin="0,16,0,8"/>
-
-                    <!-- Comment List Placeholder -->
-                    <Border Background="{ThemeResource SystemControlBackgroundListLowBrush}" 
-                          CornerRadius="8" 
-                          Padding="16"
-                          Margin="0,0,0,24">
-                        <TextBlock Text="Comments will appear here." 
-                                 FontSize="14" 
-                                 HorizontalAlignment="Center"
-                                 Margin="0,24,0,24"
-                                 Opacity="0.6"/>
-                    </Border>
-                </StackPanel>
+                </Border>
+                
+                <!-- Comment Input Area -->
+                <components:CommentInput 
+                    HorizontalAlignment="Stretch" 
+                    Margin="0,16,0,0"/>
+                
+                <!-- Comments Section Header -->
+                <TextBlock 
+                    Text="Comments" 
+                    FontSize="18" 
+                    FontWeight="SemiBold" 
+                    Margin="0,16,0,8" 
+                    HorizontalAlignment="Left"/>
+                
+                <!-- Comments List -->
+                <StackPanel 
+                    x:Name="CommentsPanel" 
+                    HorizontalAlignment="Stretch" 
+                    Spacing="0"/>
             </StackPanel>
         </ScrollViewer>
     </Grid>
