@@ -6,6 +6,7 @@ public class CommentService
     private readonly CommentRepository _commentRepository;
     private readonly PostRepository _postRepository;
     private readonly UserService _userService;
+    private Dictionary<int, int> _commentNumberPerPost = new Dictionary<int, int>();
 
     public CommentService(CommentRepository commentRepository, PostRepository postRepository, UserService userService)
     {
@@ -78,12 +79,15 @@ public class CommentService
             if (parentComment == null)
                 throw new Exception("Parent comment not found");
 
+            if (parentComment.Level >= 3) // Enforce maximum 3-level nesting
+                throw new Exception("Replies cannot exceed 3 levels of nesting");
+
             var user = _userService.GetCurrentUser();
 
             if (user == null)
                 throw new Exception("User not found");
 
-            var comment = new Comment(1, content, parentComment.PostId, 1, parrentCommentId, DateTime.Now, 0, parentComment.Level + 1);
+            var comment = new Comment(1, content, parentComment.PostId, user.Id, parrentCommentId, DateTime.Now, 0, parentComment.Level + 1);
             return _commentRepository.CreateComment(comment);
         }
         catch (Exception ex)
@@ -127,6 +131,15 @@ public class CommentService
         catch (Exception ex)
         {
             throw new Exception(ex.Message);
+        }
+    }
+
+    private void initializeCommentNumberPerPost()
+    {
+        var posts = _postRepository.GetPosts();
+        foreach (var post in posts)
+        {
+            _commentNumberPerPost.Add(post.Id, _commentRepository.GetCommentsByPostId(post.Id).Count);
         }
     }
 
