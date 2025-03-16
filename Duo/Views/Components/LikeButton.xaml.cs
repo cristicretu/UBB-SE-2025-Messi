@@ -37,18 +37,30 @@ namespace Duo.Views.Components
             try
             {
                 // Play heart beat animation
-                Storyboard heartAnimation = this.Resources["HeartAnimation"] as Storyboard;
-                heartAnimation?.Begin();
+                var heartAnimation = this.Resources["HeartAnimation"] as Storyboard;
+                if (heartAnimation != null)
+                {
+                    heartAnimation.Begin();
+                }
                 
                 // Update like count and state
                 LikeCount++;
                 IsLiked = true;
+                
+                // RoutedEventArgs doesn't have a Handled property in WinUI
+                // We'll rely on the Tapped handler to prevent navigation
             }
             catch (System.Exception ex)
             {
                 // Log error or handle exception gracefully
                 System.Diagnostics.Debug.WriteLine($"Error in LikeButton_Click: {ex.Message}");
             }
+        }
+        
+        private void LikeButton_Tapped(object sender, TappedRoutedEventArgs e)
+        {
+            // Mark the tapped event as handled to stop it from bubbling up
+            e.Handled = true;
         }
     }
 }
