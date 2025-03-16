@@ -1,6 +1,8 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System.Collections.Generic;
+using System.ComponentModel;
+using Microsoft.UI.Xaml.Input;
 
 namespace Duo.Views.Components
 {
@@ -27,6 +29,28 @@ namespace Duo.Views.Components
         public Post()
         {
             InitializeComponent();
+        }
+
+        // Handle pointer entered event for hover effects
+        private void PostBorder_PointerEntered(object sender, PointerRoutedEventArgs e)
+        {
+            if (sender is Border border)
+            {
+                border.Background = Application.Current.Resources["SystemControlBackgroundAltHighBrush"] as Microsoft.UI.Xaml.Media.Brush;
+                border.BorderBrush = Application.Current.Resources["SystemControlBackgroundListLowBrush"] as Microsoft.UI.Xaml.Media.Brush;
+            }
+        }
+
+        // Handle pointer exited event for hover effects
+        private void PostBorder_PointerExited(object sender, PointerRoutedEventArgs e)
+        {
+            if (sender is Border border)
+            {
+                border.Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+                    Microsoft.UI.Colors.Transparent);
+                border.BorderBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+                    Microsoft.UI.Colors.Transparent);
+            }
         }
 
         public string Username
