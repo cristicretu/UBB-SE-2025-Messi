@@ -12,12 +12,16 @@ namespace Duo.Views.Pages
     // MockPost class to represent a post until we have a real Post class
     public class MockPost
     {
+        public int Id { get; set; } = 0;
         public string Title { get; set; } = string.Empty;
         public string Content { get; set; } = string.Empty;
         public List<string> Hashtags { get; set; } = new List<string>();
-        public string Username { get; set; } = "u/anonymous"; // Added property for username
+        public string User { get; set; } = "anonymous"; // Username without u/ prefix
+        public string Username { get; set; } = "u/anonymous"; // Kept for backward compatibility
         public string Date { get; set; } = "1 year ago"; // Added property for display date
         public int LikeCount { get; set; } = 0; // Added property for like count
+        public bool IsLiked { get; set; } = false; // Track if the post is liked by the current user
+        public DateTime PostDate { get; set; } = DateTime.Now; // Actual date object for calculations
 
         public MockPost()
         {
@@ -34,12 +38,17 @@ namespace Duo.Views.Pages
             
             // Generate random mock data for demo purposes
             Random random = new Random();
-            Username = $"u/user{random.Next(100, 999)}";
+            Id = random.Next(1000, 9999);
+            string userName = $"user{random.Next(100, 999)}";
+            User = userName;
+            Username = $"u/{userName}";
             
             string[] timeOptions = { "2 hours ago", "5 days ago", "2 weeks ago", "1 month ago", "3 months ago" };
             Date = timeOptions[random.Next(timeOptions.Length)];
+            PostDate = DateTime.Now.AddDays(-random.Next(1, 30));
             
             LikeCount = random.Next(0, 500);
+            IsLiked = random.NextDouble() > 0.7; // 30% chance of being liked
         }
     }
 
