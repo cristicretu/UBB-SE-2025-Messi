@@ -133,15 +133,4 @@ public class CommentService
             throw new Exception(ex.Message);
         }
     }
-
-    private void initializeCommentNumberPerPost()
-    {
-        var posts = _postRepository.GetPosts();
-        foreach (var post in posts)
-        {
-            _commentNumberPerPost.Add(post.Id, _commentRepository.GetCommentsByPostId(post.Id).Count);
-        }
-    }
-
-
 }

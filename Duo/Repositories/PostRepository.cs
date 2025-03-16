@@ -119,4 +119,32 @@ public class PostRepository
 
         return new Collection<Post>(posts);
     }
+
+    public List<Post> GetAllPosts()
+    {
+        try
+        {
+            DataTable dataTable = dataLink.ExecuteReader("GetAllPosts");
+            List<Post> posts = new List<Post>();
+            foreach (DataRow row in dataTable.Rows)
+            {
+                posts.Add(new Post
+                {
+                    Id = Convert.ToInt32(row["Id"]),
+                    Title = Convert.ToString(row["Title"]) ?? string.Empty,
+                    Description = Convert.ToString(row["Description"]) ?? string.Empty,
+                    UserID = Convert.ToInt32(row["UserID"]),
+                    CategoryID = Convert.ToInt32(row["CategoryID"]),
+                    CreatedAt = Convert.ToDateTime(row["CreatedAt"]),
+                    UpdatedAt = Convert.ToDateTime(row["UpdatedAt"]),
+                    LikeCount = Convert.ToInt32(row["LikeCount"])
+                });
+            }
+            return posts;
+        }
+        catch (SqlException ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
 }
