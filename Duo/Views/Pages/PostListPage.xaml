@@ -11,7 +11,7 @@
 
     <Page.Resources>
         <Style x:Key="HashtagButtonStyle" TargetType="Button">
-            <Setter Property="Background" Value="{ThemeResource SystemControlBackgroundAltMediumBrush}"/>
+            <Setter Property="Background" Value="{ThemeResource SystemControlBackgroundListLowBrush}"/>
             <Setter Property="Foreground" Value="{ThemeResource SystemControlForegroundBaseHighBrush}"/>
             <Setter Property="Padding" Value="12,6"/>
             <Setter Property="CornerRadius" Value="16"/>
@@ -104,7 +104,7 @@
         </Style>
     </Page.Resources>
 
-    <Grid Margin="16" MaxWidth="1024" HorizontalAlignment="Center">
+    <Grid Margin="16" MaxWidth="900" HorizontalAlignment="Center">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -160,13 +160,13 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
                        
-            <ScrollViewer Grid.Row="2" Grid.Column="0"
+            <ScrollViewer x:Name="HashtagsScrollViewer" Grid.Row="2" Grid.Column="0"
                 Height="60"
                 ZoomMode="Disabled"
                 IsTabStop="True"
                 IsVerticalScrollChainingEnabled="True"
                 HorizontalScrollMode="Enabled" 
-                HorizontalScrollBarVisibility="Auto"
+                HorizontalScrollBarVisibility="Hidden"
                 VerticalScrollMode="Disabled" 
                 VerticalScrollBarVisibility="Disabled"
                 Padding="0,6"
@@ -184,44 +184,62 @@
 
     <ScrollViewer Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" 
                  VerticalScrollBarVisibility="Auto"
-                 HorizontalScrollBarVisibility="Disabled">
-        <StackPanel>
+                 HorizontalScrollBarVisibility="Disabled"
+                 Padding="0,0,12,0">
+        <StackPanel Spacing="0">
             <ListView
                 x:Name="FilteredListView"
                 ItemsSource="{x:Bind postsFiltered}"
-                SelectionMode="Single"
+                SelectionMode="None"
+                IsItemClickEnabled="False"
                 ShowsScrollingPlaceholders="True"
-                BorderThickness="1"
+                BorderThickness="0"
                 Margin="0,0,0,16"
                 Padding="0"
                 Background="Transparent"
                 HorizontalContentAlignment="Stretch"
                 HorizontalAlignment="Stretch"
                 >
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                        <Setter Property="BorderThickness" Value="0"/>
+                        <Setter Property="Padding" Value="0"/>
+                        <Setter Property="Margin" Value="0"/>
+                        <Setter Property="Background" Value="Transparent"/>
+                        <Setter Property="BorderBrush" Value="Transparent"/>
+                        <Setter Property="VerticalContentAlignment" Value="Top"/>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="ListViewItem">
+                                    <ContentPresenter HorizontalAlignment="Stretch"
+                                                    VerticalAlignment="Stretch"
+                                                    HorizontalContentAlignment="Stretch"
+                                                    VerticalContentAlignment="Stretch"
+                                                    Content="{TemplateBinding Content}"
+                                                    ContentTemplate="{TemplateBinding ContentTemplate}"
+                                                    ContentTransitions="{TemplateBinding ContentTransitions}"/>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </ListView.ItemContainerStyle>
                 <ListView.ItemTemplate>
                     <DataTemplate x:DataType="local:MockPost">
-                        <StackPanel>
+                        <StackPanel HorizontalAlignment="Stretch">
                             <components:Post 
                                 Username="{x:Bind Username}"
                                 Date="{x:Bind Date}"
                                 Title="{x:Bind Title}"
                                 Hashtags="{x:Bind Hashtags}"
                                 Content="{x:Bind Content}"
-                                LikeCount="{x:Bind LikeCount}"/>
-                            <Rectangle Height="1" Fill="{ThemeResource SystemControlForegroundBaseLowBrush}" Opacity="0.2" HorizontalAlignment="Stretch" Margin="0,4,0,4"/>
+                                LikeCount="{x:Bind LikeCount}"
+                                HorizontalAlignment="Stretch"/>
+                            <Rectangle Height="1" Fill="#E0E0E0" HorizontalAlignment="Stretch" Margin="0,4,0,4"/>
                         </StackPanel>
                     </DataTemplate>
                 </ListView.ItemTemplate>
-                <ListView.ItemContainerStyle>
-                    <Style TargetType="ListViewItem">
-                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                        <Setter Property="BorderThickness" Value="0"/>
-                        <Setter Property="Padding" Value="0"/>
-                        <Setter Property="Background" Value="Transparent"/>
-                        <Setter Property="BorderBrush" Value="Transparent"/>
-                        <Setter Property="VerticalContentAlignment" Value="Top"/>
-                    </Style>
-                </ListView.ItemContainerStyle>
             </ListView>
 
             <!-- Pagination control -->
