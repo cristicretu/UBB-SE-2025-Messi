@@ -51,6 +51,7 @@
     <Folder Include="Data\Queries\Comment\GetCommentByID\" />
     <Folder Include="Data\Queries\Comment\IncrementLikeCount\" />
     <Folder Include="Data\Queries\Comment\Update\" />
+    <Folder Include="Data\Queries\Post\GetAllPosts\" />
     <Folder Include="Data\Queries\Post\GetAll\" />
   </ItemGroup>
   <ItemGroup>

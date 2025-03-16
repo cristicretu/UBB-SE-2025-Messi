@@ -1,6 +1,7 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using System.Collections.Generic;
+using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Media.Animation;
 
 namespace Duo.Views.Components
 {
@@ -21,9 +22,33 @@ namespace Duo.Views.Components
             set { SetValue(LikeCountProperty, value); }
         }
 
+        // Is Liked Property
+        public static readonly DependencyProperty IsLikedProperty =
+            DependencyProperty.Register(nameof(IsLiked), typeof(bool), typeof(LikeButton), new PropertyMetadata(false));
+
+        public bool IsLiked
+        {
+            get { return (bool)GetValue(IsLikedProperty); }
+            set { SetValue(IsLikedProperty, value); }
+        }
+
         private void LikeButton_Click(object sender, RoutedEventArgs e)
         {
-            LikeCount++;
+            try
+            {
+                // Play heart beat animation
+                Storyboard heartAnimation = this.Resources["HeartAnimation"] as Storyboard;
+                heartAnimation?.Begin();
+                
+                // Update like count and state
+                LikeCount++;
+                IsLiked = true;
+            }
+            catch (System.Exception ex)
+            {
+                // Log error or handle exception gracefully
+                System.Diagnostics.Debug.WriteLine($"Error in LikeButton_Click: {ex.Message}");
+            }
         }
     }
 }
