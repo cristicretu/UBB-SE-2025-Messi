@@ -55,14 +55,24 @@ public class CommentService
     {
         try
         {
+            if (!_commentNumberPerPost.ContainsKey(postId))
+                _commentNumberPerPost[postId] = _commentRepository.GetCommentsByPostId(postId).Count;
+
+            if (_commentNumberPerPost[postId] >= 1000)
+                throw new Exception("Maximum number of comments per post reached");
+
             var user = _userService.GetCurrentUser();
-            
+
             if (user == null)
                 throw new Exception("User not found");
 
             var comment = new Comment(1, content, postId, user.Id, null, DateTime.Now, 0, 1);
 
-            return _commentRepository.CreateComment(comment);
+            comment = _commentRepository.CreateComment(comment);
+
+            _commentNumberPerPost[postId]++;
+
+            return comment;
         }
         catch (Exception ex)
         {
@@ -75,9 +85,16 @@ public class CommentService
         try
         {
             var parentComment = _commentRepository.GetCommentById(parrentCommentId);
+            var postId = parentComment.PostId;
 
             if (parentComment == null)
                 throw new Exception("Parent comment not found");
+
+            if (!_commentNumberPerPost.ContainsKey(postId))
+                _commentNumberPerPost[postId] = _commentRepository.GetCommentsByPostId(postId).Count;
+
+            if (_commentNumberPerPost[postId] >= 1000)
+                throw new Exception("Maximum number of comments per post reached");
 
             if (parentComment.Level >= 3) // Enforce maximum 3-level nesting
                 throw new Exception("Replies cannot exceed 3 levels of nesting");
@@ -87,8 +104,13 @@ public class CommentService
             if (user == null)
                 throw new Exception("User not found");
 
-            var comment = new Comment(1, content, parentComment.PostId, user.Id, parrentCommentId, DateTime.Now, 0, parentComment.Level + 1);
-            return _commentRepository.CreateComment(comment);
+            var comment = new Comment(1, content, postId, user.Id, parrentCommentId, DateTime.Now, 0, parentComment.Level + 1);
+
+            var newComment = _commentRepository.CreateComment(comment);
+
+            _commentNumberPerPost[parentComment.PostId]++;
+
+            return newComment;
         }
         catch (Exception ex)
         {
@@ -114,7 +136,17 @@ public class CommentService
     {
         try
         {
-            return _commentRepository.DeleteComment(id);
+            var PostId = _commentRepository.GetCommentById(id).PostId;
+
+            if(!_commentNumberPerPost.ContainsKey(PostId))
+                _commentNumberPerPost[PostId] = _commentRepository.GetCommentsByPostId(PostId).Count;
+
+            bool result = _commentRepository.DeleteComment(id);
+
+            if (result)
+                _commentNumberPerPost[PostId]--;
+
+            return result;
         }
         catch (Exception ex)
         {
