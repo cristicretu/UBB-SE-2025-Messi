@@ -15,6 +15,7 @@
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="BorderBrush" Value="Transparent" />
             <Setter Property="Background" Value="Transparent" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
             <Setter Property="Transitions">
                 <Setter.Value>
                     <TransitionCollection>
@@ -25,87 +26,71 @@
         </Style>
     </UserControl.Resources>
 
-    <Border Style="{StaticResource PostBorderStyle}" Margin="0,0,0,12">
-        <VisualStateManager.VisualStateGroups>
-            <VisualStateGroup x:Name="HoverStates">
-                <VisualState x:Name="Normal"/>
-                <VisualState x:Name="PointerOver">
-                    <VisualState.Setters>
-                        <Setter Target="PostBorder.Background" Value="White" />
-                        <Setter Target="PostBorder.BorderBrush" Value="#EEEEEE" />
-                    </VisualState.Setters>
-                </VisualState>
-            </VisualStateGroup>
-        </VisualStateManager.VisualStateGroups>
-        
-        <StackPanel Padding="16,12,16,12">
-            <!-- Header Section -->
-            <Grid Margin="0,0,0,8">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                
-                <TextBlock Text="{x:Bind Username, Mode=OneWay}"
-                           Grid.Column="0"
-                           FontWeight="SemiBold" 
-                           FontSize="12"
-                           Opacity="0.6"/>
+    <Border x:Name="PostBorder" Style="{StaticResource PostBorderStyle}" PointerEntered="PostBorder_PointerEntered" PointerExited="PostBorder_PointerExited">
+        <StackPanel Padding="16,12,16,12" Spacing="20" HorizontalAlignment="Stretch">
+            <!-- Header Column Section -->
+            <StackPanel Spacing="10" HorizontalAlignment="Stretch">
+                <!-- Username and Date Row -->
+                <Grid HorizontalAlignment="Stretch">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <TextBlock Text="{x:Bind Username, Mode=OneWay}"
+                              Grid.Column="0"
+                              FontWeight="SemiBold" 
+                              FontSize="12"
+                              Opacity="0.6"/>
+                    
+                    <TextBlock Text="{x:Bind Date, Mode=OneWay}"
+                              Grid.Column="1"
+                              FontSize="10" 
+                              FontWeight="SemiBold"
+                              Opacity="0.4"/>
+                </Grid>
 
-                <TextBlock Text="{x:Bind Date, Mode=OneWay}"
-                           Grid.Column="1"
-                           FontSize="10" 
-                           FontWeight="SemiBold"
-                           Opacity="0.4"
-                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                           HorizontalAlignment="Right"/>
-            </Grid>
+                <!-- Post Title -->
+                <TextBlock Text="{x:Bind Title, Mode=OneWay}"
+                          FontWeight="Bold"
+                          FontSize="14"
+                          TextWrapping="Wrap"/>
 
-            <TextBlock Text="{x:Bind Title, Mode=OneWay}"
-                       FontSize="16" 
-                       FontWeight="Bold" 
-                       TextWrapping="Wrap"
-                       Margin="0,0,0,8"/>
-            
-            <ItemsControl ItemsSource="{x:Bind Hashtags, Mode=OneWay}"
-                          Margin="0,0,0,8">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <StackPanel Orientation="Horizontal" Spacing="8"/>
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Border Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                                BorderThickness="0"
-                                CornerRadius="10"
-                                Padding="12,4,12,4"
-                                Margin="0,0,0,0">
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="#" 
-                                           FontSize="12"
-                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
-                                <TextBlock Text="{Binding}" 
-                                           FontSize="12"
-                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
-                            </StackPanel>
-                        </Border>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-                           
-            <TextBlock Text="{x:Bind Content, Mode=OneWay}" 
-                       TextWrapping="Wrap" 
-                       Margin="0,0,0,8"/>
+                <!-- Hashtags/Chips Row -->
+                <ItemsControl ItemsSource="{x:Bind Hashtags, Mode=OneWay}" HorizontalAlignment="Left">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal" Spacing="8"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Background="{ThemeResource SystemControlBackgroundListLowBrush}" 
+                                   CornerRadius="10" 
+                                   Padding="12,1,12,3">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="#" 
+                                             FontSize="12"
+                                             Foreground="{ThemeResource SystemControlForegroundBaseHighBrush}"/>
+                                    <TextBlock Text="{Binding}" 
+                                             FontSize="12"
+                                             Foreground="{ThemeResource SystemControlForegroundBaseHighBrush}"/>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
 
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                
-                <local:LikeButton Grid.Column="0" LikeCount="{x:Bind LikeCount, Mode=TwoWay}" />
-            </Grid>
+            <!-- Post Content -->
+            <TextBlock Text="{x:Bind Content, Mode=OneWay}"
+                      TextWrapping="Wrap"
+                      FontSize="12"/>
+
+            <!-- Likes Row -->
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <local:LikeButton LikeCount="{x:Bind LikeCount, Mode=TwoWay}" />
+            </StackPanel>
         </StackPanel>
     </Border>
 </UserControl> 

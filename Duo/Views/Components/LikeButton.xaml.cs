@@ -1,6 +1,7 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Media.Animation;
 
 namespace Duo.Views.Components
 {
@@ -33,8 +34,21 @@ namespace Duo.Views.Components
 
         private void LikeButton_Click(object sender, RoutedEventArgs e)
         {
-            LikeCount++;
-            IsLiked = true;
+            try
+            {
+                // Play heart beat animation
+                Storyboard heartAnimation = this.Resources["HeartAnimation"] as Storyboard;
+                heartAnimation?.Begin();
+                
+                // Update like count and state
+                LikeCount++;
+                IsLiked = true;
+            }
+            catch (System.Exception ex)
+            {
+                // Log error or handle exception gracefully
+                System.Diagnostics.Debug.WriteLine($"Error in LikeButton_Click: {ex.Message}");
+            }
         }
     }
 }

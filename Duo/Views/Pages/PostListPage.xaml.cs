@@ -1,6 +1,7 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
+using Microsoft.UI.Xaml.Input;
 using System.Linq; // Ensure this is included for LINQ operations
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
@@ -57,6 +58,10 @@ namespace Duo.Views.Pages
         // Property to store the category name
         private string category = "Posts";
 
+        // Add the following fields for drag scrolling
+        private double _previousPosition;
+        private bool _isDragging;
+
         public PostListPage()
         {
             this.InitializeComponent();
@@ -91,6 +96,9 @@ namespace Duo.Views.Pages
             
             // Set up pagination
             PostsPager.SelectedIndexChanged += PostsPager_SelectedIndexChanged;
+
+            // Initialize drag scrolling
+            SetupHashtagDragScrolling();
         }
         
         // Override OnNavigatedTo to receive the category name parameter
@@ -305,6 +313,53 @@ namespace Duo.Views.Pages
             
             // Apply filters to update the list
             ApplyFilters();
+        }
+
+        private void SetupHashtagDragScrolling()
+        {
+            // Set up drag scrolling for the hashtags list
+            HashtagsScrollViewer.PointerPressed += HashtagsScrollViewer_PointerPressed;
+            HashtagsScrollViewer.PointerMoved += HashtagsScrollViewer_PointerMoved;
+            HashtagsScrollViewer.PointerReleased += HashtagsScrollViewer_PointerReleased;
+            HashtagsScrollViewer.PointerExited += HashtagsScrollViewer_PointerReleased;
+            HashtagsScrollViewer.PointerCaptureLost += HashtagsScrollViewer_PointerReleased;
+        }
+        
+        private void HashtagsScrollViewer_PointerPressed(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
+        {
+            _isDragging = true;
+            _previousPosition = e.GetCurrentPoint(HashtagsScrollViewer).Position.X;
+            
+            // Capture the pointer to receive events outside the control
+            HashtagsScrollViewer.CapturePointer(e.Pointer);
+            
+            // Mark the event as handled to prevent standard scrolling behavior
+            e.Handled = true;
+        }
+        
+        private void HashtagsScrollViewer_PointerMoved(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
+        {
+            if (_isDragging)
+            {
+                var currentPosition = e.GetCurrentPoint(HashtagsScrollViewer).Position.X;
+                var delta = _previousPosition - currentPosition;
+                
+                // Update scroll position
+                HashtagsScrollViewer.ChangeView(HashtagsScrollViewer.HorizontalOffset + delta, null, null);
+                
+                _previousPosition = currentPosition;
+                e.Handled = true;
+            }
+        }
+        
+        private void HashtagsScrollViewer_PointerReleased(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
+        {
+            if (_isDragging)
+            {
+                _isDragging = false;
+                HashtagsScrollViewer.ReleasePointerCapture(e.Pointer);
+                e.Handled = true;
+            }
         }
     }
 }
