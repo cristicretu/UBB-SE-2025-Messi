@@ -12,6 +12,7 @@
     <Page.Resources>
         <Style x:Key="HashtagButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="{ThemeResource SystemControlBackgroundListLowBrush}"/>
+            <Setter Property="Background" Value="{ThemeResource SystemControlBackgroundListLowBrush}"/>
             <Setter Property="Foreground" Value="{ThemeResource SystemControlForegroundBaseHighBrush}"/>
             <Setter Property="Padding" Value="12,6"/>
             <Setter Property="CornerRadius" Value="16"/>
@@ -110,6 +111,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <Grid.ColumnDefinitions>
@@ -161,11 +163,13 @@
             </Grid.ColumnDefinitions>
                        
             <ScrollViewer x:Name="HashtagsScrollViewer" Grid.Row="2" Grid.Column="0"
+            <ScrollViewer x:Name="HashtagsScrollViewer" Grid.Row="2" Grid.Column="0"
                 Height="60"
                 ZoomMode="Disabled"
                 IsTabStop="True"
                 IsVerticalScrollChainingEnabled="True"
                 HorizontalScrollMode="Enabled" 
+                HorizontalScrollBarVisibility="Hidden"
                 HorizontalScrollBarVisibility="Hidden"
                 VerticalScrollMode="Disabled" 
                 VerticalScrollBarVisibility="Disabled"
@@ -242,18 +246,17 @@
                 </ListView.ItemTemplate>
             </ListView>
 
-            <!-- Pagination control -->
-            <PipsPager 
-                x:Name="PostsPager"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Bottom"
-                Margin="0,0,0,16"
-                NumberOfPages="1"
-                Orientation="Horizontal"
-                PreviousButtonVisibility="Visible"
-                NextButtonVisibility="Visible"
-                SelectedPageIndex="0" />
-        </StackPanel>
-    </ScrollViewer>
+    <!-- Pagination control -->
+    <PipsPager 
+        x:Name="PostsPager"
+        Grid.Row="4"
+        Grid.Column="0"
+        Grid.ColumnSpan="2"
+        HorizontalAlignment="Center"
+        NumberOfPages="1"
+        Orientation="Horizontal"
+        PreviousButtonVisibility="Visible"
+        NextButtonVisibility="Visible"
+        SelectedPageIndex="0" />
 </Grid>
 </Page>
