@@ -236,7 +236,7 @@
                                 Content="{x:Bind Content}"
                                 LikeCount="{x:Bind LikeCount}"
                                 HorizontalAlignment="Stretch"/>
-                            <Rectangle Height="1" Fill="#E0E0E0" HorizontalAlignment="Stretch" Margin="0,4,0,4"/>
+                            <Rectangle Height="1" Fill="{ThemeResource SystemControlForegroundBaseLowBrush}" HorizontalAlignment="Stretch" Margin="0,4,0,4"/>
                         </StackPanel>
                     </DataTemplate>
                 </ListView.ItemTemplate>
