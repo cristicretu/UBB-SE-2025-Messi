@@ -201,13 +201,16 @@
         >
             <ListView.ItemTemplate>
                 <DataTemplate x:DataType="local:MockPost">
-                    <components:Post 
-                        Username="{x:Bind Username}"
-                        Date="{x:Bind Date}"
-                        Title="{x:Bind Title}"
-                        Hashtags="{x:Bind Hashtags}"
-                        Content="{x:Bind Content}"
-                        LikeCount="{x:Bind LikeCount}"/>
+                    <StackPanel>
+                        <components:Post 
+                            Username="{x:Bind Username}"
+                            Date="{x:Bind Date}"
+                            Title="{x:Bind Title}"
+                            Hashtags="{x:Bind Hashtags}"
+                            Content="{x:Bind Content}"
+                            LikeCount="{x:Bind LikeCount}"/>
+                        <Rectangle Height="1" Fill="{ThemeResource SystemControlForegroundBaseLowBrush}" Opacity="0.2" HorizontalAlignment="Stretch" Margin="0,4,0,4"/>
+                    </StackPanel>
                 </DataTemplate>
             </ListView.ItemTemplate>
             <ListView.ItemContainerStyle>

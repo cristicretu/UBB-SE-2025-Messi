@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 namespace Duo.Views.Components
 {
-    public sealed partial class Post : UserControl, INotifyPropertyChanged
+    public sealed partial class Post : UserControl
     {
         public static readonly DependencyProperty UsernameProperty = 
             DependencyProperty.Register(nameof(Username), typeof(string), typeof(Post), new PropertyMetadata(""));
