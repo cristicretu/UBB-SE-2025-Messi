@@ -76,12 +76,21 @@ namespace Duo
                         titleBar.ButtonPressedForegroundColor = foregroundPressedBrush.Color;
                     
                     int windowWidth = (int)AppWindow.Size.Width;
-                    int rightPadding = Math.Max(150, windowWidth / 5);
+                    int systemButtonsWidth = 138; 
                     
                     titleBar.SetDragRectangles(new RectInt32[]
                     {
-                        new RectInt32(0, 0, windowWidth - rightPadding, TitleBarHeight)
+                        new RectInt32(0, 0, windowWidth - systemButtonsWidth, TitleBarHeight)
                     });
+                    
+                    this.SizeChanged += (s, e) =>
+                    {
+                        int newWidth = (int)AppWindow.Size.Width;
+                        titleBar.SetDragRectangles(new RectInt32[]
+                        {
+                            new RectInt32(0, 0, newWidth - systemButtonsWidth, TitleBarHeight)
+                        });
+                    };
                     
                     ContentRoot.Padding = new Thickness(0, TitleBarHeight, 0, 0);
                 }
