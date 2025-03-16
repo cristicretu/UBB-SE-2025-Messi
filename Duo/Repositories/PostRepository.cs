@@ -175,27 +175,34 @@
 
     public List<Post> GetAllPosts()
     {
-        DataTable result = dataLink.ExecuteReader("GetAllPosts");
-        List<Post> posts = new List<Post>();
-
-        foreach (DataRow row in result.Rows)
+        DataTable? dataTable = null;
+        try
         {
-            posts.Add(new Post
+            dataTable = dataLink.ExecuteReader("GetAllPosts");
+            List<Post> posts = new List<Post>();
+            foreach (DataRow row in dataTable.Rows)
             {
-                Id = Convert.ToInt32(row["Id"]),
-                Title = row["Title"].ToString(),
-                Description = row["Description"].ToString(),
-                UserID = Convert.ToInt32(row["UserID"]),
-                CategoryID = Convert.ToInt32(row["CategoryID"]),
-                CreatedAt = Convert.ToDateTime(row["CreatedAt"]),
-                UpdatedAt = Convert.ToDateTime(row["UpdatedAt"]),
-                LikeCount = Convert.ToInt32(row["LikeCount"])
-            });
+                posts.Add(new Post
+                {
+                    Id = Convert.ToInt32(row["Id"]),
+                    Title = Convert.ToString(row["Title"]) ?? string.Empty,
+                    Description = Convert.ToString(row["Description"]) ?? string.Empty,
+                    UserID = Convert.ToInt32(row["UserID"]),
+                    CategoryID = Convert.ToInt32(row["CategoryID"]),
+                    CreatedAt = Convert.ToDateTime(row["CreatedAt"]),
+                    UpdatedAt = Convert.ToDateTime(row["UpdatedAt"]),
+                    LikeCount = Convert.ToInt32(row["LikeCount"])
+                });
+            }
+            return posts;
         }
-
-        return posts;
+        catch (SqlException ex)
+        {
+            throw new Exception(ex.Message);
+        }
+        finally
+        {
+            dataTable?.Dispose();
+        }
     }
-
-
-
 }
