@@ -2,6 +2,8 @@
     x:Class="Duo.Views.Components.Post"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Duo.Views.Components"
+    xmlns:components="using:Duo.Views.Components"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
@@ -88,6 +90,7 @@
                            Foreground="{ThemeResource TextFillColorSecondaryBrush}" 
                            VerticalAlignment="Center"
                            Margin="8,0,0,0"/>
+                <local:LikeButton LikeCount="{x:Bind LikeCount, Mode=TwoWay}" />
             </Grid>
         </StackPanel>
     </Border>
