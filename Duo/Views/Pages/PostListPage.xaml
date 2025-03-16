@@ -229,6 +229,8 @@
     <PipsPager 
         x:Name="PostsPager"
         Grid.Row="4"
+        Grid.Column="0"
+        Grid.ColumnSpan="2"
         HorizontalAlignment="Center"
         NumberOfPages="1"
         Orientation="Horizontal"
