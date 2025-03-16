@@ -120,12 +120,17 @@ public class CommentService
         }
     }
 
-    public bool DeleteComment(int commentId)
+    public bool DeleteComment(int commentId, int userId)
     {
         if (commentId <= 0) throw new ArgumentException("Invalid comment ID", nameof(commentId));
+        if(userId <= 0) throw new ArgumentException("Invalid user ID", nameof(userId));
 
         try
         {
+            User user = RetrieveUser();
+
+            if (user.Id != userId) throw new Exception("User does not have permission to delete this comment");
+
             return _commentRepository.DeleteComment(commentId);
         }
         catch (Exception ex)
