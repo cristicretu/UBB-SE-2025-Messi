@@ -233,4 +233,26 @@ public class CommentRepository
             throw new Exception(ex.Message);
         }
     }
+
+    public int GetCommentsCountForPost(int postId)
+    {
+        if (postId <= 0) throw new ArgumentException("Invalid post ID", nameof(postId));
+
+        SqlParameter[] parameters = new SqlParameter[]
+        {
+            new SqlParameter("@PostID", postId)
+        };
+
+        try
+        {
+            int? result = _dataLink.ExecuteScalar<int>("GetCommentsCountForPost", parameters);
+            if (result == null)
+                throw new Exception("Failed to get comment count");
+            return result.Value;
+        }
+        catch (SqlException ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
 }

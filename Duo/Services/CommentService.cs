@@ -6,163 +6,169 @@ public class CommentService
     private readonly CommentRepository _commentRepository;
     private readonly PostRepository _postRepository;
     private readonly UserService _userService;
-    private Dictionary<int, int> _commentNumberPerPost = new Dictionary<int, int>();
 
     public CommentService(CommentRepository commentRepository, PostRepository postRepository, UserService userService)
     {
-        _commentRepository = commentRepository;
-        _postRepository = postRepository;
-        _userService = userService;
+        _commentRepository = commentRepository ?? throw new ArgumentNullException(nameof(commentRepository));
+        _postRepository = postRepository ?? throw new ArgumentNullException(nameof(postRepository));
+        _userService = userService ?? throw new ArgumentNullException(nameof(userService));
     }
 
     public Comment GetCommentById(int id)
     {
+        if (id <= 0) throw new ArgumentException("Invalid comment ID", nameof(id));
+
         try
         {
             return _commentRepository.GetCommentById(id);
         }
         catch (Exception ex)
         {
-            throw new Exception(ex.Message);
+            throw new Exception($"Error retrieving comment with ID {id}: {ex.Message}", ex);
         }
     }
 
     public List<Comment> GetCommentsByPostId(int postId)
     {
+        if (postId <= 0) throw new ArgumentException("Invalid post ID", nameof(postId));
+
         try
         {
             return _commentRepository.GetCommentsByPostId(postId);
         }
         catch (Exception ex)
         {
-            throw new Exception(ex.Message);
+            throw new Exception($"Error retrieving comments for post ID {postId}: {ex.Message}", ex);
         }
     }
 
     public List<Comment> GetRepliesByCommentId(int commentId)
     {
+        if (commentId <= 0) throw new ArgumentException("Invalid comment ID", nameof(commentId));
+
         try
         {
             return _commentRepository.GetRepliesByCommentId(commentId);
         }
         catch (Exception ex)
         {
-            throw new Exception(ex.Message);
+            throw new Exception($"Error retrieving replies for comment ID {commentId}: {ex.Message}", ex);
         }
     }
 
     public Comment CreateComment(int postId, string content)
     {
+        if (postId <= 0) throw new ArgumentException("Invalid post ID", nameof(postId));
+        if (string.IsNullOrWhiteSpace(content)) throw new ArgumentException("Content cannot be empty", nameof(content));
+
         try
         {
-            if (!_commentNumberPerPost.ContainsKey(postId))
-                _commentNumberPerPost[postId] = _commentRepository.GetCommentsByPostId(postId).Count;
+            ValidateCommentCount(postId);
 
-            if (_commentNumberPerPost[postId] >= 1000)
-                throw new Exception("Maximum number of comments per post reached");
-
-            var user = _userService.GetCurrentUser();
-
-            if (user == null)
-                throw new Exception("User not found");
+            User user = RetrieveUser();
 
             var comment = new Comment(1, content, postId, user.Id, null, DateTime.Now, 0, 1);
 
-            comment = _commentRepository.CreateComment(comment);
-
-            _commentNumberPerPost[postId]++;
-
-            return comment;
+            return _commentRepository.CreateComment(comment);
         }
         catch (Exception ex)
         {
-            throw new Exception(ex.Message);
+            throw new Exception($"Error creating comment for post ID {postId}: {ex.Message}", ex);
         }
     }
 
-    public Comment CreateReply(int parrentCommentId, string content)
+    public Comment CreateReply(int parentCommentId, string content)
     {
+        if (parentCommentId <= 0) throw new ArgumentException("Invalid parent comment ID", nameof(parentCommentId));
+        if (string.IsNullOrWhiteSpace(content)) throw new ArgumentException("Content cannot be empty", nameof(content));
+
         try
         {
-            var parentComment = _commentRepository.GetCommentById(parrentCommentId);
-            var postId = parentComment.PostId;
+            var parentComment = _commentRepository.GetCommentById(parentCommentId);
 
-            if (parentComment == null)
-                throw new Exception("Parent comment not found");
+            ValidateCommentCount(parentComment.PostId);
+            ValidateCommentNestingLevel(parentComment.Id);
 
-            if (!_commentNumberPerPost.ContainsKey(postId))
-                _commentNumberPerPost[postId] = _commentRepository.GetCommentsByPostId(postId).Count;
+            User user = RetrieveUser();
 
-            if (_commentNumberPerPost[postId] >= 1000)
-                throw new Exception("Maximum number of comments per post reached");
+            var comment = new Comment(1, content, parentComment.PostId, user.Id, parentCommentId, DateTime.Now, 0, parentComment.Level + 1);
 
-            if (parentComment.Level >= 3) // Enforce maximum 3-level nesting
-                throw new Exception("Replies cannot exceed 3 levels of nesting");
-
-            var user = _userService.GetCurrentUser();
-
-            if (user == null)
-                throw new Exception("User not found");
-
-            var comment = new Comment(1, content, postId, user.Id, parrentCommentId, DateTime.Now, 0, parentComment.Level + 1);
-
-            var newComment = _commentRepository.CreateComment(comment);
-
-            _commentNumberPerPost[parentComment.PostId]++;
-
-            return newComment;
+            return _commentRepository.CreateComment(comment);
         }
         catch (Exception ex)
         {
-            throw new Exception(ex.Message);
+            throw new Exception($"Error creating reply for parent comment ID {parentCommentId}: {ex.Message}", ex);
         }
     }
 
     public bool UpdateComment(int commentId, string content)
     {
+        if (commentId <= 0) throw new ArgumentException("Invalid comment ID", nameof(commentId));
+        if (string.IsNullOrWhiteSpace(content)) throw new ArgumentException("Content cannot be empty", nameof(content));
+
         try
         {
             var comment = _commentRepository.GetCommentById(commentId);
+            if (comment == null) throw new Exception("Comment not found");
+
             comment.Content = content;
             return _commentRepository.UpdateComment(comment);
         }
         catch (Exception ex)
         {
-            throw new Exception(ex.Message);
+            throw new Exception($"Error updating comment with ID {commentId}: {ex.Message}", ex);
         }
     }
 
-    public bool DeleteComment(int id)
+    public bool DeleteComment(int commentId)
     {
+        if (commentId <= 0) throw new ArgumentException("Invalid comment ID", nameof(commentId));
+
         try
         {
-            var PostId = _commentRepository.GetCommentById(id).PostId;
-
-            if(!_commentNumberPerPost.ContainsKey(PostId))
-                _commentNumberPerPost[PostId] = _commentRepository.GetCommentsByPostId(PostId).Count;
-
-            bool result = _commentRepository.DeleteComment(id);
-
-            if (result)
-                _commentNumberPerPost[PostId]--;
-
-            return result;
+            return _commentRepository.DeleteComment(commentId);
         }
         catch (Exception ex)
         {
-            throw new Exception(ex.Message);
+            throw new Exception($"Error deleting comment with ID {commentId}: {ex.Message}", ex);
         }
     }
 
     public bool LikeComment(int commentId)
     {
+        if (commentId <= 0) throw new ArgumentException("Invalid comment ID", nameof(commentId));
+
         try
         {
             return _commentRepository.IncrementLikeCount(commentId);
         }
         catch (Exception ex)
         {
-            throw new Exception(ex.Message);
+            throw new Exception($"Error liking comment with ID {commentId}: {ex.Message}", ex);
         }
+    }
+
+    private User RetrieveUser()
+    {
+        var user = _userService.GetCurrentUser();
+        if (user == null) throw new Exception("User not found");
+
+        return user;
+    }
+
+    private void ValidateCommentCount(int postId)
+    {
+        var post = _postRepository.GetPostById(postId);
+        if (post == null) throw new Exception("Post not found");
+
+        var commentCount = _commentRepository.GetCommentsCountForPost(postId);
+        if (commentCount >= 1000) throw new Exception("Comment limit reached");
+    }
+
+    private void ValidateCommentNestingLevel(int parentCommentID)
+    {
+        var parentComment = _commentRepository.GetCommentById(parentCommentID);
+        if (parentComment == null) throw new Exception("Parent comment not found");
+        if (parentComment.Level >= 5) throw new Exception("Comment nesting limit reached");
     }
 }

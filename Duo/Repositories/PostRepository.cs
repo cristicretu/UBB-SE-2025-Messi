@@ -122,9 +122,10 @@ public class PostRepository
 
     public List<Post> GetAllPosts()
     {
+        DataTable? dataTable = null;
         try
         {
-            DataTable dataTable = dataLink.ExecuteReader("GetAllPosts");
+            dataTable = dataLink.ExecuteReader("GetAllPosts");
             List<Post> posts = new List<Post>();
             foreach (DataRow row in dataTable.Rows)
             {
@@ -145,6 +146,10 @@ public class PostRepository
         catch (SqlException ex)
         {
             throw new Exception(ex.Message);
+        }
+        finally
+        {
+            dataTable?.Dispose();
         }
     }
 }
