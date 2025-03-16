@@ -12,6 +12,8 @@
     Title="Duo">
 
     <Grid>
-        <pages:CategoryPage />
+        <Grid x:Name="ContentRoot">
+            <pages:CategoryPage />
+        </Grid>
     </Grid>
 </Window>
