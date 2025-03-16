@@ -7,33 +7,51 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
-
+    
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <SolidColorBrush x:Key="HeartDefaultBrush" Color="Black"/>
+            <SolidColorBrush x:Key="HeartHoverBrush" Color="Red"/>
+            <SolidColorBrush x:Key="HeartFilledBrush" Color="Red"/>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
-
+        
         <Button x:Name="likeButton"
-                Content="Like"
                 Grid.Column="0"
-                Style="{ThemeResource AccentButtonStyle}"
-                CornerRadius="8"
-                Padding="12,4"
-                Background="{ThemeResource SystemControlBackgroundAccentBrush}"
-                Foreground="White"
-                FontWeight="Bold"
-                Margin="0,0,8,0"
+                Background="Transparent"
+                BorderThickness="0"
+                Padding="8,4"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
-                Click="LikeButton_Click" />
-
+                Click="LikeButton_Click">
+            <!-- Prevent background/foreground changes -->
+            <Button.Resources>
+                <ResourceDictionary>
+                    <Style TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+                        <Setter Property="Background" Value="Transparent"/>
+                        <Setter Property="BorderBrush" Value="Transparent"/>
+                    </Style>
+                </ResourceDictionary>
+            </Button.Resources>
+            
+            <FontIcon x:Name="heartIcon"
+                     Glyph="&#xE00F;"
+                     FontFamily="Segoe Fluent Icons"
+                     Foreground="{StaticResource HeartDefaultBrush}"
+                     FontSize="20"/>
+        </Button>
+        
         <TextBlock Text="{x:Bind LikeCount, Mode=OneWay}"
                    Grid.Column="1"
                    FontSize="16"
                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                    VerticalAlignment="Center"
-                   Margin="8,0,0,0" />
+                   Margin="4,0,0,0" />
     </Grid>
-
 </UserControl>
