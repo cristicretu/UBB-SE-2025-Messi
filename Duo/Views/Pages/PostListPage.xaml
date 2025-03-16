@@ -186,31 +186,31 @@
         </Grid>
 
         <!-- ListView for displaying filtered posts -->
-        <ListView
-            x:Name="FilteredListView"
-            Grid.Row="3"
-            Grid.Column="0"
-            Grid.ColumnSpan="2"
-            ItemsSource="{x:Bind postsFiltered}"
-            Margin="0,0,0,16"
-            SelectionMode="Single"
-            HorizontalContentAlignment="Stretch"
-            HorizontalAlignment="Stretch"
-            VerticalAlignment="Stretch"
-            Padding="0"
-            Background="Transparent"
-            ShowsScrollingPlaceholders="True">
+    <ListView
+        x:Name="FilteredListView"
+        Grid.Row="3"
+        Grid.Column="0"
+        Grid.ColumnSpan="2"
+        ItemsSource="{x:Bind postsFiltered}"
+        SelectionMode="Single"
+        ShowsScrollingPlaceholders="True"
+        BorderThickness="1"
+        Margin="0,0,0,16"
+        Padding="0"
+        Background="Transparent"
+        HorizontalContentAlignment="Stretch"
+        HorizontalAlignment="Stretch"
+        VerticalAlignment="Stretch"
+        >
             <ListView.ItemTemplate>
                 <DataTemplate x:DataType="local:MockPost">
-                    <StackPanel Margin="0,8,0,12" Padding="8">
-                        <TextBlock Text="{x:Bind Title}" 
-                                   FontWeight="SemiBold" 
-                                   FontSize="16"/>
-                        <TextBlock Text="{x:Bind Content}" 
-                                   TextWrapping="Wrap" 
-                                   Margin="0,4,0,0"
-                                   Opacity="0.87"/>
-                    </StackPanel>
+                    <components:Post 
+                        Username="{x:Bind Username}"
+                        Date="{x:Bind Date}"
+                        Title="{x:Bind Title}"
+                        Hashtags="{x:Bind Hashtags}"
+                        Content="{x:Bind Content}"
+                        LikeCount="{x:Bind LikeCount}"/>
                 </DataTemplate>
             </ListView.ItemTemplate>
             <ListView.ItemContainerStyle>
