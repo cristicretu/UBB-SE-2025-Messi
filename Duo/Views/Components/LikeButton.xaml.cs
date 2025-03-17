@@ -52,6 +52,7 @@ namespace Duo.Views.Components
                 // Log error or handle exception gracefully
                 System.Diagnostics.Debug.WriteLine($"Error in LikeButton_Click: {ex.Message}");
             }
+        }
 
         private void LikeButton_Tapped(object sender, TappedRoutedEventArgs e)
         {
