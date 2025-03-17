@@ -9,13 +9,12 @@ using System.Threading.Tasks;
 public class PostService
 {
     private readonly PostRepository _postRepository;
-    private CancellationTokenSource _debounceTokenSource;
-    private readonly SemaphoreSlim _searchLock = new SemaphoreSlim(1, 1);
+    private SearchService searchService; 
 
     public PostService(PostRepository postRepository)
     {
         _postRepository = postRepository;
-        _debounceTokenSource = new CancellationTokenSource();
+        this.searchService = new SearchService();
     }
 
     public int CreatePost(Post post)
@@ -28,13 +27,12 @@ public class PostService
         try
         {
             return _postRepository.CreatePost(post);
-        }catch(Exception ex)
+        } 
+        catch(Exception ex)
         {
             throw new Exception($"Error creating post: {ex.Message}");
         }
-
-
-       }
+    }
 
     public void DeletePost(int id)
     {
@@ -96,7 +94,6 @@ public class PostService
 
         try
         {
-
             return _postRepository.GetByCategory(categoryId, page, pageSize);
         }
         catch (Exception ex)
@@ -158,63 +155,21 @@ public class PostService
     //    }
     //}
 
-
-    public async Task<List<Post>> SearchPostsAsync(string query, int page, int pageSize, int delay = 300)
-    {
-        if (string.IsNullOrWhiteSpace(query))
-        {
+    public List<Post> SearchPostsByKeyword(string keyword)
+    {   
+        if (string.IsNullOrEmpty(keyword))
             return new List<Post>();
-        }
 
-        if (page < 1 || pageSize < 1)
+        List<string> allTitles = _postRepository.GetAllPostTitles();
+        List<string> matchingTitles = searchService.Search(keyword, allTitles, 0.6);
+
+        List<Post> results = new List<Post>();
+        foreach (string title in matchingTitles)
         {
-            throw new ArgumentException("Invalid pagination parameters.");
+            List<Post> postsWithTitle = _postRepository.GetByTitle(title);
+            results.AddRange(postsWithTitle);
         }
 
-        // Cancel any previous search operation
-        _debounceTokenSource?.Cancel();
-        _debounceTokenSource = new CancellationTokenSource();
-        var token = _debounceTokenSource.Token;
-
-        try
-        {
-            // Wait for the debounce delay
-            await Task.Delay(delay, token);
-
-            // Check if this operation was canceled
-            token.ThrowIfCancellationRequested();
-
-            // Ensure only one search operation executes at a time
-            await _searchLock.WaitAsync(token);
-            try
-            {
-                // Perform the search
-                var result = _postRepository.SearchPosts(query, page, pageSize);
-                return result;
-            }
-            finally
-            {
-                _searchLock.Release();
-            }
-        }
-        catch (OperationCanceledException)
-        {
-            // Return empty list if operation was canceled
-            return new List<Post>();
-        }
+        return results;
     }
-
-    public async Task<List<Post>> GetAllPostsAsync()
-    {
-        return await Task.Run(() => _postRepository.GetAllPosts());
-    }
-
-    public void Dispose()
-    {
-        _debounceTokenSource?.Dispose();
-        _searchLock.Dispose();
-    }
-
-
-
 }
