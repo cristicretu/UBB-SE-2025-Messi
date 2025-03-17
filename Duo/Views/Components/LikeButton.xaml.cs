@@ -46,17 +46,13 @@ namespace Duo.Views.Components
                 // Update like count and state
                 LikeCount++;
                 IsLiked = true;
-                
-                // RoutedEventArgs doesn't have a Handled property in WinUI
-                // We'll rely on the Tapped handler to prevent navigation
             }
             catch (System.Exception ex)
             {
                 // Log error or handle exception gracefully
                 System.Diagnostics.Debug.WriteLine($"Error in LikeButton_Click: {ex.Message}");
             }
-        }
-        
+
         private void LikeButton_Tapped(object sender, TappedRoutedEventArgs e)
         {
             // Mark the tapped event as handled to stop it from bubbling up

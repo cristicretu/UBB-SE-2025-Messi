@@ -128,6 +128,7 @@ namespace Duo.Views.Components
             return parent as Frame;
         }
 
+
         public string Username
         {
             get => (string)GetValue(UsernameProperty);
