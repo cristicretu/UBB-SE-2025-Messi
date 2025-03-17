@@ -171,24 +171,26 @@ namespace Duo.Views.Components
                         body {{
                             margin: 0;
                             padding: 0;
-                            background-color: {(isDarkTheme ? "#1e1e1e" : "#ffffff")};
+                            background-color: transparent;
                             color: {(isDarkTheme ? "#ffffff" : "#000000")};
                         }}
                         
                         html[data-theme='dark'] {{
                             color-scheme: dark;
+                            background-color: transparent;
                         }}
                         
                         html[data-theme='light'] {{
                             color-scheme: light;
+                            background-color: transparent;
                         }}
                         
                         .markdown-body {{
                             box-sizing: border-box;
                             margin: 0;
-                            padding: 0;
+                            padding: 6px 0;
                             color: {(isDarkTheme ? "#d4d4d4" : "#24292e")};
-                            background-color: {(isDarkTheme ? "#1e1e1e" : "#ffffff")};
+                            background-color: transparent !important;
                         }}
                         
                         .markdown-body a {{
@@ -202,10 +204,31 @@ namespace Duo.Views.Components
                         .markdown-body blockquote {{
                             color: {(isDarkTheme ? "#bbb" : "#6a737d")};
                             border-left-color: {(isDarkTheme ? "#444" : "#dfe2e5")};
+                            background-color: transparent;
                         }}
                         
                         .markdown-body code {{
+                            background-color: {(isDarkTheme ? "#2b2b2b99" : "#f6f8fa99")};
+                        }}
+                        
+                        .markdown-body pre {{
                             background-color: {(isDarkTheme ? "#2b2b2b" : "#f6f8fa")};
+                        }}
+                        
+                        .markdown-body h1, .markdown-body h2, .markdown-body h3, 
+                        .markdown-body h4, .markdown-body h5, .markdown-body h6 {{
+                            margin-top: 12px;
+                            margin-bottom: 10px;
+                        }}
+                        
+                        .markdown-body p, .markdown-body ul, .markdown-body ol {{
+                            margin-top: 6px;
+                            margin-bottom: 6px;
+                        }}
+                        
+                        /* Override any potential github-markdown-css backgrounds */
+                        .markdown-body table tr, .markdown-body table th, .markdown-body table td {{
+                            background-color: transparent !important;
                         }}
                     </style>
                 </head>

@@ -38,7 +38,8 @@
               VerticalAlignment="Stretch">
             <WebView2 x:Name="MarkdownPreview" 
                       HorizontalAlignment="Stretch"
-                      VerticalAlignment="Stretch"/>
+                      VerticalAlignment="Stretch"
+                      DefaultBackgroundColor="Transparent"/>
         </Grid>
     </Grid>
 </UserControl>

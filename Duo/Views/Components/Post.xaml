@@ -83,9 +83,18 @@
             </StackPanel>
 
             <!-- Post Content -->
-            <TextBlock Text="{x:Bind Content, Mode=OneWay}"
+            <!-- <TextBlock Text="{x:Bind Content, Mode=OneWay}"
                       TextWrapping="Wrap"
-                      FontSize="12"/>
+                      FontSize="12"/> -->
+
+             <components:MarkdownComponent 
+                    MarkdownText="# Test i am test&#x0A;&#x0A;1. me&#x0A;2. you&#x0A;&#x0A;[acasa](cretu.dev)"
+                    HorizontalAlignment="Stretch"
+                    MinHeight="200"
+                    Margin="0,0,0,16"
+                    BorderThickness="0"
+                    BorderBrush="Transparent"
+                    Background="Transparent" />
 
             <!-- Likes Row -->
             <StackPanel Orientation="Horizontal" Spacing="8">
