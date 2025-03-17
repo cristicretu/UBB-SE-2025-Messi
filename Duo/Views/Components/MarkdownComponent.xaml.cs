@@ -2,11 +2,16 @@ using System;
 using System.ComponentModel;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
+using System.Threading.Tasks;
 
 namespace Duo.Views.Components
 {
     public sealed partial class MarkdownComponent : UserControl, INotifyPropertyChanged
     {
+        private bool _isWebViewInitialized = false;
+        private string _pendingMarkdownText = null;
+
         // Dependency property for markdown text
         public static readonly DependencyProperty MarkdownTextProperty =
             DependencyProperty.Register(
@@ -28,15 +33,11 @@ namespace Duo.Views.Components
             if (d is MarkdownComponent component && e.NewValue is string newText)
             {
                 component.SetMarkdownText(newText);
-                // Show preview automatically when text is provided
-                if (!string.IsNullOrEmpty(newText) && !component.PreviewVisible)
-                {
-                    component.PreviewVisible = true;
-                }
             }
         }
 
-        private bool _previewVisible = false;
+        // Always visible now, keeping for compatibility
+        private bool _previewVisible = true;
         public bool PreviewVisible
         {
             get => _previewVisible;
@@ -60,25 +61,57 @@ namespace Duo.Views.Components
         public MarkdownComponent()
         {
             this.InitializeComponent();
+            PreviewVisible = true;
             InitializeWebView();
+            
+            // Subscribe to theme changes
+            ActualThemeChanged += MarkdownComponent_ActualThemeChanged;
+        }
+
+        private void MarkdownComponent_ActualThemeChanged(FrameworkElement sender, object args)
+        {
+            // Re-render markdown when theme changes
+            if (_isWebViewInitialized)
+            {
+                RenderMarkdown();
+            }
         }
 
         private async void InitializeWebView()
         {
-            await MarkdownPreview.EnsureCoreWebView2Async();
-            
-            // If markdown text was set before WebView was initialized
-            if (!string.IsNullOrEmpty(MarkdownText))
+            try
             {
-                SetMarkdownText(MarkdownText);
-                PreviewVisible = true;
+                await MarkdownPreview.EnsureCoreWebView2Async();
+                _isWebViewInitialized = true;
+                
+                // If we have pending markdown to render
+                if (_pendingMarkdownText != null)
+                {
+                    // Store the text in the input
+                    MarkdownInput.Text = _pendingMarkdownText;
+                    _pendingMarkdownText = null;
+                    
+                    // Now render it
+                    RenderMarkdown();
+                }
+                else if (!string.IsNullOrEmpty(MarkdownText))
+                {
+                    // If markdown text was set from property
+                    MarkdownInput.Text = MarkdownText;
+                    RenderMarkdown();
+                }
+            }
+            catch (Exception ex)
+            {
+                // Handle any exception during initialization
+                System.Diagnostics.Debug.WriteLine($"WebView2 initialization error: {ex.Message}");
             }
         }
 
         public void TogglePreview()
         {
-            PreviewVisible = !PreviewVisible;
-            if (PreviewVisible)
+            // Kept for compatibility, no longer used
+            if (_isWebViewInitialized)
             {
                 RenderMarkdown();
             }
@@ -88,7 +121,8 @@ namespace Duo.Views.Components
         {
             MarkdownInput.Text = string.Empty;
             MarkdownText = string.Empty;
-            if (PreviewVisible)
+            
+            if (_isWebViewInitialized)
             {
                 RenderMarkdown();
             }
@@ -101,20 +135,32 @@ namespace Duo.Views.Components
 
         public void SetMarkdownText(string text)
         {
-            MarkdownInput.Text = text;
-            if (PreviewVisible)
+            if (_isWebViewInitialized)
             {
+                MarkdownInput.Text = text;
                 RenderMarkdown();
+            }
+            else
+            {
+                // Store the text for when WebView gets initialized
+                _pendingMarkdownText = text;
             }
         }
 
         private void RenderMarkdown()
         {
+            // Safety check to prevent calling NavigateToString before the WebView is initialized
+            if (!_isWebViewInitialized)
+            {
+                return;
+            }
+            
             string markdownText = MarkdownInput.Text ?? string.Empty;
+            bool isDarkTheme = IsDarkTheme();
 
             string html = $@"
                 <!DOCTYPE html>
-                <html>
+                <html data-theme=""{(isDarkTheme ? "dark" : "light")}"">
                 <head>
                     <meta charset='utf-8'>
                     <meta name='viewport' content='width=device-width, initial-scale=1'>
@@ -122,12 +168,44 @@ namespace Duo.Views.Components
                     <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/github-markdown-css/github-markdown.min.css'>
                     <script src='https://cdn.jsdelivr.net/npm/marked/marked.min.js'></script>
                     <style>
+                        body {{
+                            margin: 0;
+                            padding: 0;
+                            background-color: {(isDarkTheme ? "#1e1e1e" : "#ffffff")};
+                            color: {(isDarkTheme ? "#ffffff" : "#000000")};
+                        }}
+                        
+                        html[data-theme='dark'] {{
+                            color-scheme: dark;
+                        }}
+                        
+                        html[data-theme='light'] {{
+                            color-scheme: light;
+                        }}
+                        
                         .markdown-body {{
                             box-sizing: border-box;
-                            min-width: 200px;
-                            max-width: 980px;
-                            margin: 0 auto;
-                            padding: 15px;
+                            margin: 0;
+                            padding: 0;
+                            color: {(isDarkTheme ? "#d4d4d4" : "#24292e")};
+                            background-color: {(isDarkTheme ? "#1e1e1e" : "#ffffff")};
+                        }}
+                        
+                        .markdown-body a {{
+                            color: {(isDarkTheme ? "#6cb5ff" : "#0366d6")};
+                        }}
+                        
+                        .markdown-body hr {{
+                            background-color: {(isDarkTheme ? "#444" : "#e1e4e8")};
+                        }}
+                        
+                        .markdown-body blockquote {{
+                            color: {(isDarkTheme ? "#bbb" : "#6a737d")};
+                            border-left-color: {(isDarkTheme ? "#444" : "#dfe2e5")};
+                        }}
+                        
+                        .markdown-body code {{
+                            background-color: {(isDarkTheme ? "#2b2b2b" : "#f6f8fa")};
                         }}
                     </style>
                 </head>
@@ -139,7 +217,20 @@ namespace Duo.Views.Components
                 </body>
                 </html>";
 
-            MarkdownPreview.NavigateToString(html);
+            try
+            {
+                MarkdownPreview.NavigateToString(html);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error rendering markdown: {ex.Message}");
+            }
+        }
+
+        // Helper method to determine if in dark theme
+        private bool IsDarkTheme()
+        {
+            return ActualTheme == ElementTheme.Dark;
         }
 
         private string EscapeJavaScriptString(string input)
