@@ -279,9 +279,8 @@ namespace Duo.Views.Pages
             // Calculate total pages
             totalPages = (int)Math.Ceiling(filteredData.Count / (double)ItemsPerPage);
             
-            // Ensure at least one page
-            if (totalPages == 0)
-                totalPages = 1;
+            // Ensure pager is visible only if there are multiple pages
+            PostsPager.Visibility = totalPages > 1 ? Visibility.Visible : Visibility.Collapsed;
             
             // Update PipsPager
             PostsPager.NumberOfPages = totalPages;
