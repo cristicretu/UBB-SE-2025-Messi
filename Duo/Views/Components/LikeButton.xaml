@@ -38,6 +38,7 @@
         <Button x:Name="likeButton"
                 Grid.Column="0"
                 Click="LikeButton_Click"
+                Tapped="LikeButton_Tapped"
                 Background="Transparent"
                 BorderBrush="Transparent"
                 BorderThickness="0"

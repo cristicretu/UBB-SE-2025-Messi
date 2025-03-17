@@ -3,6 +3,8 @@ using Microsoft.UI.Xaml.Controls;
 using System.Collections.Generic;
 using System.ComponentModel;
 using Microsoft.UI.Xaml.Input;
+using Duo.Views.Pages;
+using Microsoft.UI.Xaml.Media;
 
 namespace Duo.Views.Components
 {
@@ -17,7 +19,7 @@ namespace Duo.Views.Components
         public static readonly DependencyProperty TitleProperty = 
             DependencyProperty.Register(nameof(Title), typeof(string), typeof(Post), new PropertyMetadata(""));
         
-        public static readonly DependencyProperty ContentProperty = 
+        public static new readonly DependencyProperty ContentProperty = 
             DependencyProperty.Register(nameof(Content), typeof(string), typeof(Post), new PropertyMetadata(""));
         
         public static readonly DependencyProperty LikeCountProperty = 
@@ -53,6 +55,80 @@ namespace Duo.Views.Components
             }
         }
 
+        // Handle tapped event for navigation
+        private void PostBorder_Tapped(object sender, TappedRoutedEventArgs e)
+        {
+            // Check if the tap originated from a LikeButton or its children
+            if (IsLikeButtonTap(e.OriginalSource as DependencyObject))
+            {
+                // Skip navigation if the tap was on the like button
+                return;
+            }
+            
+            // Get the parent frame for navigation
+            var frame = FindParentFrame();
+            if (frame != null)
+            {
+                // Create a MockPost with the current post's data
+                var post = new MockPost
+                {
+                    Title = this.Title,
+                    Content = this.Content,
+                    Username = this.Username,
+                    Date = this.Date,
+                    LikeCount = this.LikeCount
+                };
+
+                // Copy hashtags
+                if (this.Hashtags != null)
+                {
+                    foreach (var hashtag in this.Hashtags)
+                    {
+                        post.Hashtags.Add(hashtag);
+                    }
+                }
+
+                // Navigate to the post detail page
+                frame.Navigate(typeof(PostDetailPage), post);
+            }
+        }
+        
+        // Helper method to determine if a tap originated from the LikeButton
+        private bool IsLikeButtonTap(DependencyObject element)
+        {
+            // If null, it can't be the LikeButton
+            if (element == null)
+                return false;
+                
+            // Check if the element is a LikeButton
+            if (element is LikeButton)
+                return true;
+                
+            // Check parent hierarchy
+            DependencyObject parent = VisualTreeHelper.GetParent(element);
+            while (parent != null && !(parent is Post))
+            {
+                if (parent is LikeButton)
+                    return true;
+                    
+                parent = VisualTreeHelper.GetParent(parent);
+            }
+            
+            return false;
+        }
+
+        // Helper method to find the parent Frame
+        private Frame FindParentFrame()
+        {
+            DependencyObject parent = this;
+            while (parent != null && !(parent is Frame))
+            {
+                parent = VisualTreeHelper.GetParent(parent);
+            }
+            return parent as Frame;
+        }
+
+
         public string Username
         {
             get => (string)GetValue(UsernameProperty);
@@ -71,7 +147,7 @@ namespace Duo.Views.Components
             set => SetValue(TitleProperty, value);
         }
 
-        public string Content
+        public new string Content
         {
             get => (string)GetValue(ContentProperty);
             set => SetValue(ContentProperty, value);
