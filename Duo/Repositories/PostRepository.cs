@@ -205,35 +205,41 @@
         }
     }
 
-    public List<Post> SearchPosts(string query, int page, int pageSize)
+    public List<string> GetAllPostTitles()
     {
-        if (string.IsNullOrWhiteSpace(query))
-        {
-            throw new ArgumentException("Search query cannot be empty.");
-        }
-        if (page <= 0)
-        {
-            throw new ArgumentException("Page number must be greater than 0.");
-        }
-        if (pageSize <= 0)
-        {
-            throw new ArgumentException("Page size must be greater than 0.");
-        }
+        var titles = new List<string>();
 
-        DataTable? dataTable = null;
+        try 
+        {
+            DataTable dataTable = dataLink.ExecuteReader("GetAllPostTitles", null);
+
+            foreach (DataRow row in dataTable.Rows)
+            {
+                titles.Add(row["Title"].ToString());
+            }
+
+            return titles;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error getting post titles: {ex.Message}");
+            return titles;
+        }
+    }
+
+    public List<Post> GetByTitle(string title)
+    {
+        SqlParameter[] parameters = new SqlParameter[]
+        {
+            new SqlParameter("@Title", title)
+        };
+        
         try
         {
-            int offset = (page - 1) * pageSize;
-            SqlParameter[] parameters = new SqlParameter[]
-            {
-                new SqlParameter("@Query", $"%{query}%"),
-                new SqlParameter("@PageSize", pageSize),
-                new SqlParameter("@Offset", offset)
-            };
-
-            dataTable = dataLink.ExecuteReader("SearchPosts", parameters);
+            DataTable dataTable = dataLink.ExecuteReader("GetPostsByTitle", parameters);
             List<Post> posts = new List<Post>();
-            foreach (DataRow row in dataTable.Rows)
+            
+            foreach(DataRow row in dataTable.Rows)
             {
                 posts.Add(new Post
                 {
@@ -247,16 +253,13 @@
                     LikeCount = Convert.ToInt32(row["LikeCount"])
                 });
             }
+            
             return posts;
         }
-        catch (SqlException ex)
+        catch (Exception ex)
         {
-            throw new Exception(ex.Message);
-        }
-        finally
-        {
-            dataTable?.Dispose();
+            Console.WriteLine($"Error getting posts by title: {ex.Message}");
+            return new List<Post>();
         }
     }
-
 }
