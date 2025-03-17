@@ -6,11 +6,13 @@ public class PostService
 {
     private readonly PostRepository _postRepository;
     private readonly HashtagRepository _hashtagRepository;
+    private readonly UserService _userService;
 
-    public PostService(PostRepository postRepository, HashtagRepository hashtagRepository)
+    public PostService(PostRepository postRepository, HashtagRepository hashtagRepository, UserService userService)
     {
         _postRepository = postRepository;
         _hashtagRepository = hashtagRepository;
+        _userService = userService;
     }
 
     public int CreatePost(Post post)
@@ -116,12 +118,15 @@ public class PostService
         }
     }
 
-    public bool AddHashtagToPost(int postId, string text)
+    public bool AddHashtagToPost(int postId, string text, int userId)
     {
         if (postId <= 0) throw new ArgumentException("Invalid Post ID.");
         if (string.IsNullOrWhiteSpace(text)) throw new ArgumentException("Hashtag text cannot be null or empty.");
+        if (userId <= 0) throw new ArgumentException("Invalid User ID.");
         try
         {
+            if(_userService.GetCurrentUser().Id != userId) throw new Exception("User does not have permission to add hashtags to this post.");
+
             Hashtag hashtag = _hashtagRepository.CreateHashtag(text);
             return _hashtagRepository.AddHashtagToPost(postId, hashtag.Id);
         }
@@ -131,12 +136,15 @@ public class PostService
         }
     }
 
-    public bool RemoveHashtagFromPost(int postId, int hashtagId)
+    public bool RemoveHashtagFromPost(int postId, int hashtagId, int userId)
     {
         if (postId <= 0) throw new ArgumentException("Invalid Post ID.");
         if (hashtagId <= 0) throw new ArgumentException("Invalid Hashtag ID.");
+        if (userId <= 0) throw new ArgumentException("Invalid User ID.");
         try
         {
+            if (_userService.GetCurrentUser().Id != userId) throw new Exception("User does not have permission to remove hashtags from this post.");
+
             return _hashtagRepository.RemoveHashtagFromPost(postId, hashtagId);
         }
         catch (Exception ex)
@@ -144,5 +152,4 @@ public class PostService
             throw new Exception($"Error removing hashtag from post with ID {postId}: {ex.Message}");
         }
     }
-
 }
