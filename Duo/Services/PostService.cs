@@ -5,10 +5,12 @@ using System.Collections.ObjectModel;
 public class PostService
 {
     private readonly PostRepository _postRepository;
+    private readonly HashtagRepository _hashtagRepository;
 
-    public PostService(PostRepository postRepository)
+    public PostService(PostRepository postRepository, HashtagRepository hashtagRepository)
     {
         _postRepository = postRepository;
+        _hashtagRepository = hashtagRepository;
     }
 
     public int CreatePost(Post post)
@@ -25,8 +27,6 @@ public class PostService
         {
             throw new Exception($"Error creating post: {ex.Message}");
         }
-
-
        }
 
     public void DeletePost(int id)
@@ -101,6 +101,48 @@ public class PostService
     public List<Post> GetAllPosts()
     {
         return _postRepository.GetAllPosts();
+    }
+
+    public List<Hashtag> GetHashtagsByPostId(int postId)
+    {
+        if (postId <= 0) throw new ArgumentException("Invalid Post ID.");
+        try
+        {
+            return _hashtagRepository.GetHashtagsByPostId(postId);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Error retrieving hashtags for post with ID {postId}: {ex.Message}");
+        }
+    }
+
+    public bool AddHashtagToPost(int postId, string text)
+    {
+        if (postId <= 0) throw new ArgumentException("Invalid Post ID.");
+        if (string.IsNullOrWhiteSpace(text)) throw new ArgumentException("Hashtag text cannot be null or empty.");
+        try
+        {
+            Hashtag hashtag = _hashtagRepository.CreateHashtag(text);
+            return _hashtagRepository.AddHashtagToPost(postId, hashtag.Id);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Error adding hashtag to post with ID {postId}: {ex.Message}");
+        }
+    }
+
+    public bool RemoveHashtagFromPost(int postId, int hashtagId)
+    {
+        if (postId <= 0) throw new ArgumentException("Invalid Post ID.");
+        if (hashtagId <= 0) throw new ArgumentException("Invalid Hashtag ID.");
+        try
+        {
+            return _hashtagRepository.RemoveHashtagFromPost(postId, hashtagId);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Error removing hashtag from post with ID {postId}: {ex.Message}");
+        }
     }
 
 }
