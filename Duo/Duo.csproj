@@ -51,6 +51,7 @@
     <Folder Include="Data\Queries\Comment\GetCommentByID\" />
     <Folder Include="Data\Queries\Comment\IncrementLikeCount\" />
     <Folder Include="Data\Queries\Comment\Update\" />
+    <Folder Include="Data\Queries\Hashtag\GetHashtagByText\" />
     <Folder Include="Data\Queries\PostHashtag\AddHashtagToPost\" />
     <Folder Include="Data\Queries\PostHashtag\DeleteHashtagFromPost\" />
     <Folder Include="Data\Queries\PostHashtag\GetHashtagsForPost\" />

@@ -148,7 +148,7 @@ public class HashtagRepository
             {
                 new SqlParameter("@PostID", postId)
             };
-            dataTable = _dataLink.ExecuteReader("GetHashtagsByPostId", sqlParameters);
+            dataTable = _dataLink.ExecuteReader("GetHashtagsForPost", sqlParameters);
             if (dataTable.Rows.Count == 0) throw new Exception("Error - GetHashtagsByPostId: No records found");
             List<Hashtag> hashtags = new List<Hashtag>();
             foreach (DataRow row in dataTable.Rows)

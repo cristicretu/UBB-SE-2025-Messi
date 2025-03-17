@@ -4,4 +4,7 @@ AS
 BEGIN
     INSERT INTO Hashtags (Tag)
     VALUES (@Tag);
+
+    -- Return the newly created ID
+    SELECT SCOPE_IDENTITY();
 END;
