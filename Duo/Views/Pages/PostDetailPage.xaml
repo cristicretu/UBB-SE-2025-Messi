@@ -109,6 +109,9 @@
                         </StackPanel>
                     </StackPanel>
                 </Border>
+
+                <components:MarkdownComponent x:Name="markdownEditor" 
+                    MarkdownText="# Test i am test&#x0A;&#x0A;1. me&#x0A;2. you&#x0A;&#x0A;[acasa](cretu.dev)" />
                 
                 <!-- Comment Input Area -->
                 <components:CommentInput 
