@@ -1,12 +1,12 @@
-using System;
-using System.Data;
-using Microsoft.Data.SqlClient;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+    using System;
+    using System.Data;
+    using Microsoft.Data.SqlClient;
+    using System.Collections.Generic;
+    using System.Collections.ObjectModel;
 
-public class PostRepository
-{
-    private readonly DataLink dataLink;
+    public class PostRepository
+    {
+        private readonly DataLink dataLink;
     
     public PostRepository(DataLink dataLink)
     {
@@ -171,4 +171,92 @@ public class PostRepository
 
         return new Collection<Post>(posts);
     }
+
+    public List<Post> GetAllPosts()
+    {
+        DataTable? dataTable = null;
+        try
+        {
+            dataTable = dataLink.ExecuteReader("GetAllPosts");
+            List<Post> posts = new List<Post>();
+            foreach (DataRow row in dataTable.Rows)
+            {
+                posts.Add(new Post
+                {
+                    Id = Convert.ToInt32(row["Id"]),
+                    Title = Convert.ToString(row["Title"]) ?? string.Empty,
+                    Description = Convert.ToString(row["Description"]) ?? string.Empty,
+                    UserID = Convert.ToInt32(row["UserID"]),
+                    CategoryID = Convert.ToInt32(row["CategoryID"]),
+                    CreatedAt = Convert.ToDateTime(row["CreatedAt"]),
+                    UpdatedAt = Convert.ToDateTime(row["UpdatedAt"]),
+                    LikeCount = Convert.ToInt32(row["LikeCount"])
+                });
+            }
+            return posts;
+        }
+        catch (SqlException ex)
+        {
+            throw new Exception(ex.Message);
+        }
+        finally
+        {
+            dataTable?.Dispose();
+        }
+    }
+
+    public List<Post> SearchPosts(string query, int page, int pageSize)
+    {
+        if (string.IsNullOrWhiteSpace(query))
+        {
+            throw new ArgumentException("Search query cannot be empty.");
+        }
+        if (page <= 0)
+        {
+            throw new ArgumentException("Page number must be greater than 0.");
+        }
+        if (pageSize <= 0)
+        {
+            throw new ArgumentException("Page size must be greater than 0.");
+        }
+
+        DataTable? dataTable = null;
+        try
+        {
+            int offset = (page - 1) * pageSize;
+            SqlParameter[] parameters = new SqlParameter[]
+            {
+                new SqlParameter("@Query", $"%{query}%"),
+                new SqlParameter("@PageSize", pageSize),
+                new SqlParameter("@Offset", offset)
+            };
+
+            dataTable = dataLink.ExecuteReader("SearchPosts", parameters);
+            List<Post> posts = new List<Post>();
+            foreach (DataRow row in dataTable.Rows)
+            {
+                posts.Add(new Post
+                {
+                    Id = Convert.ToInt32(row["Id"]),
+                    Title = Convert.ToString(row["Title"]) ?? string.Empty,
+                    Description = Convert.ToString(row["Description"]) ?? string.Empty,
+                    UserID = Convert.ToInt32(row["UserID"]),
+                    CategoryID = Convert.ToInt32(row["CategoryID"]),
+                    CreatedAt = Convert.ToDateTime(row["CreatedAt"]),
+                    UpdatedAt = Convert.ToDateTime(row["UpdatedAt"]),
+                    LikeCount = Convert.ToInt32(row["LikeCount"])
+                });
+            }
+            return posts;
+        }
+        catch (SqlException ex)
+        {
+            throw new Exception(ex.Message);
+        }
+        finally
+        {
+            dataTable?.Dispose();
+        }
+    }
+
 }

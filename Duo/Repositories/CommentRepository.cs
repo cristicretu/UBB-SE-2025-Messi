@@ -171,7 +171,7 @@ public class CommentRepository
         }
     }
 
-    public List<Comment> GetReplies(int parentCommentId)
+    public List<Comment> GetRepliesByCommentId(int parentCommentId)
     {
         if (parentCommentId <= 0) throw new ArgumentException("Invalid parent comment ID", nameof(parentCommentId));
 
@@ -227,6 +227,28 @@ public class CommentRepository
         {
             _dataLink.ExecuteNonQuery("IncrementLikeCount", parameters);
             return true;
+        }
+        catch (SqlException ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
+
+    public int GetCommentsCountForPost(int postId)
+    {
+        if (postId <= 0) throw new ArgumentException("Invalid post ID", nameof(postId));
+
+        SqlParameter[] parameters = new SqlParameter[]
+        {
+            new SqlParameter("@PostID", postId)
+        };
+
+        try
+        {
+            int? result = _dataLink.ExecuteScalar<int>("GetCommentsCountForPost", parameters);
+            if (result == null)
+                throw new Exception("Failed to get comment count");
+            return result.Value;
         }
         catch (SqlException ex)
         {
