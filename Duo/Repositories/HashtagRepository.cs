@@ -138,18 +138,84 @@ public class HashtagRepository
 
         }
     }
-
     public List<Hashtag> GetHashtagsByPostId(int postId)
     {
+        if (postId <= 0) throw new Exception("Error - GetHashtagsByPostId: PostId must be greater than 0");
+        DataTable? dataTable = null;
+        try
+        {
+            var sqlParameters = new SqlParameter[]
+            {
+                new SqlParameter("@PostID", postId)
+            };
+            dataTable = _dataLink.ExecuteReader("GetHashtagsByPostId", sqlParameters);
+            if (dataTable.Rows.Count == 0) throw new Exception("Error - GetHashtagsByPostId: No records found");
+            List<Hashtag> hashtags = new List<Hashtag>();
+            foreach (DataRow row in dataTable.Rows)
+            {
+                var tag = row["Tag"]?.ToString();
+                if (tag == null)
+                {
+                    throw new Exception("Error - GetHashtagsByPostId: Tag is null");
+                }
+                Hashtag hashtag = new Hashtag(
+                    Convert.ToInt32(row["Id"]),
+                    tag
+                );
+                hashtags.Add(hashtag);
+            }
+            return hashtags;
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Error - GetHashtagsByPostId: {ex.Message}");
+        }
+        finally
+        {
+            dataTable?.Dispose();
+        }
 
     }
 
     public bool AddHashtagToPost(int postId, int hashtagId)
     {
+        if (postId <= 0) throw new Exception("Error - AddHashtagToPost: PostId must be greater than 0");
+        if (hashtagId <= 0) throw new Exception("Error - AddHashtagToPost: HashtagId must be greater than 0");
+        try
+        {
+            var sqlParameters = new SqlParameter[]
+            {
+                new SqlParameter("@PostID", postId),
+                new SqlParameter("@HashtagID", hashtagId)
+            };
+            var result = _dataLink.ExecuteNonQuery("AddHashtagToPost", sqlParameters);
+            if (result == 0) throw new Exception("Error - AddHashtagToPost: Hashtag could not be added to post!");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Error - AddHashtagToPost: {ex.Message}");
+        }
 
     }
     public bool RemoveHashtagFromPost(int postId, int hashtagId)
     {
-
+        if (postId <= 0) throw new Exception("Error - RemoveHashtagFromPost: PostId must be greater than 0");
+        if (hashtagId <= 0) throw new Exception("Error - RemoveHashtagFromPost: HashtagId must be greater than 0");
+        try
+        {
+            var sqlParameters = new SqlParameter[]
+            {
+                new SqlParameter("@PostID", postId),
+                new SqlParameter("@HashtagID", hashtagId)
+            };
+            var result = _dataLink.ExecuteNonQuery("DeleteHashtagFromPost", sqlParameters);
+            if (result == 0) throw new Exception("Error - RemoveHashtagFromPost: Hashtag could not be removed from post!");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Error - RemoveHashtagFromPost: {ex.Message}");
+        }
     }
 }
