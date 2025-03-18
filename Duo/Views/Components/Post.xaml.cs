@@ -128,6 +128,18 @@ namespace Duo.Views.Components
             return parent as Frame;
         }
 
+        // Event handlers for the MoreDropdown component
+        private void MoreOptions_EditClicked(object sender, RoutedEventArgs e)
+        {
+            // Handle edit action
+            // For now, just show a message dialog
+        }
+
+        private void MoreOptions_DeleteClicked(object sender, RoutedEventArgs e)
+        {
+            // Handle delete action
+            // For now, just show a confirmation dialog
+        }
 
         public string Username
         {

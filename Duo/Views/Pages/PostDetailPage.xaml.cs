@@ -31,6 +31,18 @@ namespace Duo.Views.Pages
             }
         }
 
+        private void MoreOptions_EditClicked(object sender, RoutedEventArgs e)
+        {
+            // Handle edit action
+            // For now, just show a message dialog
+        }
+
+        private void MoreOptions_DeleteClicked(object sender, RoutedEventArgs e)
+        {
+            // Handle delete action
+            // For now, just show a confirmation dialog
+        }
+
         private void DisplayPostDetails()
         {
             // Set post details
