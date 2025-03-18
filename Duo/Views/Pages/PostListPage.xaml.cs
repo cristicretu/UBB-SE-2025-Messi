@@ -1,6 +1,7 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
+using Microsoft.UI.Xaml.Input;
 using System.Linq; // Ensure this is included for LINQ operations
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
@@ -11,12 +12,16 @@ namespace Duo.Views.Pages
     // MockPost class to represent a post until we have a real Post class
     public class MockPost
     {
-        public string Title { get; set; }
-        public string Content { get; set; }
+        public int Id { get; set; } = 0;
+        public string Title { get; set; } = string.Empty;
+        public string Content { get; set; } = string.Empty;
         public List<string> Hashtags { get; set; } = new List<string>();
-        public string Username { get; set; } = "u/anonymous"; // Added property for username
+        public string User { get; set; } = "anonymous"; // Username without u/ prefix
+        public string Username { get; set; } = "u/anonymous"; // Kept for backward compatibility
         public string Date { get; set; } = "1 year ago"; // Added property for display date
         public int LikeCount { get; set; } = 0; // Added property for like count
+        public bool IsLiked { get; set; } = false; // Track if the post is liked by the current user
+        public DateTime PostDate { get; set; } = DateTime.Now; // Actual date object for calculations
 
         public MockPost()
         {
@@ -33,12 +38,17 @@ namespace Duo.Views.Pages
             
             // Generate random mock data for demo purposes
             Random random = new Random();
-            Username = $"u/user{random.Next(100, 999)}";
+            Id = random.Next(1000, 9999);
+            string userName = $"user{random.Next(100, 999)}";
+            User = userName;
+            Username = $"u/{userName}";
             
             string[] timeOptions = { "2 hours ago", "5 days ago", "2 weeks ago", "1 month ago", "3 months ago" };
             Date = timeOptions[random.Next(timeOptions.Length)];
+            PostDate = DateTime.Now.AddDays(-random.Next(1, 30));
             
             LikeCount = random.Next(0, 500);
+            IsLiked = random.NextDouble() > 0.7; // 30% chance of being liked
         }
     }
 
@@ -56,6 +66,10 @@ namespace Duo.Views.Pages
         
         // Property to store the category name
         private string category = "Posts";
+
+        // Add the following fields for drag scrolling
+        private double _previousPosition;
+        private bool _isDragging;
 
         public PostListPage()
         {
@@ -91,6 +105,9 @@ namespace Duo.Views.Pages
             
             // Set up pagination
             PostsPager.SelectedIndexChanged += PostsPager_SelectedIndexChanged;
+
+            // Initialize drag scrolling
+            SetupHashtagDragScrolling();
         }
         
         // Override OnNavigatedTo to receive the category name parameter
@@ -262,9 +279,8 @@ namespace Duo.Views.Pages
             // Calculate total pages
             totalPages = (int)Math.Ceiling(filteredData.Count / (double)ItemsPerPage);
             
-            // Ensure at least one page
-            if (totalPages == 0)
-                totalPages = 1;
+            // Ensure pager is visible only if there are multiple pages
+            PostsPager.Visibility = totalPages > 1 ? Visibility.Visible : Visibility.Collapsed;
             
             // Update PipsPager
             PostsPager.NumberOfPages = totalPages;
@@ -291,20 +307,94 @@ namespace Duo.Views.Pages
 
         private void ClearHashtags_Click(object sender, RoutedEventArgs e)
         {
+            ClearHashtagSelection();
+            ApplyFilters();
+        }
+        
+        private void FilteredListView_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            if (e.ClickedItem is MockPost clickedPost)
+            {
+                // Navigate to post detail page with the clicked post as parameter
+                Frame.Navigate(typeof(PostDetailPage), clickedPost);
+            }
+        }
+
+        private void SetupHashtagDragScrolling()
+        {
+            // Set up drag scrolling for the hashtags list
+            HashtagsScrollViewer.PointerPressed += HashtagsScrollViewer_PointerPressed;
+            HashtagsScrollViewer.PointerMoved += HashtagsScrollViewer_PointerMoved;
+            HashtagsScrollViewer.PointerReleased += HashtagsScrollViewer_PointerReleased;
+            HashtagsScrollViewer.PointerExited += HashtagsScrollViewer_PointerReleased;
+            HashtagsScrollViewer.PointerCaptureLost += HashtagsScrollViewer_PointerReleased;
+        }
+        
+        private void HashtagsScrollViewer_PointerPressed(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
+        {
+            _isDragging = true;
+            _previousPosition = e.GetCurrentPoint(HashtagsScrollViewer).Position.X;
+            
+            // Capture the pointer to receive events outside the control
+            HashtagsScrollViewer.CapturePointer(e.Pointer);
+            
+            // Mark the event as handled to prevent standard scrolling behavior
+            e.Handled = true;
+        }
+        
+        private void HashtagsScrollViewer_PointerMoved(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
+        {
+            if (_isDragging)
+            {
+                var currentPosition = e.GetCurrentPoint(HashtagsScrollViewer).Position.X;
+                var delta = _previousPosition - currentPosition;
+                
+                // Update scroll position
+                HashtagsScrollViewer.ChangeView(HashtagsScrollViewer.HorizontalOffset + delta, null, null);
+                
+                _previousPosition = currentPosition;
+                e.Handled = true;
+            }
+        }
+        
+        private void HashtagsScrollViewer_PointerReleased(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
+        {
+            if (_isDragging)
+            {
+                _isDragging = false;
+                HashtagsScrollViewer.ReleasePointerCapture(e.Pointer);
+                e.Handled = true;
+            }
+        }
+
+        private void ClearHashtagSelection()
+        {
             // Reset all selected hashtags
             foreach (var tag in selectedHashtags.ToList())
             {
                 if (hashtagButtons.TryGetValue(tag, out Button button))
                 {
-                    button.Style = Resources["HashtagButtonStyle"] as Style;
+                    var style = Resources["HashtagButtonStyle"] as Style;
+                    if (style != null)
+                    {
+                        button.Style = style;
+                    }
                 }
             }
             
             // Clear the selected hashtags collection
             selectedHashtags.Clear();
             
-            // Apply filters to update the list
-            ApplyFilters();
+            // Set "All" as selected
+            if (hashtagButtons.TryGetValue("All", out Button allButton))
+            {
+                selectedHashtags.Add("All");
+                var style = Resources["SelectedHashtagButtonStyle"] as Style;
+                if (style != null)
+                {
+                    allButton.Style = style;
+                }
+            }
         }
     }
 }

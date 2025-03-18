@@ -13,11 +13,10 @@
         PaneDisplayMode="Left"
         PaneTitle="Duo"
         IsTabStop="False"
-        ExpandedModeThresholdWidth="400"
+        ExpandedModeThresholdWidth="300"
         SelectionChanged="NavigationView_SelectionChanged">
 
         <NavigationView.MenuItems>
-            <NavigationViewItemHeader Content="Courses Header" />
             <NavigationViewItem Content="Courses" Icon="Library" ToolTipService.ToolTip="Courses" Tag="CoursesParent">
             </NavigationViewItem> 
             <NavigationViewItem Content="Quiz" Icon="Help" ToolTipService.ToolTip="Quiz" Tag="QuizParent">
