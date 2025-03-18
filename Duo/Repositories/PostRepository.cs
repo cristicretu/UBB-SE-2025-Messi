@@ -1,13 +1,13 @@
-    using System;
-    using System.Data;
-    using Microsoft.Data.SqlClient;
-    using System.Collections.Generic;
-    using System.Collections.ObjectModel;
+using System;
+using System.Data;
+using Microsoft.Data.SqlClient;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
-    public class PostRepository
-    {
-        private readonly DataLink dataLink;
-    
+public class PostRepository
+{
+    private readonly DataLink dataLink;
+
     public PostRepository(DataLink dataLink)
     {
         this.dataLink = dataLink;
