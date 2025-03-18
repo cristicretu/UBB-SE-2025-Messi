@@ -5,16 +5,16 @@ using System;
 
 namespace Duo.Views.Components
 {
-    public sealed partial class DeleteDialogComponent
+    public sealed partial class DialogComponent
     {
-        public async Task<bool> ShowDeleteConfirmationDialog(string title, string content, XamlRoot xamlRoot)
+        public async Task<bool> ShowConfirmationDialog(string title, string content, XamlRoot xamlRoot)
         {
-            var dialogContent = new DeleteDialogContent
+            var dialogContent = new DialogContent
             {
                 ContentText = content
             };
 
-            ContentDialog deleteDialog = new ContentDialog
+            ContentDialog dialog = new ContentDialog
             {
                 XamlRoot = xamlRoot,
                 Title = title,
@@ -25,9 +25,9 @@ namespace Duo.Views.Components
             };
 
             // Apply accent button style to the confirmation button
-            deleteDialog.PrimaryButtonStyle = Application.Current.Resources["AccentButtonStyle"] as Style;
+            dialog.PrimaryButtonStyle = Application.Current.Resources["AccentButtonStyle"] as Style;
 
-            ContentDialogResult result = await deleteDialog.ShowAsync();
+            ContentDialogResult result = await dialog.ShowAsync();
             return result == ContentDialogResult.Primary;
         }
     }
