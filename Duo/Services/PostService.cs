@@ -3,17 +3,18 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
+using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 
 public class PostService
 {
-    private readonly PostRepository _postRepository;
+    private readonly PostRepository postRepository;
     private SearchService searchService; 
 
-    public PostService(PostRepository postRepository)
+    public PostService(PostRepository newPostRepository)
     {
-        _postRepository = postRepository;
+        this.postRepository = newPostRepository;
         this.searchService = new SearchService();
     }
 
@@ -26,7 +27,7 @@ public class PostService
 
         try
         {
-            return _postRepository.CreatePost(post);
+            return postRepository.CreatePost(post);
         } 
         catch(Exception ex)
         {
@@ -43,7 +44,7 @@ public class PostService
 
         try
         {
-            _postRepository.DeletePost(id);
+            postRepository.DeletePost(id);
         }
         catch (Exception ex)
         {
@@ -61,7 +62,7 @@ public class PostService
         try
         {
             post.UpdatedAt = DateTime.UtcNow;
-            _postRepository.UpdatePost(post);
+            postRepository.UpdatePost(post);
         }
         catch (Exception ex)
         {
@@ -77,7 +78,7 @@ public class PostService
         }
         try
         {
-            return _postRepository.GetPostById(id);
+            return postRepository.GetPostById(id);
         }
         catch (Exception ex)
         {
@@ -94,7 +95,7 @@ public class PostService
 
         try
         {
-            return _postRepository.GetByCategory(categoryId, page, pageSize);
+            return postRepository.GetByCategory(categoryId, page, pageSize);
         }
         catch (Exception ex)
         {
@@ -104,7 +105,7 @@ public class PostService
 
     public List<Post> GetAllPosts()
     {
-        return _postRepository.GetAllPosts();
+        return postRepository.GetAllPosts();
     }
 
     //public List<Post> GetPostsByUser(int userId, int page, int pageSize)
@@ -160,16 +161,22 @@ public class PostService
         if (string.IsNullOrEmpty(keyword))
             return new List<Post>();
 
-        List<string> allTitles = _postRepository.GetAllPostTitles();
+        List<string> allTitles = postRepository.GetAllPostTitles();
         List<string> matchingTitles = searchService.Search(keyword, allTitles, 0.6);
 
         List<Post> results = new List<Post>();
         foreach (string title in matchingTitles)
         {
-            List<Post> postsWithTitle = _postRepository.GetByTitle(title);
+            List<Post> postsWithTitle = postRepository.GetByTitle(title);
             results.AddRange(postsWithTitle);
         }
 
         return results;
+    }
+
+    public bool ValidatePostOwnership(int currentUserId, int currentPostId) {
+        int? postUserId = postRepository.GetUserIdByPostId(currentPostId);
+
+        return currentUserId == postUserId;
     }
 }

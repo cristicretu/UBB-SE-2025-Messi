@@ -3,6 +3,7 @@ using System.Data;
 using Microsoft.Data.SqlClient;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Data.Common;
 
 public class PostRepository
 {
@@ -179,6 +180,7 @@ public class PostRepository
         {
             dataTable = dataLink.ExecuteReader("GetAllPosts");
             List<Post> posts = new List<Post>();
+
             foreach (DataRow row in dataTable.Rows)
             {
                 posts.Add(new Post
@@ -260,6 +262,32 @@ public class PostRepository
         {
             Console.WriteLine($"Error getting posts by title: {ex.Message}");
             return new List<Post>();
+        }
+    }
+
+    public int? GetUserIdByPostId(int PostId)
+    {
+        SqlParameter[] parameters = new SqlParameter[]
+        {
+            new SqlParameter("@PostId", PostId)
+        };
+
+        try
+        {
+            DataTable dataTable = dataLink.ExecuteReader("GetUserIdByPostId", parameters); 
+            
+            if (dataTable.Rows.Count > 0) {
+                DataRow row = dataTable.Rows[0];
+
+                int postId = Convert.ToInt32(row["UserId"]);
+                return postId; 
+            }
+
+            return null;
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"GetUserIdByPostId exception: {ex.Message}");
         }
     }
 }
