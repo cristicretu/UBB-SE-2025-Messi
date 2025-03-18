@@ -1,4 +1,4 @@
-CREATE OR ALTER PROCEDURE GetPostsByCategory (
+CREATE OR ALTER PROCEDURE GetPostsByUser (
     @UserID INT,
     @PageSize INT,
     @Offset INT

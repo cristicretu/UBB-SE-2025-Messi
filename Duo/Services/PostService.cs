@@ -108,21 +108,21 @@ public class PostService
         return postRepository.GetAllPosts();
     }
 
-    //public List<Post> GetPostsByUser(int userId, int page, int pageSize)
-    //{
-    //    if (userId <= 0 || page < 1 || pageSize < 1)
-    //    {
-    //        throw new ArgumentException("Invalid pagination parameters.");
-    //    }
-    //    try
-    //    {
-    //        return _postRepository.GetByUser(userId, page, pageSize);
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        throw new Exception($"Error retrieving posts for user {userId}: {ex.Message}");
-    //    }
-    //}
+    public List<Post> GetPostsByUser(int userId, int page, int pageSize)
+    {
+       if (userId <= 0 || page < 1 || pageSize < 1)
+       {
+           throw new ArgumentException("Invalid pagination parameters.");
+       }
+       try
+       {
+           return postRepository.GetByUser(userId, page, pageSize);
+       }
+       catch (Exception ex)
+       {
+           throw new Exception($"Error retrieving posts for user {userId}: {ex.Message}");
+       }
+    }
 
     //public bool LikePost(int postId)
     //{
@@ -140,21 +140,21 @@ public class PostService
     //    }
     //}
 
-    //public List<Post> GetPostsByHashtag(string hashtag, int page, int pageSize)
-    //{
-    //    if (string.IsNullOrWhiteSpace(hashtag) || page < 1 || pageSize < 1)
-    //    {
-    //        throw new ArgumentException("Invalid pagination parameters.");
-    //    }
-    //    try
-    //    {
-    //        return _postRepository.GetByHashtag(hashtag, page, pageSize);
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        throw new Exception($"Error retrieving posts for hashtag {hashtag}: {ex.Message}");
-    //    }
-    //}
+    public List<Post> GetPostsByHashtags(List<string> hashtags, int page, int pageSize)
+    {
+       if (page < 1 || pageSize < 1)
+       {
+           throw new ArgumentException("Invalid pagination parameters.");
+       }
+       try
+       {
+           return postRepository.GetByHashtags(hashtags, page, pageSize);
+       }
+       catch (Exception ex)
+       {
+           throw new Exception($"Error retrieving posts for hashtag {hashtags}: {ex.Message}");
+       }
+    }
 
     public List<Post> SearchPostsByKeyword(string keyword)
     {   

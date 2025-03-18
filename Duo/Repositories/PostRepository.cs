@@ -4,6 +4,7 @@ using Microsoft.Data.SqlClient;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data.Common;
+using Windows.Storage.Streams;
 
 public class PostRepository
 {
@@ -288,6 +289,92 @@ public class PostRepository
         catch (Exception ex)
         {
             throw new Exception($"GetUserIdByPostId exception: {ex.Message}");
+        }
+    }
+
+    public List<Post> GetByUser(int userId, int page, int pageSize)
+    {
+        SqlParameter[] parameters = new SqlParameter[]
+        {
+            new SqlParameter("@UserID", userId),
+            new SqlParameter("@PageSize", pageSize),
+            new SqlParameter("@Offset", page)
+        };
+
+        try
+        {
+            DataTable dataTable = dataLink.ExecuteReader("GetPostsByUser");
+
+            if(dataTable.Rows.Count > 0)
+            {
+                List<Post> posts = new List<Post>();
+                
+                foreach (DataRow row in dataTable.Rows)
+                {
+                    posts.Add(new Post
+                    {
+                        Id = Convert.ToInt32(row["Id"]),
+                        Title = Convert.ToString(row["Title"]) ?? string.Empty,
+                        Description = Convert.ToString(row["Description"]) ?? string.Empty,
+                        UserID = Convert.ToInt32(row["UserID"]),
+                        CategoryID = Convert.ToInt32(row["CategoryID"]),
+                        CreatedAt = Convert.ToDateTime(row["CreatedAt"]),
+                        UpdatedAt = Convert.ToDateTime(row["UpdatedAt"]),
+                        LikeCount = Convert.ToInt32(row["LikeCount"])
+                    });
+                }
+
+                return posts;
+            }
+
+            return null;
+        } 
+        catch (Exception ex) 
+        {
+            throw new Exception($"GetByUser: {ex.Message}");
+        }
+    }
+
+    public List<Post> GetByHashtags(List<string> hashtags, int page, int pageSize)
+    {
+        string hashtagsString = string.Join(",", hashtags);
+        
+        int offset = (page - 1) * pageSize;
+        
+        SqlParameter[] parameters = new SqlParameter[]
+        {
+            new SqlParameter("@hashtags", hashtagsString),
+            new SqlParameter("@PageSize", pageSize),
+            new SqlParameter("@Offset", offset)
+        };
+        
+        try
+        {
+            DataTable dataTable = dataLink.ExecuteReader("GetByHashtags", parameters);
+            if(dataTable != null && dataTable.Rows.Count > 0)
+            {
+                List<Post> posts = new List<Post>();
+                foreach (DataRow row in dataTable.Rows)
+                {
+                    posts.Add(new Post
+                    {
+                        Id = Convert.ToInt32(row["Id"]),
+                        Title = Convert.ToString(row["Title"]) ?? string.Empty,
+                        Description = Convert.ToString(row["Description"]) ?? string.Empty,
+                        UserID = Convert.ToInt32(row["UserID"]),
+                        CategoryID = Convert.ToInt32(row["CategoryID"]),
+                        CreatedAt = Convert.ToDateTime(row["CreatedAt"]),
+                        UpdatedAt = Convert.ToDateTime(row["UpdatedAt"]),
+                        LikeCount = Convert.ToInt32(row["LikeCount"])
+                    });
+                }
+                return posts;
+            }
+            return new List<Post>();
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"GetByHashtags: {ex.Message}");
         }
     }
 }
