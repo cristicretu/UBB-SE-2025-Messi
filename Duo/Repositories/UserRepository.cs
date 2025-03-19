@@ -1,5 +1,3 @@
-
-
 using System.Data;
 using Microsoft.Data.SqlClient;
 using System.Collections.Generic;
@@ -72,34 +70,7 @@ public class UserRepository
             dataTable?.Dispose();
         }
     }
-    public List<User> GetUsers()
-    {
-        List<User> users = new List<User>();
-        DataTable? dataTable = null;
-
-        try
-        {
-            dataTable = dataLink.ExecuteReader("GetAllUsers");
-
-            foreach (DataRow row in dataTable.Rows)
-            {
-                users.Add(new User(
-                    Convert.ToInt32(row[0]),
-                    row.IsNull(1) ? string.Empty : row[1].ToString()
-                ));
-            }
-        }
-        catch (SqlException ex)
-        {
-            throw new Exception($"Database error: {ex.Message}", ex);
-        }
-        finally
-        {
-            dataTable?.Dispose();
-        }
-
-        return users;
-    }
+  
 }
 
 

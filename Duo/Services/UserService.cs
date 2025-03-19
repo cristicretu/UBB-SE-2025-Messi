@@ -7,7 +7,7 @@ public class UserService
 {
 
     private readonly UserRepository userRepository;
-    User currentUser = new User();
+    User currentUser;
     public UserService(UserRepository userRepository)
     {
         this.userRepository = userRepository;
@@ -18,14 +18,13 @@ public class UserService
         currentUser.Username = name;
     }
 
-    public string getUser()
-    {
-        return currentUser.Username;
-    }
-
     public User GetCurrentUser()
     {
-        return new User();
+        if(currentUser == null)
+        {
+            throw new Exception("No user is currently logged in.");
+        }
+        return currentUser;
     }
 
     public int CreateUser(User user)
@@ -52,12 +51,6 @@ public class UserService
             throw new Exception(ex.Message);
         }
     }
-
-    public List<User> GetUsers()
-    {
-        return userRepository.GetUsers();
-    }
-
 }
 
 
