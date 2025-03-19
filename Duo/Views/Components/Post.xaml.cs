@@ -1,11 +1,18 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Navigation;
 using System.Collections.Generic;
 using System.ComponentModel;
 using Microsoft.UI.Xaml.Input;
-using Duo.Views.Pages;
 using Microsoft.UI.Xaml.Media;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
+// is this the right way to access userService and its methods?
+using static Duo.App;
+using Duo.Views.Pages;
 namespace Duo.Views.Components
 {
     public sealed partial class Post : UserControl
@@ -129,16 +136,92 @@ namespace Duo.Views.Components
         }
 
         // Event handlers for the MoreDropdown component
-        private void MoreOptions_EditClicked(object sender, RoutedEventArgs e)
+        private async void MoreOptions_EditClicked(object sender, RoutedEventArgs e)
         {
-            // Handle edit action
-            // For now, just show a message dialog
+            // Verify that the current user is the owner of the post            
+            if(this.Username != $"u/{userService.GetCurrentUser().Username}")
+            {
+                // Display an error dialog if the user is not the owner
+                ContentDialog errorDialog = new ContentDialog
+                {
+                    XamlRoot = this.XamlRoot,
+                    Title = "Error",
+                    Content = "You do not have permission to edit this item.",
+                    CloseButtonText = "OK"
+                };
+                await errorDialog.ShowAsync();
+                return;
+            }
+
+            // Handle the edit logic here
+
+            bool succesfullyEdited = true; // Placeholder for actual success event
+            
+            if (succesfullyEdited)
+            {
+                // Send/confirm
+                ContentDialog successDialog = new ContentDialog
+                {
+                    XamlRoot = this.XamlRoot,
+                    Title = "Edited",
+                    Content = "The item has been successfully edited.",
+                    CloseButtonText = "OK"
+                };
+                await successDialog.ShowAsync();
+            } else {
+                // Handle the error logic here
+                ContentDialog errorDialog = new ContentDialog
+                {
+                    XamlRoot = this.XamlRoot,
+                    Title = "Error",
+                    Content = "An error occurred while editing the item. Please try again.",
+                    CloseButtonText = "OK"
+                };
+                await errorDialog.ShowAsync();
+            }
         }
 
-        private void MoreOptions_DeleteClicked(object sender, RoutedEventArgs e)
+        private async void MoreOptions_DeleteClicked(object sender, RoutedEventArgs e)
         {
-            // Handle delete action
-            // For now, just show a confirmation dialog
+            // Verify that the current user is the owner of the post
+            if(this.Username != $"u/{userService.GetCurrentUser().Username}")
+            {
+                // Display an error dialog if the user is not the owner
+                ContentDialog errorDialog = new ContentDialog
+                {
+                    XamlRoot = this.XamlRoot,
+                    Title = "Error",
+                    Content = "You do not have permission to delete this item.",
+                    CloseButtonText = "OK"
+                };
+                await errorDialog.ShowAsync();
+                return;
+            }
+
+            // Instantiate a DeleteDialog
+            var deleteDialog = new DialogComponent();
+
+            // Create the deletion confirmation (add whatever text you wish to display)
+            bool isConfirmed = await deleteDialog.ShowConfirmationDialog(
+                "Confirm Deletion",
+                "Are you sure you want to delete this item?",
+                this.XamlRoot
+            );
+
+            // if User confirms...
+            if (isConfirmed)
+            {
+                // Handle the deletion logic here
+                // Send/confirm
+                ContentDialog successDialog = new ContentDialog
+                {
+                    XamlRoot = this.XamlRoot,
+                    Title = "Deleted",
+                    Content = "The item has been successfully deleted.",
+                    CloseButtonText = "OK"
+                };
+                await successDialog.ShowAsync();
+            }
         }
 
         public string Username

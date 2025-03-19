@@ -50,6 +50,30 @@ namespace Duo.Views.Pages
             LikeCount = random.Next(0, 500);
             IsLiked = random.NextDouble() > 0.7; // 30% chance of being liked
         }
+
+        // MockPost constructor with username parameter for testing
+        public MockPost(string userName, string title, string content, params string[] hashtags)
+        {
+            Title = title;
+            Content = content;
+            if (hashtags != null)
+            {
+                Hashtags.AddRange(hashtags);
+            }
+            
+            // Generate random mock data for demo purposes
+            Random random = new Random();
+            Id = random.Next(1000, 9999);
+            User = userName;
+            Username = $"u/{userName}";
+            
+            string[] timeOptions = { "2 hours ago", "5 days ago", "2 weeks ago", "1 month ago", "3 months ago" };
+            Date = timeOptions[random.Next(timeOptions.Length)];
+            PostDate = DateTime.Now.AddDays(-random.Next(1, 30));
+            
+            LikeCount = random.Next(0, 500);
+            IsLiked = random.NextDouble() > 0.7; // 30% chance of being liked
+        }
     }
 
     public sealed partial class PostListPage : Page
@@ -90,6 +114,10 @@ namespace Duo.Views.Pages
             allPosts.Add(new MockPost("Productivity Hacks", "Boost your productivity with these tips.", "productivity", "work"));
             allPosts.Add(new MockPost("Gaming News", "The latest updates in the gaming world.", "gaming", "entertainment"));
             allPosts.Add(new MockPost("Home Decor Ideas", "Creative ideas for home decor.", "home", "decor"));
+
+            // Add a post with my username for testing
+            allPosts.Add(new MockPost("Mihai", "My First Post", "This is my first post on Duo!", "duo", "firstpost"));
+            allPosts.Add(new MockPost("admin", "BlaBla", "Messi rocks!", "messi", "bestprojectever"));
             
             // Initialize filtered posts with all posts
             foreach (var post in allPosts)

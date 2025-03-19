@@ -9,6 +9,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
+// is this the right way to access userService and its methods?
+using static Duo.App;
+
 namespace Duo.Views.Pages
 {
     public sealed partial class PostDetailPage : Page
@@ -34,9 +37,24 @@ namespace Duo.Views.Pages
 
         private async void MoreOptions_EditClicked(object sender, RoutedEventArgs e)
         {
+            // Verify that the current user is the owner of the post            
+            if(_post.User != userService.GetCurrentUser().Username)
+            {
+                // Display an error dialog if the user is not the owner
+                ContentDialog errorDialog = new ContentDialog
+                {
+                    XamlRoot = this.XamlRoot,
+                    Title = "Error",
+                    Content = "You do not have permission to edit this item.",
+                    CloseButtonText = "OK"
+                };
+                await errorDialog.ShowAsync();
+                return;
+            }
+
             // Handle the edit logic here
 
-            bool succesfullyEdited = true; // Placeholder for actual logic
+            bool succesfullyEdited = true; // Placeholder for actual success event
             
             if (succesfullyEdited)
             {
@@ -64,6 +82,21 @@ namespace Duo.Views.Pages
 
         private async void MoreOptions_DeleteClicked(object sender, RoutedEventArgs e)
         {
+            // Verify that the current user is the owner of the post
+            if(_post.User != userService.GetCurrentUser().Username)
+            {
+                // Display an error dialog if the user is not the owner
+                ContentDialog errorDialog = new ContentDialog
+                {
+                    XamlRoot = this.XamlRoot,
+                    Title = "Error",
+                    Content = "You do not have permission to delete this item.",
+                    CloseButtonText = "OK"
+                };
+                await errorDialog.ShowAsync();
+                return;
+            }
+
             // Instantiate a DeleteDialog
             var deleteDialog = new DialogComponent();
 

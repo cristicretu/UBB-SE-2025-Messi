@@ -3,6 +3,10 @@ using Microsoft.UI.Xaml.Controls;
 using System;
 using Duo.Helpers;
 
+// is this the right way to access userService and its methods?
+using static Duo.App;
+using Duo.Models;
+
 namespace Duo.Views
 {
     public sealed partial class LoginWindow : Window
@@ -14,6 +18,9 @@ namespace Duo.Views
             this.InitializeComponent();
             
             // login on enter 
+            // Issue: When pressing Enter, the text entered by the user gets an extra 'Enter' / '\n' character, thus breaking the validation
+            // Solution: Debounce the keydown event to prevent the extra character from being added?
+            
             UsernameTextBox.KeyDown += (sender, e) => 
             {
                 DebounceHelper.Debounce(() => {
@@ -52,7 +59,14 @@ namespace Duo.Views
         {
             try 
             {
+                // Validate the username
                 ValidationHelper.ValidateUsername(username);
+
+                // Create a new user
+                // userService.CreateUser('1', username);
+
+                // Only fot testing purposes
+                userService.setUser(username);
                 return null; 
             }
             catch (Exception ex)

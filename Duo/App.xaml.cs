@@ -28,6 +28,8 @@ namespace Duo
     /// </summary>
     public partial class App : Application
     {
+        public static UserService userService;
+
         /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code
         /// executed, and as such is the logical equivalent of main() or WinMain().
@@ -35,6 +37,12 @@ namespace Duo
         public App()
         {
             this.InitializeComponent();
+
+            // Instantiate a user service
+            // UserService userService = new UserService(new UserRepository());
+
+            // Only for testing purposes
+            userService = new UserService();
         }
 
         /// <summary>

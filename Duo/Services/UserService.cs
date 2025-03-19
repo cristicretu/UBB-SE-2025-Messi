@@ -7,11 +7,14 @@ public class UserService
 {
 
     private readonly UserRepository userRepository;
-    User currentUser;
+    User currentUser = new User();
     public UserService(UserRepository userRepository)
     {
         this.userRepository = userRepository;
     }
+
+    // Default constructor for testing
+    public UserService() {}
 
     public void setUser(string name)
     {
