@@ -22,6 +22,7 @@ namespace Duo.Views
 
                 if (e.Key == Windows.System.VirtualKey.Enter)
                 {
+                    e.Handled = true;
                     AttemptLogin();
                 }
             };
@@ -65,6 +66,7 @@ namespace Duo.Views
         {
             
             LoginSuccessful?.Invoke(this, EventArgs.Empty);
+            Console.WriteLine("Username: " + UsernameTextBox.Text);
             
             this.Close();
         }
