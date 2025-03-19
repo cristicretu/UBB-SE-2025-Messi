@@ -1,10 +1,17 @@
+using System;
+
 public class User
 {
-    private int _Id;
+    public int Id { get; init; }
+    public string Username { get; set; } = string.Empty;  // Prevents null issues
 
-    public int Id
+    public User(int id, string username)
     {
-        get { return _Id; }
-        set { _Id = value; }
+        Id = id;
+        Username = username ?? throw new ArgumentNullException(nameof(username), "Username cannot be null.");
+    }
+
+    public User()
+    {
     }
 }
