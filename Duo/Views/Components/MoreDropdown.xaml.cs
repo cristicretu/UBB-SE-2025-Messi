@@ -16,13 +16,13 @@ namespace Duo.Views.Components
             this.InitializeComponent();
         }
 
-        private async void EditMenuItem_Click(object sender, RoutedEventArgs e)
+        private void EditMenuItem_Click(object sender, RoutedEventArgs e)
         {
             // Raise the EditClicked event when the Edit menu item is clicked
             EditClicked?.Invoke(this, e);
         }
 
-        private async void DeleteMenuItem_Click(object sender, RoutedEventArgs e)
+        private void DeleteMenuItem_Click(object sender, RoutedEventArgs e)
         {
             // Raise the DeleteClicked event when the Delete menu item is clicked
             DeleteClicked?.Invoke(this, e);
