@@ -3,74 +3,118 @@ using Microsoft.Data.SqlClient;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System;
+using Duo.Models;
+using Duo.Data;
 
-
-public class UserRepository
+namespace Duo.Repositories
 {
-    private readonly DataLink dataLink;
-    public UserRepository(DataLink dataLink)
+    public class UserRepository
     {
-        this.dataLink = dataLink;
-    }
-    public int CreateUser(User user)
-    {
-        if (user == null)
+        private readonly DataLink dataLink;
+        public UserRepository(DataLink dataLink)
         {
-            throw new ArgumentNullException(nameof(user), "User cannot be null.");
+            this.dataLink = dataLink;
         }
-        if (string.IsNullOrWhiteSpace(user.Username))
+        public int CreateUser(User user)
         {
-            throw new ArgumentException("Username cannot be empty.");
-        }
-        SqlParameter[] parameters = new SqlParameter[]
-        {
-            new SqlParameter("@Username", user.Username),
-        };
-        try
-        {
-            int? result = dataLink.ExecuteScalar<int>("CreateUser", parameters);
-            return result ?? 0;
-        }
-        catch (SqlException ex)
-        {
-            throw new Exception($"Database error: {ex.Message}");
-        }
-    }
-
-    public User GetUserById(int id)
-    {
-        if (id <= 0)
-        {
-            throw new ArgumentException("Invalid user ID.");
-        }
-        SqlParameter[] parameters = new SqlParameter[]
-        {
-            new SqlParameter("@UserID", id)
-        };
-        DataTable? dataTable = null;
-        try
-        {
-            dataTable = dataLink.ExecuteReader("GetUserByID", parameters);
-            if (dataTable.Rows.Count == 0)
+            if (user == null)
             {
-                throw new Exception("User not found.");
+                throw new ArgumentNullException(nameof(user), "User cannot be null.");
             }
-            var row = dataTable.Rows[0];
-            return new User(
-                Convert.ToInt32(row[0]),
-                row[1]?.ToString() ?? string.Empty
-            );
+            if (string.IsNullOrWhiteSpace(user.Username))
+            {
+                throw new ArgumentException("Username cannot be empty.");
+            }
+            
+            var existingUser = GetUserByUsername(user.Username);
+            if (existingUser != null)
+            {
+                return existingUser.UserId;
+            }
+            
+            SqlParameter[] parameters = new SqlParameter[]
+            {
+                new SqlParameter("@Username", user.Username),
+            };
+            try
+            {
+                int? result = dataLink.ExecuteScalar<int>("CreateUser", parameters);
+                return result ?? 0;
+            }
+            catch (SqlException ex)
+            {
+                throw new Exception($"Database error: {ex.Message}");
+            }
         }
-        catch (SqlException ex)
+
+        public User GetUserById(int id)
         {
-            throw new Exception($"Database error: {ex.Message}");
+            if (id <= 0)
+            {
+                throw new ArgumentException("Invalid user ID.");
+            }
+            SqlParameter[] parameters = new SqlParameter[]
+            {
+                new SqlParameter("@UserID", id)
+            };
+            DataTable? dataTable = null;
+            try
+            {
+                dataTable = dataLink.ExecuteReader("GetUserByID", parameters);
+                if (dataTable.Rows.Count == 0)
+                {
+                    throw new Exception("User not found.");
+                }
+                var row = dataTable.Rows[0];
+                return new User(
+                    Convert.ToInt32(row[0]),
+                    row[1]?.ToString() ?? string.Empty
+                );
+            }
+            catch (SqlException ex)
+            {
+                throw new Exception($"Database error: {ex.Message}");
+            }
+            finally
+            {
+                dataTable?.Dispose();
+            }
         }
-        finally
+
+        public User GetUserByUsername(string username)
         {
-            dataTable?.Dispose();
+            if (string.IsNullOrWhiteSpace(username))
+            {
+                throw new ArgumentException("Invalid username.");
+            }
+            SqlParameter[] parameters = new SqlParameter[]
+            {
+                new SqlParameter("@Username", username)
+            };
+            DataTable? dataTable = null;
+            try
+            {
+                dataTable = dataLink.ExecuteReader("GetUserByUsername", parameters);
+                if (dataTable.Rows.Count == 0)
+                {
+                    return null;
+                }
+                var row = dataTable.Rows[0];
+                return new User(
+                    Convert.ToInt32(row["userID"]),
+                    row["username"]?.ToString() ?? string.Empty
+                );
+            }
+            catch (SqlException ex)
+            {
+                throw new Exception($"Database error: {ex.Message}");
+            }
+            finally
+            {
+                dataTable?.Dispose();
+            }
         }
     }
-  
 }
 
 

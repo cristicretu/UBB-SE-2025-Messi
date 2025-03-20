@@ -1,17 +1,21 @@
 using System;
 
-public class User
+namespace Duo.Models
 {
-    public int Id { get; init; }
-    public string Username { get; set; } = string.Empty;  // Prevents null issues
-
-    public User(int id, string username)
+    public class User
     {
-        Id = id;
-        Username = username ?? throw new ArgumentNullException(nameof(username), "Username cannot be null.");
-    }
+        public int UserId { get; set; }
+        public string Username { get; set; }
 
-    public User()
-    {
+        public User(int userId, string username)
+        {
+            UserId = userId;
+            Username = username;
+        }
+
+        public User(string username)
+        {
+            Username = username;
+        }
     }
 }

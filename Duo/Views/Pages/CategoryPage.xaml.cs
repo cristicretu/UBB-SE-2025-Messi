@@ -2,6 +2,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System;
 using System.Diagnostics;
+using Duo.Models;
 
 namespace Duo.Views.Pages
 {
@@ -21,6 +22,17 @@ namespace Duo.Views.Pages
             try
             {
                 this.InitializeComponent();
+
+                try
+                {
+                    User currentUser = App.userService.GetCurrentUser();
+                    UsernameTextBlock.Text = currentUser.Username;
+                }
+                catch (Exception ex)
+                {
+                    UsernameTextBlock.Text = "Guest";
+                    Debug.WriteLine($"Failed to get username: {ex.Message}");
+                }
 
                 try
                 {

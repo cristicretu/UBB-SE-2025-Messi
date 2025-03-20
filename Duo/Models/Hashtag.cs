@@ -1,25 +1,29 @@
 using System;
+using System.Collections.Generic;
 
-public class Hashtag
+namespace Duo.Models
 {
-    private int _id;
-    private string _tag;
-
-    public Hashtag(int id, string tag)
+    public class Hashtag
     {
-        _id = id;
-        _tag = tag;
-    }
+        private int _id;
+        private string _tag;
 
-    public int Id
-    {
-        get { return _id; }
-        set { _id = value; }
-    }
+        public Hashtag(int id, string tag)
+        {
+            _id = id;
+            _tag = tag;
+        }
 
-    public string Tag
-    {
-        get { return _tag; }
-        set { _tag = value; }
+        public int Id
+        {
+            get { return _id; }
+            set { _id = value; }
+        }
+
+        public string Tag
+        {
+            get { return _tag; }
+            set { _tag = value; }
+        }
     }
 }
