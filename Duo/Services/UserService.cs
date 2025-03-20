@@ -1,57 +1,95 @@
-
-
 using System;
 using System.Collections.Generic;
+using Duo.Models;
+using Duo.Repositories;
 
-public class UserService
+namespace Duo.Services
 {
-
-    private readonly UserRepository userRepository;
-    User currentUser = new User();
-    public UserService(UserRepository userRepository)
+    public class UserService
     {
-        this.userRepository = userRepository;
-    }
+        private readonly UserRepository _userRepository;
+        private User _currentUser;
 
-    // Default constructor for testing
-    public UserService() {}
-
-    public void setUser(string name)
-    {
-        currentUser.Username = name;
-    }
-
-    public User GetCurrentUser()
-    {
-        if(currentUser == null)
+        public UserService(UserRepository userRepository)
         {
-            throw new Exception("No user is currently logged in.");
+            _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
         }
-        return currentUser;
-    }
 
-    public int CreateUser(User user)
-    {
-        try
+        public void setUser(string username)
         {
-            return userRepository.CreateUser(user);
-        }
-        catch (Exception ex)
-        {
-            throw new Exception(ex.Message);
-        }
-    }
+            if (string.IsNullOrWhiteSpace(username))
+            {
+                throw new ArgumentException("Username cannot be empty", nameof(username));
+            }
 
+            // Try to find existing user or create a new one
+            var user = GetUserByUsername(username);
+            if (user == null)
+            {
+                // Create new user
+                user = new User(username);
+                int userId = CreateUser(user);
+                user = new User(userId, username);
+            }
 
-    public User GetUserById(int id)
-    {
-        try
-        {
-            return userRepository.GetUserById(id);
+            _currentUser = user;
         }
-        catch (Exception ex)
+
+        public User GetCurrentUser()
         {
-            throw new Exception(ex.Message);
+            if (_currentUser == null)
+            {
+                throw new InvalidOperationException("No user is currently logged in.");
+            }
+            return _currentUser;
+        }
+
+        public int CreateUser(User user)
+        {
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user), "User cannot be null.");
+            }
+
+            if (string.IsNullOrWhiteSpace(user.Username))
+            {
+                throw new ArgumentException("Username cannot be empty.", nameof(user));
+            }
+
+            try
+            {
+                return _userRepository.CreateUser(user);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Failed to create user: {ex.Message}", ex);
+            }
+        }
+
+        public User GetUserById(int id)
+        {
+            try
+            {
+                return _userRepository.GetUserById(id);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Failed to get user by ID: {ex.Message}", ex);
+            }
+        }
+
+        public User GetUserByUsername(string username)
+        {
+            try
+            {
+                // Use repository to find user
+                return _userRepository.GetUserByUsername(username);
+            }
+            catch (Exception)
+            {
+                // Return null if user not found
+                return null;
+            }
         }
     }
 }

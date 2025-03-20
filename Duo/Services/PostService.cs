@@ -1,155 +1,164 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using Duo.Models;
+using Duo.Services;
+using Duo.Repositories;
 
-public class PostService
+namespace Duo.Services
 {
-    private readonly PostRepository _postRepository;
-    private readonly HashtagRepository _hashtagRepository;
-    private readonly UserService _userService;
-
-    public PostService(PostRepository postRepository, HashtagRepository hashtagRepository, UserService userService)
+    public class PostService
     {
-        _postRepository = postRepository;
-        _hashtagRepository = hashtagRepository;
-        _userService = userService;
-    }
+        private readonly PostRepository _postRepository;
+        private readonly HashtagRepository _hashtagRepository;
+        private readonly UserService _userService;
 
-    public int CreatePost(Post post)
-    {
-        if (string.IsNullOrWhiteSpace(post.Title) || string.IsNullOrWhiteSpace(post.Description))
+        public PostService(PostRepository postRepository, HashtagRepository hashtagRepository, UserService userService)
         {
-            throw new ArgumentException("Title and Description cannot be empty.");
-        }
-
-        try
-        {
-            return _postRepository.CreatePost(post);
-        }catch(Exception ex)
-        {
-            throw new Exception($"Error creating post: {ex.Message}");
-        }
-       }
-
-    public void DeletePost(int id)
-    {
-        if (id <= 0)
-        {
-            throw new ArgumentException("Invalid Post ID.");
+            _postRepository = postRepository;
+            _hashtagRepository = hashtagRepository;
+            _userService = userService;
         }
 
-        try
+        public int CreatePost(Post post)
         {
-            _postRepository.DeletePost(id);
-        }
-        catch (Exception ex)
-        {
-            throw new Exception($"Error deleting post with ID {id}: {ex.Message}");
-        }
-    }
+            if (string.IsNullOrWhiteSpace(post.Title) || string.IsNullOrWhiteSpace(post.Description))
+            {
+                throw new ArgumentException("Title and Description cannot be empty.");
+            }
 
-    public void UpdatePost(Post post)
-    {
-        if (post.Id <= 0)
-        {
-            throw new ArgumentException("Invalid Post ID.");
-        }
-
-        try
-        {
-            post.UpdatedAt = DateTime.UtcNow;
-            _postRepository.UpdatePost(post);
-        }
-        catch (Exception ex)
-        {
-            throw new Exception($"Error updating post with ID {post.Id}: {ex.Message}");
-        }
-    }
-
-    public Post? GetPostById(int id)
-    {
-        if (id <= 0)
-        {
-            throw new ArgumentException("Invalid Post ID.");
-        }
-        try
-        {
-            return _postRepository.GetPostById(id);
-        }
-        catch (Exception ex)
-        {
-            throw new Exception($"Error retrieving post with ID {id}: {ex.Message}");
-        }
-    }
-
-    public Collection<Post> GetPostsByCategory(int categoryId, int page, int pageSize)
-    {
-        if (categoryId <= 0 || page < 1 || pageSize < 1)
-        {
-            throw new ArgumentException("Invalid pagination parameters.");
+            try
+            {
+                return _postRepository.CreatePost(post);
+            }catch(Exception ex)
+            {
+                throw new Exception($"Error creating post: {ex.Message}");
+            }
         }
 
-        try
+        public void DeletePost(int id)
         {
+            if (id <= 0)
+            {
+                throw new ArgumentException("Invalid Post ID.");
+            }
 
-            return _postRepository.GetByCategory(categoryId, page, pageSize);
+            try
+            {
+                _postRepository.DeletePost(id);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error deleting post with ID {id}: {ex.Message}");
+            }
         }
-        catch (Exception ex)
-        {
-            throw new Exception($"Error retrieving posts for category {categoryId}: {ex.Message}");
-        }
-    }
 
-    public List<Post> GetAllPosts()
-    {
-        return _postRepository.GetAllPosts();
-    }
+        public void UpdatePost(Post post)
+        {
+            if (post.Id <= 0)
+            {
+                throw new ArgumentException("Invalid Post ID.");
+            }
 
-    public List<Hashtag> GetHashtagsByPostId(int postId)
-    {
-        if (postId <= 0) throw new ArgumentException("Invalid Post ID.");
-        try
-        {
-            return _hashtagRepository.GetHashtagsByPostId(postId);
+            try
+            {
+                post.UpdatedAt = DateTime.UtcNow;
+                _postRepository.UpdatePost(post);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error updating post with ID {post.Id}: {ex.Message}");
+            }
         }
-        catch (Exception ex)
-        {
-            throw new Exception($"Error retrieving hashtags for post with ID {postId}: {ex.Message}");
-        }
-    }
 
-    public bool AddHashtagToPost(int postId, string text, int userId)
-    {
-        if (postId <= 0) throw new ArgumentException("Invalid Post ID.");
-        if (string.IsNullOrWhiteSpace(text)) throw new ArgumentException("Hashtag text cannot be null or empty.");
-        if (userId <= 0) throw new ArgumentException("Invalid User ID.");
-        try
+        public Post? GetPostById(int id)
         {
-            if(_userService.GetCurrentUser().Id != userId) throw new Exception("User does not have permission to add hashtags to this post.");
-
-            Hashtag hashtag = _hashtagRepository.CreateHashtag(text);
-            return _hashtagRepository.AddHashtagToPost(postId, hashtag.Id);
+            if (id <= 0)
+            {
+                throw new ArgumentException("Invalid Post ID.");
+            }
+            try
+            {
+                return _postRepository.GetPostById(id);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error retrieving post with ID {id}: {ex.Message}");
+            }
         }
-        catch (Exception ex)
-        {
-            throw new Exception($"Error adding hashtag to post with ID {postId}: {ex.Message}");
-        }
-    }
 
-    public bool RemoveHashtagFromPost(int postId, int hashtagId, int userId)
-    {
-        if (postId <= 0) throw new ArgumentException("Invalid Post ID.");
-        if (hashtagId <= 0) throw new ArgumentException("Invalid Hashtag ID.");
-        if (userId <= 0) throw new ArgumentException("Invalid User ID.");
-        try
+        public Collection<Post> GetPostsByCategory(int categoryId, int page, int pageSize)
         {
-            if (_userService.GetCurrentUser().Id != userId) throw new Exception("User does not have permission to remove hashtags from this post.");
+            if (categoryId <= 0 || page < 1 || pageSize < 1)
+            {
+                throw new ArgumentException("Invalid pagination parameters.");
+            }
 
-            return _hashtagRepository.RemoveHashtagFromPost(postId, hashtagId);
+            try
+            {
+
+                return _postRepository.GetByCategory(categoryId, page, pageSize);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error retrieving posts for category {categoryId}: {ex.Message}");
+            }
         }
-        catch (Exception ex)
+
+        public List<Post> GetAllPosts()
         {
-            throw new Exception($"Error removing hashtag from post with ID {postId}: {ex.Message}");
+            return _postRepository.GetAllPosts();
+        }
+
+        public List<Hashtag> GetHashtagsByPostId(int postId)
+        {
+            if (postId <= 0) throw new ArgumentException("Invalid Post ID.");
+            try
+            {
+                return _hashtagRepository.GetHashtagsByPostId(postId);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error retrieving hashtags for post with ID {postId}: {ex.Message}");
+            }
+        }
+
+        public bool AddHashtagToPost(int postId, string tagName, int userId)
+        {
+            if (postId <= 0) throw new ArgumentException("Invalid Post ID.");
+            if (string.IsNullOrWhiteSpace(tagName)) throw new ArgumentException("Tag name cannot be empty.");
+            if (userId <= 0) throw new ArgumentException("Invalid User ID.");
+            
+            try
+            {
+                if(_userService.GetCurrentUser().UserId != userId) throw new Exception("User does not have permission to add hashtags to this post.");
+                
+                var hashtag = _hashtagRepository.GetHashtagByName(tagName) ?? _hashtagRepository.CreateHashtag(tagName);
+                
+                return _hashtagRepository.AddHashtagToPost(postId, hashtag.Id);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error adding hashtag to post with ID {postId}: {ex.Message}");
+            }
+        }
+        
+        public bool RemoveHashtagFromPost(int postId, int hashtagId, int userId)
+        {
+            if (postId <= 0) throw new ArgumentException("Invalid Post ID.");
+            if (hashtagId <= 0) throw new ArgumentException("Invalid Hashtag ID.");
+            if (userId <= 0) throw new ArgumentException("Invalid User ID.");
+            
+            try
+            {
+                if (_userService.GetCurrentUser().UserId != userId) throw new Exception("User does not have permission to remove hashtags from this post.");
+                
+                return _hashtagRepository.RemoveHashtagFromPost(postId, hashtagId);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error removing hashtag from post with ID {postId}: {ex.Message}");
+            }
         }
     }
 }
