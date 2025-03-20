@@ -2,9 +2,26 @@
 
 > 🌍 Duolingo-like  Learning App
 
-A modern learning application inspired by Duolingo, built with a clean MVVM architecture.
+## Dev
 
-## 📋 Project Structure
+Create a `appsettings.json` file in the `Duo` directory with the following content:
+
+```json
+{
+  "LocalDataSource": "np:\\\\.\\pipe\\your_pipe_name\\tsql\\query",
+  "InitialCatalog": "your_database_name" // e.g. "Duo"
+}
+```
+
+You can find the pipe by running:
+```cmd
+SqlLocalDB.exe start
+SqlLocalDB.exe info MSSQLLocalDB
+```
+
+Go inside `Duo/Data` and from there run the `run_all_procedures.ps1` script to run all stored procedures.
+
+## Project Structure
 
 ```
 UBB-SE-2025-Messi/
