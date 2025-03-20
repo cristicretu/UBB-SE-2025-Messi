@@ -22,17 +22,36 @@ namespace Duo.Services
                 throw new ArgumentException("Username cannot be empty", nameof(username));
             }
 
-            // Try to find existing user or create a new one
-            var user = GetUserByUsername(username);
-            if (user == null)
+            try 
             {
-                // Create new user
-                user = new User(username);
-                int userId = CreateUser(user);
-                user = new User(userId, username);
+                // Try to find existing user first
+                var existingUser = GetUserByUsername(username);
+                
+                if (existingUser != null)
+                {
+                    // User exists, just set as current user
+                    _currentUser = existingUser;
+                    return;
+                }
+                
+                // User doesn't exist, create a new one
+                // The repository layer will handle unique constraint violations
+                var newUser = new User(username);
+                int userId = _userRepository.CreateUser(newUser);
+                _currentUser = new User(userId, username);
             }
-
-            _currentUser = user;
+            catch (Exception ex)
+            {
+                // One more attempt to find the user if creation failed for some reason
+                var lastAttemptUser = GetUserByUsername(username);
+                if (lastAttemptUser != null)
+                {
+                    _currentUser = lastAttemptUser;
+                    return;
+                }
+                
+                throw new Exception($"Failed to create or find user: {ex.Message}", ex);
+            }
         }
 
         public User GetCurrentUser()

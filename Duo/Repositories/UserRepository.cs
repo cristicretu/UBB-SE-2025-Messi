@@ -25,6 +25,13 @@ namespace Duo.Repositories
             {
                 throw new ArgumentException("Username cannot be empty.");
             }
+            
+            var existingUser = GetUserByUsername(user.Username);
+            if (existingUser != null)
+            {
+                return existingUser.UserId;
+            }
+            
             SqlParameter[] parameters = new SqlParameter[]
             {
                 new SqlParameter("@Username", user.Username),
