@@ -35,8 +35,13 @@ namespace Duo
     {
         public static UserService userService;
         private static IConfiguration _configuration;
-        private static DataLink _dataLink;
+        public static DataLink _dataLink;
         public static UserRepository userRepository;
+        public static PostRepository _postRepository;
+        public static HashtagRepository _hashtagRepository;
+        public static CommentRepository _commentRepository;
+        public static PostService _postService;
+        public static CategoryService _categoryService;
 
         /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code
@@ -54,9 +59,15 @@ namespace Duo
             
             // Initialize repositories
             userRepository = new UserRepository(_dataLink);
+            _postRepository = new PostRepository(_dataLink);
+            _hashtagRepository = new HashtagRepository(_dataLink);
+            _commentRepository = new CommentRepository(_dataLink);
+            var categoryRepository = new CategoryRepository(_dataLink);
             
             // Initialize services
             userService = new UserService(userRepository);
+            _postService = new PostService(_postRepository, _hashtagRepository, userService);
+            _categoryService = new CategoryService(categoryRepository);
         }
 
         private IConfiguration InitializeConfiguration()

@@ -76,11 +76,11 @@ namespace Duo.Views.Components
             var frame = FindParentFrame();
             if (frame != null)
             {
-                // Create a MockPost with the current post's data
-                var post = new MockPost
+                // Create a Post with the current post's data
+                var post = new Models.Post
                 {
                     Title = this.Title,
-                    Content = this.Content,
+                    Description = this.Content,
                     Username = this.Username,
                     Date = this.Date,
                     LikeCount = this.LikeCount
