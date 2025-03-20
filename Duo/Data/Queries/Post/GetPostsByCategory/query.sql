@@ -1,6 +1,7 @@
 CREATE PROCEDURE GetPostsByCategory
   @Offset INT,
-    @PageSize INT
+    @PageSize INT,
+    @CategoryID INT
 AS
 BEGIN
     SET NOCOUNT ON;
