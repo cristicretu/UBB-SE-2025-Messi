@@ -160,5 +160,18 @@ namespace Duo.Services
                 throw new Exception($"Error removing hashtag from post with ID {postId}: {ex.Message}");
             }
         }
+
+        public bool IncrementPostLikeCount(int postId)
+        {
+            if (postId <= 0) throw new ArgumentException("Invalid Post ID.");
+            try
+            {
+                return _postRepository.IncrementPostLikeCount(postId);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error incrementing like count for post with ID {postId}: {ex.Message}");
+            }
+        }
     }
 }
