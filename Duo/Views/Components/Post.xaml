@@ -94,7 +94,7 @@
 
             <!-- Likes Row -->
             <StackPanel Orientation="Horizontal" Spacing="8">
-                <local:LikeButton LikeCount="{x:Bind LikeCount, Mode=TwoWay}" />
+                <local:LikeButton LikeCount="{x:Bind LikeCount, Mode=TwoWay}" PostId="{x:Bind PostId, Mode=OneWay}" />
             </StackPanel>
         </StackPanel>
     </Border>

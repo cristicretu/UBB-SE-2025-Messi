@@ -237,6 +237,7 @@
                                 Hashtags="{x:Bind Hashtags}"
                                 Content="{x:Bind Content}"
                                 LikeCount="{x:Bind LikeCount}"
+                                PostId="{x:Bind Id}"
                                 HorizontalAlignment="Stretch"/>
                             <Rectangle Height="1" Fill="{ThemeResource SystemControlForegroundBaseLowBrush}" HorizontalAlignment="Stretch" Margin="0,4,0,4"/>
                         </StackPanel>

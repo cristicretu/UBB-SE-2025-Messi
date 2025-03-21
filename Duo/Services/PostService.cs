@@ -123,6 +123,27 @@ namespace Duo.Services
             }
         }
 
+        public bool LikePost(int postId)
+        {
+            if (postId <= 0) throw new ArgumentException("Invalid Post ID.");
+            
+            try
+            {
+                // Get the current post
+                var post = _postRepository.GetPostById(postId);
+                if (post == null) throw new Exception("Post not found");
+                
+                post.LikeCount++;
+                
+                _postRepository.UpdatePost(post);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error liking post with ID {postId}: {ex.Message}");
+            }
+        }
+
         public bool AddHashtagToPost(int postId, string tagName, int userId)
         {
             if (postId <= 0) throw new ArgumentException("Invalid Post ID.");
