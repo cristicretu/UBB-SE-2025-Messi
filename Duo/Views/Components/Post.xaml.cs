@@ -216,7 +216,7 @@ namespace Duo.Views.Components
             {
                 // Handle the deletion logic here
                 try {
-                _postService.DeletePost(_post.Id);
+                _postService.DeletePost(this.PostId);
                 }
                 catch (Exception ex)
                 {
