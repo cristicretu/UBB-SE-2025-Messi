@@ -9,25 +9,25 @@ namespace Duo.Views.Components
 {
     public sealed partial class Comment : UserControl
     {
-        private MockComment _commentData;
+        private Models.Comment _commentData;
 
         public Comment()
         {
             this.InitializeComponent();
         }
 
-        public void SetCommentData(MockComment comment, Dictionary<int, List<MockComment>> commentsByParent)
+        public void SetCommentData(Models.Comment comment, Dictionary<int?, List<Models.Comment>> commentsByParent)
         {
             _commentData = comment;
 
             // Set the comment data
-            UserTextBlock.Text = $"u/{comment.User}";
-            DescriptionTextBlock.Text = comment.Description;
-            DateTextBlock.Text = FormatDate(comment.Date);
+            UserTextBlock.Text = $"u/{comment.Username}";
+            DescriptionTextBlock.Text = comment.Content;
+            DateTextBlock.Text = FormatDate(comment.CreatedAt);
 
             // Generate lines based on tree level
             var lineCount = new List<int>();
-            for (int i = 0; i <= comment.TreeLevel; i++)
+            for (int i = 0; i <= comment.Level; i++)
             {
                 lineCount.Add(i);
             }

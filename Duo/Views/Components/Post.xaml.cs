@@ -35,6 +35,9 @@ namespace Duo.Views.Components
         public static readonly DependencyProperty HashtagsProperty = 
             DependencyProperty.Register(nameof(Hashtags), typeof(IEnumerable<string>), typeof(Post), new PropertyMetadata(null));
 
+        public static readonly DependencyProperty PostIdProperty = 
+            DependencyProperty.Register(nameof(PostId), typeof(int), typeof(Post), new PropertyMetadata(0));
+
         public Post()
         {
             InitializeComponent();
@@ -76,11 +79,11 @@ namespace Duo.Views.Components
             var frame = FindParentFrame();
             if (frame != null)
             {
-                // Create a MockPost with the current post's data
-                var post = new MockPost
+                // Create a Post with the current post's data
+                var post = new Models.Post
                 {
                     Title = this.Title,
-                    Content = this.Content,
+                    Description = this.Content,
                     Username = this.Username,
                     Date = this.Date,
                     LikeCount = this.LikeCount
@@ -258,6 +261,12 @@ namespace Duo.Views.Components
         {
             get => (IEnumerable<string>)GetValue(HashtagsProperty);
             set => SetValue(HashtagsProperty, value);
+        }
+
+        public int PostId
+        {
+            get => (int)GetValue(PostIdProperty);
+            set => SetValue(PostIdProperty, value);
         }
     }
 } 

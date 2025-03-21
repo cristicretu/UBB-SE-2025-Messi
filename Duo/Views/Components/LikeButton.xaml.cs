@@ -2,6 +2,8 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media.Animation;
+using System;
+using static Duo.App;
 
 namespace Duo.Views.Components
 {
@@ -31,6 +33,15 @@ namespace Duo.Views.Components
             get { return (bool)GetValue(IsLikedProperty); }
             set { SetValue(IsLikedProperty, value); }
         }
+        
+        public static readonly DependencyProperty PostIdProperty =
+            DependencyProperty.Register(nameof(PostId), typeof(int), typeof(LikeButton), new PropertyMetadata(0));
+
+        public int PostId
+        {
+            get { return (int)GetValue(PostIdProperty); }
+            set { SetValue(PostIdProperty, value); }
+        }
 
         private void LikeButton_Click(object sender, RoutedEventArgs e)
         {
@@ -43,9 +54,21 @@ namespace Duo.Views.Components
                     heartAnimation.Begin();
                 }
                 
-                // Update like count and state
-                LikeCount++;
-                IsLiked = true;
+                if (PostId > 0)
+                {
+                    try 
+                    {
+                        var postService = new Duo.Services.PostService(_postRepository, _hashtagRepository, userService);
+                        if (postService.LikePost(PostId))
+                        {
+                            LikeCount++;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Error liking post: {ex.Message}");
+                    }
+                }
             }
             catch (System.Exception ex)
             {
