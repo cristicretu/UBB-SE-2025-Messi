@@ -141,6 +141,19 @@ namespace Duo.ViewModels
                 
                 post.Date = Helpers.DateTimeHelper.GetRelativeTime(post.CreatedAt);
                 
+                post.Hashtags.Clear();
+                try 
+                {
+                    var hashtags = _postService.GetHashtagsByPostId(post.Id);
+                    foreach (var hashtag in hashtags)
+                    {
+                        post.Hashtags.Add(hashtag.Name);
+                    }
+                }
+                catch
+                {
+                }
+                
                 AllPosts.Add(post);
             }
             
