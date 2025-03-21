@@ -210,13 +210,8 @@ namespace Duo.Views.Components
                 "Are you sure you want to delete this item?",
                 this.XamlRoot
             );
-
-            // if User confirms...
-            if (isConfirmed)
-            {
-                // Handle the deletion logic here
                 
-                // if User confirms...
+            // if User confirms...
             if (isConfirmed)
             {
                 // Handle the deletion logic here
