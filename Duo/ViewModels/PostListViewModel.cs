@@ -136,6 +136,11 @@ namespace Duo.ViewModels
             AllPosts.Clear();
             foreach (var post in postsData)
             {
+                var user = App.userService.GetUserById(post.UserID);
+                post.Username = user?.Username ?? "Unknown User";
+                
+                post.Date = Helpers.DateTimeHelper.GetRelativeTime(post.CreatedAt);
+                
                 AllPosts.Add(post);
             }
             
