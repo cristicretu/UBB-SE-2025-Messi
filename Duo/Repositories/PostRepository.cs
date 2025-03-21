@@ -151,9 +151,9 @@ namespace Duo.Repositories
 
             SqlParameter[] parameters = new SqlParameter[]
             {
-                new SqlParameter("CategoryID", categoryId),
-                new SqlParameter("PageSize", pageSize),
-                new SqlParameter("Offset", offset)
+                new SqlParameter("@CategoryID", categoryId),
+                new SqlParameter("@PageSize", pageSize),
+                new SqlParameter("@Offset", offset)
             };
 
             DataTable dataTable = dataLink.ExecuteReader("GetPostsByCategory", parameters);

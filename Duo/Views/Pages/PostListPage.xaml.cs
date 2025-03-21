@@ -55,14 +55,15 @@ namespace Duo.Views.Pages
             {
                 _viewModel.CategoryName = categoryName;
                 
-                // Update the page title with the category name
                 PageTitle.Text = categoryName;
                 
-                // Get category ID if needed
                 if (_viewModel.CategoryID == 0 && _viewModel.CategoryName != null)
                 {
-                    // Assuming CategoryService has a method to get ID by name
-                    // _viewModel.CategoryID = _categoryService.GetCategoryIdByName(_viewModel.CategoryName);
+                    var category = _categoryService.GetCategoryByName(_viewModel.CategoryName);
+                    if (category != null)
+                    {
+                        _viewModel.CategoryID = category.Id;
+                    }
                 }
             }
             
