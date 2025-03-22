@@ -210,12 +210,28 @@ namespace Duo.Views.Components
                 "Are you sure you want to delete this item?",
                 this.XamlRoot
             );
-
+                
             // if User confirms...
             if (isConfirmed)
             {
                 // Handle the deletion logic here
-                // Send/confirm
+                try {
+                _postService.DeletePost(this.PostId);
+                }
+                catch (Exception ex)
+                {
+                    // Handle the error logic here
+                    ContentDialog errorDialog = new ContentDialog
+                    {
+                        XamlRoot = this.XamlRoot,
+                        Title = "Error",
+                        Content = "An error occurred while deleting the item. Please try again.\n" + ex.Message,
+                        CloseButtonText = "OK"
+                    };
+                    await errorDialog.ShowAsync();
+                    return;
+                }
+
                 ContentDialog successDialog = new ContentDialog
                 {
                     XamlRoot = this.XamlRoot,

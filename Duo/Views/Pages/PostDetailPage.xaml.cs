@@ -132,7 +132,23 @@ namespace Duo.Views.Pages
             if (isConfirmed)
             {
                 // Handle the deletion logic here
-                // Send/confirm
+                try {
+                _postService.DeletePost(_post.Id);
+                }
+                catch (Exception ex)
+                {
+                    // Handle the error logic here
+                    ContentDialog errorDialog = new ContentDialog
+                    {
+                        XamlRoot = this.XamlRoot,
+                        Title = "Error",
+                        Content = "An error occurred while deleting the item. Please try again.\n" + ex.Message,
+                        CloseButtonText = "OK"
+                    };
+                    await errorDialog.ShowAsync();
+                    return;
+                }
+
                 ContentDialog successDialog = new ContentDialog
                 {
                     XamlRoot = this.XamlRoot,
