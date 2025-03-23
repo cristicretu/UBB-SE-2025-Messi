@@ -88,29 +88,13 @@
                 </ItemsControl>
             </StackPanel>
 
-            <!-- Post Content -->
-            <!-- <RichTextBlock 
-                Margin="6"
-                TextWrapping="Wrap">
-                <Paragraph>
-                    <Run Text="{x:Bind Content, Mode=OneWay}"/>
-                </Paragraph>
-            </RichTextBlock> -->
-
-             <!-- <components:MarkdownComponent 
-                    MarkdownText="# Test i am test&#x0A;&#x0A;1. me&#x0A;2. you&#x0A;&#x0A;[acasa](cretu.dev)"
-                    HorizontalAlignment="Stretch"
-                    MinHeight="200"
-                    Margin="0,0,0,16"
-                    BorderThickness="0"
-                    BorderBrush="Transparent"
-                    Background="Transparent" /> -->
 
                 <markdown:MarkdownTextBlock
                     Text="{x:Bind Content, Mode=OneWay}"
                     MarkdownRendered="MarkdownText_MarkdownRendered"
                     LinkClicked="MarkdownText_LinkClicked"
-                    Margin="6">
+                    Background="Transparent"
+                    >
                 </markdown:MarkdownTextBlock>
 
             <!-- Likes Row -->
