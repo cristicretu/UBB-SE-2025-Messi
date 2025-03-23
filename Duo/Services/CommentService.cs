@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Duo.Models;
 using Duo.Services;
 using Duo.Repositories;
@@ -27,8 +26,8 @@ namespace Duo.Services
             try
             {
                 var comment = _commentRepository.GetCommentById(id);
-                
-                // Get the username
+
+                // Add username to the comment
                 try
                 {
                     User user = _userService.GetUserById(comment.UserId);
@@ -38,12 +37,12 @@ namespace Duo.Services
                 {
                     comment.Username = "Unknown User";
                 }
-                
+
                 return comment;
             }
             catch (Exception ex)
             {
-                throw new Exception($"Error fetching comment {id}: {ex.Message}", ex);
+                throw new Exception($"Error retrieving comment with ID {id}: {ex.Message}", ex);
             }
         }
 
@@ -54,8 +53,8 @@ namespace Duo.Services
             try
             {
                 var comments = _commentRepository.GetCommentsByPostId(postId);
-                
-                // Get the user for each comment
+
+                // Add usernames to the comments
                 foreach (var comment in comments)
                 {
                     try
@@ -68,12 +67,12 @@ namespace Duo.Services
                         comment.Username = "Unknown User";
                     }
                 }
-                
+
                 return comments;
             }
             catch (Exception ex)
             {
-                throw new Exception($"Error fetching comments for post {postId}: {ex.Message}", ex);
+                throw new Exception($"Error retrieving comments for post ID {postId}: {ex.Message}", ex);
             }
         }
 
@@ -93,32 +92,38 @@ namespace Duo.Services
 
         public int CreateComment(string content, int postId, int? parentCommentId = null)
         {
+            if (postId <= 0) throw new ArgumentException("Invalid post ID", nameof(postId));
+            if (string.IsNullOrWhiteSpace(content)) throw new ArgumentException("Content cannot be empty", nameof(content));
+
             try
             {
-                User currentUser = _userService.GetCurrentUser();
-                
+                // Validate comment count for the post
+                ValidateCommentCount(postId);
+
                 // Determine comment level
                 int level = 1; // Default level for top-level comments
-                
                 if (parentCommentId.HasValue)
                 {
                     var parentComment = _commentRepository.GetCommentById(parentCommentId.Value);
                     if (parentComment == null) throw new Exception("Parent comment not found");
                     if (parentComment.Level >= 5) throw new Exception("Comment nesting limit reached");
-                    
                     level = parentComment.Level + 1;
                 }
-                
-                Comment comment = new Comment
+
+                // Retrieve the current user
+                User user = _userService.GetCurrentUser();
+
+                // Create the comment
+                var comment = new Comment
                 {
                     Content = content,
                     PostId = postId,
-                    UserId = currentUser.UserId,
+                    UserId = user.UserId,
                     ParentCommentId = parentCommentId,
                     CreatedAt = DateTime.Now,
                     Level = level
                 };
-                
+
                 return _commentRepository.CreateComment(comment);
             }
             catch (Exception ex)
@@ -149,12 +154,11 @@ namespace Duo.Services
         public bool DeleteComment(int commentId, int userId)
         {
             if (commentId <= 0) throw new ArgumentException("Invalid comment ID", nameof(commentId));
-            if(userId <= 0) throw new ArgumentException("Invalid user ID", nameof(userId));
+            if (userId <= 0) throw new ArgumentException("Invalid user ID", nameof(userId));
 
             try
             {
                 User user = _userService.GetCurrentUser();
-
                 if (user.UserId != userId) throw new Exception("User does not have permission to delete this comment");
 
                 return _commentRepository.DeleteComment(commentId);
@@ -179,14 +183,6 @@ namespace Duo.Services
             }
         }
 
-        private User RetrieveUser()
-        {
-            var user = _userService.GetCurrentUser();
-            if (user == null) throw new Exception("User not found");
-
-            return user;
-        }
-
         private void ValidateCommentCount(int postId)
         {
             var post = _postRepository.GetPostById(postId);
@@ -196,9 +192,9 @@ namespace Duo.Services
             if (commentCount >= 1000) throw new Exception("Comment limit reached");
         }
 
-        private void ValidateCommentNestingLevel(int parentCommentID)
+        private void ValidateCommentNestingLevel(int parentCommentId)
         {
-            var parentComment = _commentRepository.GetCommentById(parentCommentID);
+            var parentComment = _commentRepository.GetCommentById(parentCommentId);
             if (parentComment == null) throw new Exception("Parent comment not found");
             if (parentComment.Level >= 5) throw new Exception("Comment nesting limit reached");
         }

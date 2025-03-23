@@ -105,7 +105,7 @@
         </Style>
     </Page.Resources>
 
-    <Grid Margin="16" MaxWidth="900"  HorizontalAlignment="Center">
+    <Grid Margin="16" MaxWidth="900" HorizontalAlignment="Stretch">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
