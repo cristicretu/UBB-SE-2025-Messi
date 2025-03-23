@@ -5,10 +5,16 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:Duo.Views.Pages"
     xmlns:components="using:Duo.Views.Components"
+    xmlns:viewmodels="using:Duo.ViewModels"
+    xmlns:models="using:Duo.Models"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     HorizontalAlignment="Stretch">
+
+    <Page.DataContext>
+        <viewmodels:PostDetailViewModel x:Name="ViewModel"/>
+    </Page.DataContext>
 
     <Grid HorizontalAlignment="Stretch" MaxWidth="900" Margin="16,0,32,0">
         <ScrollViewer 
@@ -29,148 +35,23 @@
                     Margin="0,16,0,16"/>
                 
                 <!-- Main Post Content with Hover Style Always Applied -->
-                <Border 
-                    Background="{ThemeResource SystemControlBackgroundAltHighBrush}" 
-                    BorderBrush="{ThemeResource SystemControlBackgroundListLowBrush}"
-                    BorderThickness="1"
-                    CornerRadius="7" 
-                    Padding="0" 
+                <components:Post 
+                    x:Name="PostDetail"
+                    Username="{x:Bind ViewModel.Post.Username, Mode=OneWay}"
+                    Date="{x:Bind ViewModel.Post.Date, Mode=OneWay}"
+                    Title="{x:Bind ViewModel.Post.Title, Mode=OneWay}"
+                    Hashtags="{x:Bind ViewModel.Post.Hashtags, Mode=OneWay}"
+                    Content="{x:Bind ViewModel.Post.Description, Mode=OneWay}"
+                    LikeCount="{x:Bind ViewModel.Post.LikeCount, Mode=TwoWay}"
+                    PostId="{x:Bind ViewModel.Post.Id, Mode=OneWay}"
+                    IsAlwaysHighlighted="True"
                     HorizontalAlignment="Stretch"
-                    Margin="0,0,0,16">
-                    
-                    <StackPanel Padding="16,12,16,12" Spacing="20" HorizontalAlignment="Stretch">
-                        <!-- Header Section -->
-                        <StackPanel Spacing="10" HorizontalAlignment="Stretch">
-                            <!-- Username and Date Row -->
-                            <!-- <Grid HorizontalAlignment="Stretch">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                
-                                <TextBlock 
-                                    x:Name="UserTextBlock" 
-                                    Grid.Column="0"
-                                    Text="u/username" 
-                                    FontSize="12" 
-                                    FontWeight="SemiBold"
-                                    Opacity="0.6"/>
-                                
-                                <TextBlock 
-                                    x:Name="DateTextBlock" 
-                                    Grid.Column="1"
-                                    Text="Mar 14" 
-                                    FontSize="10"
-                                    FontWeight="SemiBold"
-                                    Opacity="0.4"/>
-                            </Grid> -->
+                    Margin="0,0,0,16"/>
 
-                            <Grid HorizontalAlignment="Stretch">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                
-                                <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Left" Spacing="8">
-                                    <TextBlock 
-                                                x:Name="UserTextBlock" 
-                                                Grid.Column="0"
-                                                Text="u/username" 
-                                                FontSize="12" 
-                                                FontWeight="SemiBold"
-                                                Opacity="0.6"/>
-                                            
-                                            <TextBlock 
-                                                x:Name="DateTextBlock" 
-                                                Grid.Column="1"
-                                                Text="Mar 14" 
-                                                FontSize="10"
-                                                FontWeight="SemiBold"
-                                                Opacity="0.4"/>
-                                </StackPanel>
-
-                                <DropDownButton Grid.Column="1" 
-                                            HorizontalAlignment="Right"
-                                            AutomationProperties.Name="Options"
-                                            Padding="4"
-                                            FontSize="12">
-                                    <DropDownButton.Content>
-                                        <FontIcon Glyph="&#xE712;" FontSize="12"/>
-                                    </DropDownButton.Content>
-                                    <DropDownButton.Flyout>
-                                        <MenuFlyout Placement="Bottom">
-                                            <MenuFlyoutItem Text="Edit" Click="MoreOptions_EditClicked">
-                                                <MenuFlyoutItem.Icon>
-                                                    <FontIcon Glyph="&#xE70F;"/>
-                                                </MenuFlyoutItem.Icon>
-                                            </MenuFlyoutItem>
-                                            <MenuFlyoutItem Text="Delete" Click="MoreOptions_DeleteClicked">
-                                                <MenuFlyoutItem.Icon>
-                                                    <FontIcon Glyph="&#xE74D;"/>
-                                                </MenuFlyoutItem.Icon>
-                                            </MenuFlyoutItem>
-                                        </MenuFlyout>
-                                    </DropDownButton.Flyout>
-                                </DropDownButton>
-                                
-                            </Grid>
-                            
-                            <!-- Post Title -->
-                            <TextBlock 
-                                x:Name="PostTitleTextBlock"
-                                Text="Post Title"
-                                FontWeight="Bold"
-                                FontSize="14"
-                                TextWrapping="Wrap"/>
-                                
-                            <!-- Hashtags/Chips Row -->
-                            <ItemsControl x:Name="HashtagsItemsControl" HorizontalAlignment="Left">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <StackPanel Orientation="Horizontal" Spacing="8"/>
-                                    </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Border Background="{ThemeResource SystemControlBackgroundListLowBrush}" 
-                                               CornerRadius="10" 
-                                               Padding="12,1,12,3">
-                                            <TextBlock FontSize="12" 
-                                                       Foreground="{ThemeResource SystemControlForegroundBaseHighBrush}">
-                                                <Run Text="#"/>
-                                                <Run Text="{Binding}"/>
-                                            </TextBlock>
-                                        </Border>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </StackPanel>
-                        
-                        <!-- Post content -->
-                        <TextBlock 
-                            x:Name="ContentTextBlock" 
-                            Text="Post content goes here." 
-                            TextWrapping="Wrap" 
-                            FontSize="14"/>
-                        
-                        <!-- Action buttons -->
-                        <StackPanel Orientation="Horizontal" Spacing="16" HorizontalAlignment="Left">
-                            <components:LikeButton x:Name="LikeButton"/>
-                        </StackPanel>
-                    </StackPanel>
-                </Border>
-
-                <components:MarkdownComponent x:Name="markdownEditor" 
-                    MarkdownText="# Test i am test&#x0A;&#x0A;1. me&#x0A;2. you&#x0A;&#x0A;[acasa](cretu.dev)"
-                    HorizontalAlignment="Stretch"
-                    MinHeight="200"
-                    Margin="0,0,0,16"
-                    BorderThickness="1"
-                    BorderBrush="{ThemeResource SystemControlBackgroundListLowBrush}"
-                    Background="{ThemeResource SystemControlBackgroundAltHighBrush}" />
-                
                 <!-- Comment Input Area -->
                 <components:CommentInput 
+                    x:Name="CommentInputControl"
+                    CommentSubmitted="CommentInputControl_CommentSubmitted"
                     HorizontalAlignment="Stretch" 
                     Margin="0,16,0,0"/>
                 

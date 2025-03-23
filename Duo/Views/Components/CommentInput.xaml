@@ -45,6 +45,7 @@
                 
                 <!-- Simple Borderless TextBox -->
                 <TextBox 
+                    x:Name="CommentTextBox"
                     Grid.Column="0"
                     PlaceholderText="Write a comment here..." 
                     FontSize="12" 

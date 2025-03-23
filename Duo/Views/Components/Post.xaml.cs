@@ -39,11 +39,25 @@ namespace Duo.Views.Components
         public static readonly DependencyProperty PostIdProperty = 
             DependencyProperty.Register(nameof(PostId), typeof(int), typeof(Post), new PropertyMetadata(0));
 
+        public static readonly DependencyProperty IsAlwaysHighlightedProperty = 
+            DependencyProperty.Register(nameof(IsAlwaysHighlighted), typeof(bool), typeof(Post), new PropertyMetadata(false, OnIsAlwaysHighlightedChanged));
+            
+        private static void OnIsAlwaysHighlightedChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is Post post)
+            {
+                post.UpdateHighlightState();
+            }
+        }
+
+        private bool _isPointerOver;
+
         public Post()
         {
             InitializeComponent();
             
             UpdateMoreOptionsVisibility();
+            UpdateHighlightState();
         }
 
         private void UpdateMoreOptionsVisibility()
@@ -64,28 +78,43 @@ namespace Duo.Views.Components
         // Handle pointer entered event for hover effects
         private void PostBorder_PointerEntered(object sender, PointerRoutedEventArgs e)
         {
-            if (sender is Border border)
+            _isPointerOver = true;
+            
+            if (!IsAlwaysHighlighted) 
             {
-                border.Background = Application.Current.Resources["SystemControlBackgroundAltHighBrush"] as Microsoft.UI.Xaml.Media.Brush;
-                border.BorderBrush = Application.Current.Resources["SystemControlBackgroundListLowBrush"] as Microsoft.UI.Xaml.Media.Brush;
+                if (sender is Border border)
+                {
+                    border.Background = Application.Current.Resources["SystemControlBackgroundAltHighBrush"] as Microsoft.UI.Xaml.Media.Brush;
+                    border.BorderBrush = Application.Current.Resources["SystemControlBackgroundListLowBrush"] as Microsoft.UI.Xaml.Media.Brush;
+                }
             }
         }
 
         // Handle pointer exited event for hover effects
         private void PostBorder_PointerExited(object sender, PointerRoutedEventArgs e)
         {
-            if (sender is Border border)
+            _isPointerOver = false;
+            
+            if (!IsAlwaysHighlighted) 
             {
-                border.Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(
-                    Microsoft.UI.Colors.Transparent);
-                border.BorderBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(
-                    Microsoft.UI.Colors.Transparent);
+                if (sender is Border border)
+                {
+                    border.Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+                        Microsoft.UI.Colors.Transparent);
+                    border.BorderBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+                        Microsoft.UI.Colors.Transparent);
+                }
             }
         }
 
         // Handle tapped event for navigation
         private void PostBorder_Tapped(object sender, TappedRoutedEventArgs e)
         {
+            if (IsAlwaysHighlighted)
+            {
+                return;
+            }
+            
             // Check if the tap originated from a LikeButton or its children
             if (IsLikeButtonTap(e.OriginalSource as DependencyObject))
             {
@@ -100,8 +129,8 @@ namespace Duo.Views.Components
                 // Create a Post with the current post's data
                 var post = new Models.Post
                 {
-                    Title = this.Title,
-                    Description = this.Content,
+                    Title = this.Title ?? string.Empty,
+                    Description = this.Content ?? string.Empty,
                     Username = this.Username,
                     Date = this.Date,
                     LikeCount = this.LikeCount
@@ -278,6 +307,25 @@ namespace Duo.Views.Components
             }
         }
 
+        private void UpdateHighlightState()
+        {
+            if (PostBorder != null)
+            {
+                if (IsAlwaysHighlighted)
+                {
+                    PostBorder.Background = Application.Current.Resources["SystemControlBackgroundAltHighBrush"] as Microsoft.UI.Xaml.Media.Brush;
+                    PostBorder.BorderBrush = Application.Current.Resources["SystemControlBackgroundListLowBrush"] as Microsoft.UI.Xaml.Media.Brush;
+                }
+                else if (!_isPointerOver) // Only reset if not being hovered
+                {
+                    PostBorder.Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+                        Microsoft.UI.Colors.Transparent);
+                    PostBorder.BorderBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+                        Microsoft.UI.Colors.Transparent);
+                }
+            }
+        }
+
         public string Username
         {
             get => (string)GetValue(UsernameProperty);
@@ -321,8 +369,14 @@ namespace Duo.Views.Components
 
         public int PostId
         {
-            get => (int)GetValue(PostIdProperty);
-            set => SetValue(PostIdProperty, value);
+            get { return (int)GetValue(PostIdProperty); }
+            set { SetValue(PostIdProperty, value); }
+        }
+        
+        public bool IsAlwaysHighlighted
+        {
+            get { return (bool)GetValue(IsAlwaysHighlightedProperty); }
+            set { SetValue(IsAlwaysHighlightedProperty, value); }
         }
     }
 } 
