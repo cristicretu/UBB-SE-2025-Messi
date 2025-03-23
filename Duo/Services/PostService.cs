@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using Microsoft.Data.SqlClient;
 using Duo.Models;
 using Duo.Services;
 using Duo.Repositories;
@@ -12,14 +13,17 @@ namespace Duo.Services
         private readonly PostRepository _postRepository;
         private readonly HashtagRepository _hashtagRepository;
         private readonly UserService _userService;
+        private readonly SearchService _searchService;
 
-        public PostService(PostRepository postRepository, HashtagRepository hashtagRepository, UserService userService)
+        public PostService(PostRepository postRepository, HashtagRepository hashtagRepository, UserService userService, SearchService searchService)
         {
             _postRepository = postRepository;
             _hashtagRepository = hashtagRepository;
             _userService = userService;
+            _searchService = searchService;
         }
 
+        // Common methods (unchanged)
         public int CreatePost(Post post)
         {
             if (string.IsNullOrWhiteSpace(post.Title) || string.IsNullOrWhiteSpace(post.Description))
@@ -30,7 +34,8 @@ namespace Duo.Services
             try
             {
                 return _postRepository.CreatePost(post);
-            }catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 throw new Exception($"Error creating post: {ex.Message}");
             }
@@ -77,6 +82,7 @@ namespace Duo.Services
             {
                 throw new ArgumentException("Invalid Post ID.");
             }
+
             try
             {
                 return _postRepository.GetPostById(id);
@@ -96,7 +102,6 @@ namespace Duo.Services
 
             try
             {
-
                 return _postRepository.GetByCategory(categoryId, page, pageSize);
             }
             catch (Exception ex)
@@ -110,9 +115,70 @@ namespace Duo.Services
             return _postRepository.GetAllPosts();
         }
 
+        // Unique methods from alex/PostSearch
+        public List<Post> GetPostsByUser(int userId, int page, int pageSize)
+        {
+            if (userId <= 0 || page < 1 || pageSize < 1)
+            {
+                throw new ArgumentException("Invalid pagination parameters.");
+            }
+
+            try
+            {
+                return _postRepository.GetByUser(userId, page, pageSize);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error retrieving posts for user {userId}: {ex.Message}");
+            }
+        }
+
+        public List<Post> GetPostsByHashtags(List<string> hashtags, int page, int pageSize)
+        {
+            if (page < 1 || pageSize < 1)
+            {
+                throw new ArgumentException("Invalid pagination parameters.");
+            }
+
+            try
+            {
+                return _postRepository.GetByHashtags(hashtags, page, pageSize);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error retrieving posts for hashtag {hashtags}: {ex.Message}");
+            }
+        }
+
+        public List<Post> SearchPostsByKeyword(string keyword)
+        {
+            if (string.IsNullOrEmpty(keyword))
+                return new List<Post>();
+
+            List<string> allTitles = _postRepository.GetAllPostTitles();
+            List<string> matchingTitles = _searchService.Search(keyword, allTitles, 0.6);
+
+            List<Post> results = new List<Post>();
+            foreach (string title in matchingTitles)
+            {
+                List<Post> postsWithTitle = _postRepository.GetByTitle(title);
+                results.AddRange(postsWithTitle);
+            }
+
+            return results;
+        }
+
+        public bool ValidatePostOwnership(int currentUserId, int currentPostId)
+        {
+            int? postUserId = _postRepository.GetUserIdByPostId(currentPostId);
+            return currentUserId == postUserId;
+        }
+
+        // Unique methods from main
         public List<Hashtag> GetHashtagsByPostId(int postId)
         {
             if (postId <= 0) throw new ArgumentException("Invalid Post ID.");
+
             try
             {
                 return _hashtagRepository.GetHashtagsByPostId(postId);
@@ -126,15 +192,13 @@ namespace Duo.Services
         public bool LikePost(int postId)
         {
             if (postId <= 0) throw new ArgumentException("Invalid Post ID.");
-            
+
             try
             {
-                // Get the current post
                 var post = _postRepository.GetPostById(postId);
                 if (post == null) throw new Exception("Post not found");
-                
+
                 post.LikeCount++;
-                
                 _postRepository.UpdatePost(post);
                 return true;
             }
@@ -149,13 +213,13 @@ namespace Duo.Services
             if (postId <= 0) throw new ArgumentException("Invalid Post ID.");
             if (string.IsNullOrWhiteSpace(tagName)) throw new ArgumentException("Tag name cannot be empty.");
             if (userId <= 0) throw new ArgumentException("Invalid User ID.");
-            
+
             try
             {
-                if(_userService.GetCurrentUser().UserId != userId) throw new Exception("User does not have permission to add hashtags to this post.");
-                
+                if (_userService.GetCurrentUser().UserId != userId)
+                    throw new Exception("User does not have permission to add hashtags to this post.");
+
                 var hashtag = _hashtagRepository.GetHashtagByName(tagName) ?? _hashtagRepository.CreateHashtag(tagName);
-                
                 return _hashtagRepository.AddHashtagToPost(postId, hashtag.Id);
             }
             catch (Exception ex)
@@ -163,17 +227,18 @@ namespace Duo.Services
                 throw new Exception($"Error adding hashtag to post with ID {postId}: {ex.Message}");
             }
         }
-        
+
         public bool RemoveHashtagFromPost(int postId, int hashtagId, int userId)
         {
             if (postId <= 0) throw new ArgumentException("Invalid Post ID.");
             if (hashtagId <= 0) throw new ArgumentException("Invalid Hashtag ID.");
             if (userId <= 0) throw new ArgumentException("Invalid User ID.");
-            
+
             try
             {
-                if (_userService.GetCurrentUser().UserId != userId) throw new Exception("User does not have permission to remove hashtags from this post.");
-                
+                if (_userService.GetCurrentUser().UserId != userId)
+                    throw new Exception("User does not have permission to remove hashtags from this post.");
+
                 return _hashtagRepository.RemoveHashtagFromPost(postId, hashtagId);
             }
             catch (Exception ex)
@@ -185,6 +250,7 @@ namespace Duo.Services
         public bool IncrementPostLikeCount(int postId)
         {
             if (postId <= 0) throw new ArgumentException("Invalid Post ID.");
+
             try
             {
                 return _postRepository.IncrementPostLikeCount(postId);

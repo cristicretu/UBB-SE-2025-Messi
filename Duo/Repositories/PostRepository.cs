@@ -1,8 +1,8 @@
-using System.Data;
-using Microsoft.Data.SqlClient;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System;
+using System.Data;
+using Microsoft.Data.SqlClient;
 using Duo.Models;
 using Duo.Data;
 
@@ -14,7 +14,7 @@ namespace Duo.Repositories
 
         public PostRepository(DataLink dataLink)
         {
-            this.dataLink = dataLink;
+            this.dataLink = dataLink ?? throw new ArgumentNullException(nameof(dataLink));
         }
 
         public int CreatePost(Post post)
@@ -44,6 +44,7 @@ namespace Duo.Repositories
                 new SqlParameter("@UpdatedAt", post.UpdatedAt),
                 new SqlParameter("@LikeCount", post.LikeCount)
             };
+
             try
             {
                 int? result = dataLink.ExecuteScalar<int>("CreatePost", parameters);
@@ -66,6 +67,7 @@ namespace Duo.Repositories
             {
                 new SqlParameter("@Id", id)
             };
+
             dataLink.ExecuteNonQuery("DeletePost", parameters);
         }
 
@@ -96,6 +98,7 @@ namespace Duo.Repositories
                 new SqlParameter("@UpdatedAt", post.UpdatedAt),
                 new SqlParameter("@LikeCount", post.LikeCount)
             };
+
             dataLink.ExecuteNonQuery("UpdatePost", parameters);
         }
 
@@ -138,10 +141,12 @@ namespace Duo.Repositories
             {
                 throw new ArgumentException("Invalid category ID.");
             }
+
             if (page <= 0)
             {
                 throw new ArgumentException("Page number must be greater than 0.");
             }
+
             if (pageSize <= 0)
             {
                 throw new ArgumentException("Page size must be greater than 0.");
@@ -184,6 +189,7 @@ namespace Duo.Repositories
             {
                 dataTable = dataLink.ExecuteReader("GetAllPosts");
                 List<Post> posts = new List<Post>();
+
                 foreach (DataRow row in dataTable.Rows)
                 {
                     posts.Add(new Post
@@ -198,6 +204,7 @@ namespace Duo.Repositories
                         LikeCount = Convert.ToInt32(row["LikeCount"])
                     });
                 }
+
                 return posts;
             }
             catch (SqlException ex)
@@ -210,16 +217,178 @@ namespace Duo.Repositories
             }
         }
 
+        public List<string> GetAllPostTitles()
+        {
+            var titles = new List<string>();
+
+            try
+            {
+                DataTable dataTable = dataLink.ExecuteReader("GetAllPostTitles", null);
+
+                foreach (DataRow row in dataTable.Rows)
+                {
+                    titles.Add(row["Title"].ToString());
+                }
+
+                return titles;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error getting post titles: {ex.Message}");
+                return titles;
+            }
+        }
+
+        public List<Post> GetByTitle(string title)
+        {
+            SqlParameter[] parameters = new SqlParameter[]
+            {
+                new SqlParameter("@Title", title)
+            };
+
+            try
+            {
+                DataTable dataTable = dataLink.ExecuteReader("GetPostsByTitle", parameters);
+                List<Post> posts = new List<Post>();
+
+                foreach (DataRow row in dataTable.Rows)
+                {
+                    posts.Add(new Post
+                    {
+                        Id = Convert.ToInt32(row["Id"]),
+                        Title = Convert.ToString(row["Title"]) ?? string.Empty,
+                        Description = Convert.ToString(row["Description"]) ?? string.Empty,
+                        UserID = Convert.ToInt32(row["UserID"]),
+                        CategoryID = Convert.ToInt32(row["CategoryID"]),
+                        CreatedAt = Convert.ToDateTime(row["CreatedAt"]),
+                        UpdatedAt = Convert.ToDateTime(row["UpdatedAt"]),
+                        LikeCount = Convert.ToInt32(row["LikeCount"])
+                    });
+                }
+
+                return posts;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error getting posts by title: {ex.Message}");
+                return new List<Post>();
+            }
+        }
+
+        public int? GetUserIdByPostId(int postId)
+        {
+            SqlParameter[] parameters = new SqlParameter[]
+            {
+                new SqlParameter("@PostId", postId)
+            };
+
+            try
+            {
+                DataTable dataTable = dataLink.ExecuteReader("GetUserIdByPostId", parameters);
+
+                if (dataTable.Rows.Count > 0)
+                {
+                    DataRow row = dataTable.Rows[0];
+                    return Convert.ToInt32(row["UserId"]);
+                }
+
+                return null;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"GetUserIdByPostId exception: {ex.Message}");
+            }
+        }
+
+        public List<Post> GetByUser(int userId, int page, int pageSize)
+        {
+            SqlParameter[] parameters = new SqlParameter[]
+            {
+                new SqlParameter("@UserID", userId),
+                new SqlParameter("@PageSize", pageSize),
+                new SqlParameter("@Offset", page)
+            };
+
+            try
+            {
+                DataTable dataTable = dataLink.ExecuteReader("GetPostsByUser", parameters);
+                List<Post> posts = new List<Post>();
+
+                foreach (DataRow row in dataTable.Rows)
+                {
+                    posts.Add(new Post
+                    {
+                        Id = Convert.ToInt32(row["Id"]),
+                        Title = Convert.ToString(row["Title"]) ?? string.Empty,
+                        Description = Convert.ToString(row["Description"]) ?? string.Empty,
+                        UserID = Convert.ToInt32(row["UserID"]),
+                        CategoryID = Convert.ToInt32(row["CategoryID"]),
+                        CreatedAt = Convert.ToDateTime(row["CreatedAt"]),
+                        UpdatedAt = Convert.ToDateTime(row["UpdatedAt"]),
+                        LikeCount = Convert.ToInt32(row["LikeCount"])
+                    });
+                }
+
+                return posts;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"GetByUser: {ex.Message}");
+            }
+        }
+
+        public List<Post> GetByHashtags(List<string> hashtags, int page, int pageSize)
+        {
+            string hashtagsString = string.Join(",", hashtags);
+            int offset = (page - 1) * pageSize;
+
+            SqlParameter[] parameters = new SqlParameter[]
+            {
+                new SqlParameter("@Hashtags", hashtagsString),
+                new SqlParameter("@PageSize", pageSize),
+                new SqlParameter("@Offset", offset)
+            };
+
+            try
+            {
+                DataTable dataTable = dataLink.ExecuteReader("GetByHashtags", parameters);
+                List<Post> posts = new List<Post>();
+
+                foreach (DataRow row in dataTable.Rows)
+                {
+                    posts.Add(new Post
+                    {
+                        Id = Convert.ToInt32(row["Id"]),
+                        Title = Convert.ToString(row["Title"]) ?? string.Empty,
+                        Description = Convert.ToString(row["Description"]) ?? string.Empty,
+                        UserID = Convert.ToInt32(row["UserID"]),
+                        CategoryID = Convert.ToInt32(row["CategoryID"]),
+                        CreatedAt = Convert.ToDateTime(row["CreatedAt"]),
+                        UpdatedAt = Convert.ToDateTime(row["UpdatedAt"]),
+                        LikeCount = Convert.ToInt32(row["LikeCount"])
+                    });
+                }
+
+                return posts;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"GetByHashtags: {ex.Message}");
+            }
+        }
+
         public bool IncrementPostLikeCount(int postId)
         {
             if (postId <= 0)
             {
                 throw new ArgumentException("Invalid post ID.");
             }
+
             SqlParameter[] parameters = new SqlParameter[]
             {
                 new SqlParameter("@PostID", postId)
             };
+
             try
             {
                 dataLink.ExecuteNonQuery("IncrementPostLikeCount", parameters);

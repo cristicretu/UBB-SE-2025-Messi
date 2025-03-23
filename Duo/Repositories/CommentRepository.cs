@@ -141,11 +141,16 @@ namespace Duo.Repositories
             {
                 new SqlParameter("@CommentID", id)
             };
+          
+        public List<Comment> GetRepliesByCommentId(int parentCommentId)
+        {
+            if (parentCommentId <= 0) throw new ArgumentException("Invalid parent comment ID", nameof(parentCommentId));
 
             try
             {
-                _dataLink.ExecuteNonQuery("DeleteComment", parameters);
-                return true;
+                // Assuming you want to call a method to get replies here
+                var replies = _dataLink.ExecuteQuery("GetRepliesByCommentId", new { ParentCommentId = parentCommentId });
+                return replies;
             }
             catch (SqlException ex)
             {
@@ -259,6 +264,28 @@ namespace Duo.Repositories
             {
                 throw new Exception(ex.Message);
             }
+        }
+    }
+
+    public int GetCommentsCountForPost(int postId)
+    {
+        if (postId <= 0) throw new ArgumentException("Invalid post ID", nameof(postId));
+
+        SqlParameter[] parameters = new SqlParameter[]
+        {
+            new SqlParameter("@PostID", postId)
+        };
+
+        try
+        {
+            int? result = _dataLink.ExecuteScalar<int>("GetCommentsCountForPost", parameters);
+            if (result == null)
+                throw new Exception("Failed to get comment count");
+            return result.Value;
+        }
+        catch (SqlException ex)
+        {
+            throw new Exception(ex.Message);
         }
     }
 }
