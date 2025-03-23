@@ -6,7 +6,14 @@
     xmlns:local="using:Duo.Views.Pages"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:viewmodels="using:Duo.ViewModels"
     mc:Ignorable="d">
+
+    <Page.Resources>
+        <DataTemplate x:Key="CategoryItemTemplate">
+            <NavigationViewItem Content="{Binding}" Icon="Message" ToolTipService.ToolTip="{Binding}" Tag="{Binding}"/>
+        </DataTemplate>
+    </Page.Resources>
 
     <NavigationView x:Name="NavigationView"
         Height="Auto"
@@ -21,16 +28,16 @@
             </NavigationViewItem> 
             <NavigationViewItem Content="Quiz" Icon="Help" ToolTipService.ToolTip="Quiz" Tag="QuizParent">
             </NavigationViewItem>
-            <NavigationViewItem Content="Community" Icon="Folder" ToolTipService.ToolTip="Community" Tag="CommunityParent">
-                <NavigationViewItem.MenuItems>
-                    <NavigationViewItem Content="general-discussion" Icon="Message" ToolTipService.ToolTip="General Discussion" Tag="general-discussion"/>
-                    <NavigationViewItem Content="lesson-help" Icon="Help" ToolTipService.ToolTip="Lesson Help" Tag="lesson-help"/>
-                    <NavigationViewItem Content="off-topic" Icon="OutlineStar" ToolTipService.ToolTip="Off-Topic" Tag="off-topic"/>
-                    <NavigationViewItem Content="discovery" Icon="Find" ToolTipService.ToolTip="Discovery" Tag="discovery"/>
-                    <NavigationViewItem Content="announcements" Icon="Message" ToolTipService.ToolTip="Announcements" Tag="announcements"/>
-                </NavigationViewItem.MenuItems>
+            <NavigationViewItem x:Name="CommunityItem" Content="Community" Icon="Folder" ToolTipService.ToolTip="Community" Tag="CommunityParent">
             </NavigationViewItem>
         </NavigationView.MenuItems>
+
+        <NavigationView.PaneFooter>
+            <StackPanel Orientation="Horizontal" Margin="14,10" VerticalAlignment="Center">
+                <PersonPicture ProfilePicture="/Assets/UserIcon.png" Width="24" Height="24" Margin="0,0,10,0"/>
+                <TextBlock x:Name="UsernameTextBlock" Text="Loading..." VerticalAlignment="Center" />
+            </StackPanel>
+        </NavigationView.PaneFooter>
 
         <Frame x:Name="contentFrame" />
     </NavigationView>

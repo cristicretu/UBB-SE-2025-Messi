@@ -1,10 +1,21 @@
-public class User
-{
-    private int _Id;
+using System;
 
-    public int Id
+namespace Duo.Models
+{
+    public class User
     {
-        get { return _Id; }
-        set { _Id = value; }
+        public int UserId { get; set; }
+        public string Username { get; set; }
+
+        public User(int userId, string username)
+        {
+            UserId = userId;
+            Username = username;
+        }
+
+        public User(string username)
+        {
+            Username = username;
+        }
     }
 }

@@ -2,25 +2,41 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System;
 using System.Diagnostics;
+using Duo.Models;
+using System.Collections.Generic;
+using Duo.ViewModels;
 
 namespace Duo.Views.Pages
 {
     public sealed partial class CategoryPage : Page
     {
-        private readonly string[] categoryNames = new string[] 
-        {
-            "general-discussion",
-            "lesson-help",
-            "off-topic",
-            "discovery",
-            "announcements"
-        };
+        private CategoryViewModel _viewModel;
 
         public CategoryPage()
         {
             try
             {
                 this.InitializeComponent();
+
+                // Initialize ViewModel
+                _viewModel = new CategoryViewModel(App._categoryService);
+                
+                // Set DataContext for data binding
+                this.DataContext = _viewModel;
+                
+                // Populate community menu items
+                PopulateCommunityMenuItems();
+
+                try
+                {
+                    User currentUser = App.userService.GetCurrentUser();
+                    UsernameTextBlock.Text = currentUser.Username;
+                }
+                catch (Exception ex)
+                {
+                    UsernameTextBlock.Text = "Guest";
+                    Debug.WriteLine($"Failed to get username: {ex.Message}");
+                }
 
                 try
                 {
@@ -34,6 +50,39 @@ namespace Duo.Views.Pages
             catch (Exception ex)
             {
                 Debug.WriteLine($"Page initialization failed: {ex.Message}");
+            }
+        }
+        
+        private void PopulateCommunityMenuItems()
+        {
+            try
+            {
+                var categoryNames = _viewModel.GetCategoryNames();
+                
+                // Clear existing items
+                CommunityItem.MenuItems.Clear();
+                
+                // Add menu items for each category
+                foreach (string categoryName in categoryNames)
+                {
+                    var item = new NavigationViewItem
+                    {
+                        Content = categoryName,
+                        Icon = new SymbolIcon(Symbol.Message),
+                        Tag = categoryName
+                    };
+                    
+                    // Set tooltip after initialization
+                    ToolTipService.SetToolTip(item, categoryName);
+                    
+                    CommunityItem.MenuItems.Add(item);
+                }
+                
+                Debug.WriteLine($"Successfully populated {categoryNames.Count} category menu items");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Failed to populate category menu items: {ex.Message}");
             }
         }
 
@@ -74,6 +123,7 @@ namespace Duo.Views.Pages
 
         private bool IsCategoryTag(string tag)
         {
+            var categoryNames = _viewModel.GetCategoryNames();
             foreach (var category in categoryNames)
             {
                 if (tag == category)
