@@ -7,7 +7,8 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    HorizontalAlignment="Stretch">
+    HorizontalAlignment="Stretch"
+    Margin="0,8,0,0">
 
     <StackPanel 
         HorizontalAlignment="Stretch" 
@@ -30,7 +31,7 @@
                         <Border 
                             Width="1" 
                             Height="Auto" 
-                            Margin="16,0,0,0"
+                            Margin="8,0,0,0"
                             VerticalAlignment="Stretch" 
                             Background="{ThemeResource SystemControlForegroundBaseLowBrush}" 
                             Opacity="0.5"/> 
@@ -45,7 +46,7 @@
             <StackPanel 
                 Grid.Column="1" 
                 Padding="12" 
-                Spacing="10" 
+                Spacing="8" 
                 HorizontalAlignment="Stretch">
                 
                 <!-- User info and date row -->
@@ -91,10 +92,11 @@
             </StackPanel>
         </Grid>
         
-        <!-- Container for child comments -->
+        <!-- Container for child comments - nested directly inside the comment -->
         <StackPanel 
             x:Name="ChildCommentsPanel" 
-            HorizontalAlignment="Stretch" 
+            HorizontalAlignment="Stretch"
+            Margin="16,0,0,0"
             Spacing="0"/>
     </StackPanel>
 </UserControl> 

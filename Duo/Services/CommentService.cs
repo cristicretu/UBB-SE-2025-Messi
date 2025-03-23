@@ -135,7 +135,8 @@ namespace Duo.Services
                     UserId = user.UserId,
                     ParentCommentId = parentCommentId,
                     CreatedAt = DateTime.Now,
-                    Level = level
+                    Level = level,
+                    LikeCount = 0 
                 };
 
                 return _commentRepository.CreateComment(comment);
