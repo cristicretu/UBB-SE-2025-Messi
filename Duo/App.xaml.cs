@@ -17,6 +17,11 @@ using Microsoft.UI.Xaml.Navigation;
 using Microsoft.UI.Xaml.Shapes;
 using System.Diagnostics;
 using Duo.Views;
+using Microsoft.Extensions.Configuration;
+using Duo.ViewModels;
+using Duo.Services;
+using Duo.Data;
+using Duo.Repositories;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -28,6 +33,16 @@ namespace Duo
     /// </summary>
     public partial class App : Application
     {
+        public static UserService userService;
+        private static IConfiguration _configuration;
+        public static DataLink _dataLink;
+        public static UserRepository userRepository;
+        public static PostRepository _postRepository;
+        public static HashtagRepository _hashtagRepository;
+        public static CommentRepository _commentRepository;
+        public static PostService _postService;
+        public static CategoryService _categoryService;
+
         /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code
         /// executed, and as such is the logical equivalent of main() or WinMain().
@@ -35,6 +50,33 @@ namespace Duo
         public App()
         {
             this.InitializeComponent();
+            
+            // Initialize configuration
+            _configuration = InitializeConfiguration();
+            
+            // Initialize data link
+            _dataLink = new DataLink(_configuration);
+            
+            // Initialize repositories
+            userRepository = new UserRepository(_dataLink);
+            _postRepository = new PostRepository(_dataLink);
+            _hashtagRepository = new HashtagRepository(_dataLink);
+            _commentRepository = new CommentRepository(_dataLink);
+            var categoryRepository = new CategoryRepository(_dataLink);
+            
+            // Initialize services
+            userService = new UserService(userRepository);
+            _postService = new PostService(_postRepository, _hashtagRepository, userService);
+            _categoryService = new CategoryService(categoryRepository);
+        }
+
+        private IConfiguration InitializeConfiguration()
+        {
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+            
+            return builder.Build();
         }
 
         /// <summary>
@@ -43,20 +85,26 @@ namespace Duo
         /// <param name="args">Details about the launch request and process.</param>
         protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
         {
-            // show the login window first
-            var loginWindow = new LoginWindow();
-            loginWindow.LoginSuccessful += LoginWindow_LoginSuccessful;
+            // Create view model
+            var loginViewModel = new LoginViewModel(userService);
+            
+            // Show the login window first
+            var loginWindow = new LoginWindow(loginViewModel);
             loginWindow.Activate();
             
             m_loginWindow = loginWindow;
+
+            // Handle login success
+            loginViewModel.LoginSuccessful += LoginViewModel_LoginSuccessful;
         }
         
-        private void LoginWindow_LoginSuccessful(object? sender, EventArgs e)
+        private void LoginViewModel_LoginSuccessful(object? sender, EventArgs e)
         {
-            // show the main window, after login
+            // Show the main window, after login
             m_window = new MainWindow();
             m_window.Activate();
             
+            m_loginWindow?.Close();
             m_loginWindow = null;
         }
 

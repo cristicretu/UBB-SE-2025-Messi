@@ -4,6 +4,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:Duo.Views.Pages"
+    xmlns:models="using:Duo.Models"
     xmlns:components="using:Duo.Views.Components"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -11,7 +12,7 @@
 
     <Page.Resources>
         <Style x:Key="HashtagButtonStyle" TargetType="Button">
-            <Setter Property="Background" Value="{ThemeResource SystemControlBackgroundAltMediumBrush}"/>
+            <Setter Property="Background" Value="{ThemeResource SystemControlBackgroundListLowBrush}"/>
             <Setter Property="Foreground" Value="{ThemeResource SystemControlForegroundBaseHighBrush}"/>
             <Setter Property="Padding" Value="12,6"/>
             <Setter Property="CornerRadius" Value="16"/>
@@ -104,13 +105,12 @@
         </Style>
     </Page.Resources>
 
-    <Grid Margin="16">
+    <Grid Margin="16" MaxWidth="900" HorizontalAlignment="Stretch">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <Grid.ColumnDefinitions>
@@ -161,13 +161,13 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
                        
-            <ScrollViewer Grid.Row="2" Grid.Column="0"
+            <ScrollViewer x:Name="HashtagsScrollViewer" Grid.Row="2" Grid.Column="0"
                 Height="60"
                 ZoomMode="Disabled"
                 IsTabStop="True"
                 IsVerticalScrollChainingEnabled="True"
                 HorizontalScrollMode="Enabled" 
-                HorizontalScrollBarVisibility="Auto"
+                HorizontalScrollBarVisibility="Hidden"
                 VerticalScrollMode="Disabled" 
                 VerticalScrollBarVisibility="Disabled"
                 Padding="0,6"
@@ -183,56 +183,80 @@
             </ScrollViewer>
         </Grid>
 
-    <ListView
-        x:Name="FilteredListView"
-        Grid.Row="3"
-        Grid.Column="0"
-        Grid.ColumnSpan="2"
-        ItemsSource="{x:Bind postsFiltered}"
-        SelectionMode="Single"
-        ShowsScrollingPlaceholders="True"
-        BorderThickness="1"
-        Margin="0,0,0,16"
-        Padding="0"
-        Background="Transparent"
-        HorizontalContentAlignment="Stretch"
-        HorizontalAlignment="Stretch"
-        VerticalAlignment="Stretch"
-        >
-            <ListView.ItemTemplate>
-                <DataTemplate x:DataType="local:MockPost">
-                    <components:Post 
-                        Username="{x:Bind Username}"
-                        Date="{x:Bind Date}"
-                        Title="{x:Bind Title}"
-                        Hashtags="{x:Bind Hashtags}"
-                        Content="{x:Bind Content}"
-                        LikeCount="{x:Bind LikeCount}"/>
-                </DataTemplate>
-            </ListView.ItemTemplate>
-            <ListView.ItemContainerStyle>
-                <Style TargetType="ListViewItem">
-                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                    <Setter Property="BorderThickness" Value="0"/>
-                    <Setter Property="Padding" Value="0"/>
-                    <Setter Property="Background" Value="Transparent"/>
-                    <Setter Property="BorderBrush" Value="Transparent"/>
-                    <Setter Property="VerticalContentAlignment" Value="Top"/>
-                </Style>
-            </ListView.ItemContainerStyle>
-        </ListView>
+    <ScrollViewer Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" 
+                 VerticalScrollBarVisibility="Auto"
+                 HorizontalScrollBarVisibility="Disabled"
+                 Padding="0,0,12,0">
+        <StackPanel Spacing="0">
+            <ListView
+                x:Name="FilteredListView"
+                ItemsSource="{x:Bind _viewModel.Posts, Mode=OneWay}"
+                SelectionMode="None"
+                IsItemClickEnabled="True"
+                ItemClick="FilteredListView_ItemClick"
+                ShowsScrollingPlaceholders="True"
+                BorderThickness="0"
+                Margin="0,0,0,16"
+                Padding="0"
+                Background="Transparent"
+                HorizontalContentAlignment="Stretch"
+                HorizontalAlignment="Stretch"
+                >
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                        <Setter Property="BorderThickness" Value="0"/>
+                        <Setter Property="Padding" Value="0"/>
+                        <Setter Property="Margin" Value="0"/>
+                        <Setter Property="Background" Value="Transparent"/>
+                        <Setter Property="BorderBrush" Value="Transparent"/>
+                        <Setter Property="VerticalContentAlignment" Value="Top"/>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="ListViewItem">
+                                    <ContentPresenter HorizontalAlignment="Stretch"
+                                                    VerticalAlignment="Stretch"
+                                                    HorizontalContentAlignment="Stretch"
+                                                    VerticalContentAlignment="Stretch"
+                                                    Content="{TemplateBinding Content}"
+                                                    ContentTemplate="{TemplateBinding ContentTemplate}"
+                                                    ContentTransitions="{TemplateBinding ContentTransitions}"/>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </ListView.ItemContainerStyle>
+                <ListView.ItemTemplate>
+                    <DataTemplate x:DataType="models:Post">
+                        <StackPanel HorizontalAlignment="Stretch">
+                            <components:Post 
+                                Username="{x:Bind Username}"
+                                Date="{x:Bind Date}"
+                                Title="{x:Bind Title}"
+                                Hashtags="{x:Bind Hashtags}"
+                                Content="{x:Bind Content}"
+                                LikeCount="{x:Bind LikeCount}"
+                                PostId="{x:Bind Id}"
+                                HorizontalAlignment="Stretch"/>
+                            <Rectangle Height="1" Fill="{ThemeResource SystemControlForegroundBaseLowBrush}" HorizontalAlignment="Stretch" Margin="0,4,0,4"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
 
-    <!-- Pagination control -->
-    <PipsPager 
-        x:Name="PostsPager"
-        Grid.Row="4"
-        Grid.Column="0"
-        Grid.ColumnSpan="2"
-        HorizontalAlignment="Center"
-        NumberOfPages="1"
-        Orientation="Horizontal"
-        PreviousButtonVisibility="Visible"
-        NextButtonVisibility="Visible"
-        SelectedPageIndex="0" />
+            <!-- Pagination control -->
+            <PipsPager 
+                x:Name="PostsPager"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Bottom"
+                Margin="0,0,0,16"
+                NumberOfPages="{x:Bind _viewModel.TotalPages, Mode=OneWay}"
+                Orientation="Horizontal"
+                PreviousButtonVisibility="Visible"
+                NextButtonVisibility="Visible"
+                SelectedPageIndex="0" />
+        </StackPanel>
+    </ScrollViewer>
 </Grid>
 </Page>

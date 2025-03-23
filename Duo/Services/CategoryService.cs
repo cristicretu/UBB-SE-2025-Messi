@@ -1,39 +1,43 @@
-using System.Collections.Generic;
 using System;
+using System.Collections.Generic;
+using Duo.Models;
+using Duo.Repositories;
 
-public class CategoryService
+namespace Duo.Services
 {
-    private readonly CategoryRepository _categoryRepository;
-
-    public CategoryService(CategoryRepository categoryRepository)
+    public class CategoryService
     {
-        _categoryRepository = categoryRepository;
-    }
+        private readonly CategoryRepository _categoryRepository;
 
-    public List<Category> GetAllCategories()
-    {
-        try
+        public CategoryService(CategoryRepository categoryRepository)
         {
-            return _categoryRepository.GetCategories();
+            _categoryRepository = categoryRepository ?? throw new ArgumentNullException(nameof(categoryRepository));
         }
-        catch (Exception ex)
+
+        public List<Category> GetAllCategories()
         {
-            Console.WriteLine($"Error fetching categories: {ex.Message}");
-            return new List<Category>(); // Return empty list if error occurs
+            try
+            {
+                return _categoryRepository.GetCategories();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching categories: {ex.Message}");
+                return new List<Category>(); // Return empty list if error occurs
+            }
+        }
+
+        public Category GetCategoryByName(string name)
+        {
+            try
+            {
+                return _categoryRepository.GetCategoryByName(name);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return null;
+            }
         }
     }
-
-    public Category GetCategoryByName(string name)
-    {
-        try
-        {
-            return _categoryRepository.GetCategoryByName(name);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.Message);
-            return null;
-        }
-    }
-
 }

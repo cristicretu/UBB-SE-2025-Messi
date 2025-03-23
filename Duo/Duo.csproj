@@ -54,6 +54,10 @@
     <Folder Include="Data\Queries\Post\GetAllPosts\" />
     <Folder Include="Data\Queries\Post\GetAll\" />
     <Folder Include="Data\Queries\Post\Search\" />
+    <Folder Include="Data\Queries\Hashtag\GetHashtagByText\" />
+    <Folder Include="Data\Queries\PostHashtag\AddHashtagToPost\" />
+    <Folder Include="Data\Queries\PostHashtag\DeleteHashtagFromPost\" />
+    <Folder Include="Data\Queries\PostHashtag\GetHashtagsForPost\" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="MainWindow.xaml.cs">
