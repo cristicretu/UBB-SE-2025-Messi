@@ -101,9 +101,9 @@ namespace Duo
             }
         }
 
-        // private void myButton_Click(object sender, RoutedEventArgs e)
-        // {
-        //     myButton.Content = "Clicked";
-        // }
+        private void CreatePostBtn_CreatePostRequested(object sender, RoutedEventArgs e)
+        {
+            Debug.WriteLine("Create post button clicked");
+        }
     }
 }
