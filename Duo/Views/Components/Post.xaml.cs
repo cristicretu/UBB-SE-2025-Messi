@@ -41,6 +41,23 @@ namespace Duo.Views.Components
         public Post()
         {
             InitializeComponent();
+            
+            UpdateMoreOptionsVisibility();
+        }
+
+        private void UpdateMoreOptionsVisibility()
+        {
+            var currentUser = userService.GetCurrentUser();
+            if (currentUser != null)
+            {
+                MoreOptions.Visibility = (this.Username == currentUser.Username) 
+                    ? Visibility.Visible 
+                    : Visibility.Collapsed;
+            }
+            else
+            {
+                MoreOptions.Visibility = Visibility.Collapsed;
+            }
         }
 
         // Handle pointer entered event for hover effects
@@ -142,7 +159,7 @@ namespace Duo.Views.Components
         private async void MoreOptions_EditClicked(object sender, RoutedEventArgs e)
         {
             // Verify that the current user is the owner of the post            
-            if(this.Username != $"u/{userService.GetCurrentUser().Username}")
+            if(this.Username != $"{userService.GetCurrentUser().Username}")
             {
                 // Display an error dialog if the user is not the owner
                 ContentDialog errorDialog = new ContentDialog
@@ -186,8 +203,7 @@ namespace Duo.Views.Components
 
         private async void MoreOptions_DeleteClicked(object sender, RoutedEventArgs e)
         {
-            // Verify that the current user is the owner of the post
-            if(this.Username != $"u/{userService.GetCurrentUser().Username}")
+            if(this.Username != $"{userService.GetCurrentUser().Username}")
             {
                 // Display an error dialog if the user is not the owner
                 ContentDialog errorDialog = new ContentDialog
@@ -210,12 +226,28 @@ namespace Duo.Views.Components
                 "Are you sure you want to delete this item?",
                 this.XamlRoot
             );
-
+                
             // if User confirms...
             if (isConfirmed)
             {
                 // Handle the deletion logic here
-                // Send/confirm
+                try {
+                _postService.DeletePost(this.PostId);
+                }
+                catch (Exception ex)
+                {
+                    // Handle the error logic here
+                    ContentDialog errorDialog = new ContentDialog
+                    {
+                        XamlRoot = this.XamlRoot,
+                        Title = "Error",
+                        Content = "An error occurred while deleting the item. Please try again.\n" + ex.Message,
+                        CloseButtonText = "OK"
+                    };
+                    await errorDialog.ShowAsync();
+                    return;
+                }
+
                 ContentDialog successDialog = new ContentDialog
                 {
                     XamlRoot = this.XamlRoot,
@@ -230,7 +262,12 @@ namespace Duo.Views.Components
         public string Username
         {
             get => (string)GetValue(UsernameProperty);
-            set => SetValue(UsernameProperty, value);
+            set 
+            { 
+                SetValue(UsernameProperty, value);
+                // Update visibility when username changes
+                UpdateMoreOptionsVisibility();
+            }
         }
 
         public string Date
