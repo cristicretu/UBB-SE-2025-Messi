@@ -31,17 +31,21 @@ namespace Duo.Views.Pages
         {
             base.OnNavigatedTo(e);
 
-            if (e.Parameter is Models.Post post)
+            if (e.Parameter is Models.Post post && post.Id > 0)
             {
-                // Ensure the required properties are set
-                post.Title = post.Title ?? string.Empty;
-                post.Description = post.Description ?? string.Empty;
-                
-                // Load post details using the view model
-                ViewModel.Post = post;
-                
-                // Load data using the ViewModel
+                // Load data using the ViewModel - this will set the Post property internally
                 ViewModel.LoadPostDetails(post.Id);
+            }
+            else
+            {
+                // Handle invalid post case
+                TextBlock errorText = new TextBlock
+                {
+                    Text = "Invalid post data received",
+                    Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Red),
+                    Margin = new Thickness(0, 20, 0, 0)
+                };
+                CommentsPanel.Children.Add(errorText);
             }
         }
         

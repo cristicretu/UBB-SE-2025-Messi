@@ -73,7 +73,7 @@ namespace Duo.ViewModels
             set
             {
                 _commentsPanel = value;
-                if (_commentsPanel != null && Post != null)
+                if (_commentsPanel != null && Post != null && Post.Id > 0)
                 {
                     LoadComments(Post.Id);
                 }
@@ -89,9 +89,19 @@ namespace Duo.ViewModels
 
             try
             {
+                if (postId <= 0)
+                {
+                    throw new ArgumentException("Invalid post ID", nameof(postId));
+                }
+                
                 var post = _postService.GetPostById(postId);
                 if (post != null)
                 {
+                    if (post.Id <= 0)
+                    {
+                        post.Id = postId;
+                    }
+                    
                     var user = userService.GetUserById(post.UserID);
                     post.Username = $"u/{user?.Username ?? "Unknown User"}";
                     
@@ -110,8 +120,12 @@ namespace Duo.ViewModels
                     
                     if (CommentsPanel != null)
                     {
-                        LoadComments(postId);
+                        LoadComments(post.Id);
                     }
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine($"Post with ID {postId} not found");
                 }
             }
             catch (Exception ex)
@@ -132,6 +146,11 @@ namespace Duo.ViewModels
 
             try
             {
+                if (postId <= 0)
+                {
+                    throw new ArgumentException("Invalid post ID", nameof(postId));
+                }
+                
                 var comments = _commentService.GetCommentsByPostId(postId);
                 Comments.Clear();
                 
@@ -156,6 +175,15 @@ namespace Duo.ViewModels
                         CommentsPanel.Children.Add(commentComponent);
                     }
                 }
+                else
+                {
+                    TextBlock noCommentsText = new TextBlock
+                    {
+                        Text = "No comments yet. Be the first to comment!",
+                        Margin = new Microsoft.UI.Xaml.Thickness(0, 16, 0, 16)
+                    };
+                    CommentsPanel.Children.Add(noCommentsText);
+                }
             }
             catch (Exception ex)
             {
@@ -172,7 +200,7 @@ namespace Duo.ViewModels
 
         private void AddComment(string commentText)
         {
-            if (string.IsNullOrWhiteSpace(commentText) || Post == null)
+            if (string.IsNullOrWhiteSpace(commentText) || Post == null || Post.Id <= 0)
                 return;
 
             try
