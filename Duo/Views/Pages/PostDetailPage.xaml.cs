@@ -6,6 +6,7 @@ using Duo.Data;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
+using Microsoft.UI.Xaml.Media;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,12 +20,17 @@ namespace Duo.Views.Pages
 {
     public sealed partial class PostDetailPage : Page
     {
+        private readonly CommentService _commentService;
+        
         public PostDetailPage()
         {
             this.InitializeComponent();
             
-            // Connect the comments panel to the view model
+            _commentService = new CommentService(_commentRepository, _postRepository, userService);
+            
             ViewModel.CommentsPanel = CommentsPanel;
+            
+            ViewModel.CommentsLoaded += ViewModel_CommentsLoaded;
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
@@ -59,10 +65,8 @@ namespace Duo.Views.Pages
         
         private void CommentInputControl_CommentSubmitted(object sender, RoutedEventArgs e)
         {
-            // Get the comment text from the CommentInput control
-            if (sender is CommentInput commentInput && commentInput.CommentText != null)
+            if (sender is Components.CommentInput commentInput && commentInput.CommentText != null)
             {
-                // Call the ViewModel's AddComment method
                 if (ViewModel.AddCommentCommand.CanExecute(commentInput.CommentText))
                 {
                     ViewModel.AddCommentCommand.Execute(commentInput.CommentText);
@@ -71,6 +75,98 @@ namespace Duo.Views.Pages
                     commentInput.ClearComment();
                 }
             }
+        }
+        
+        private void ViewModel_CommentsLoaded(object sender, EventArgs e)
+        {
+            ConnectCommentReplyEvents();
+            
+            ConnectCommentLikeEvents();
+        }
+        
+        private void ConnectCommentReplyEvents()
+        {
+            DisconnectCommentReplyEvents();
+            
+            var commentControls = GetAllChildrenOfType<Components.Comment>(CommentsPanel);
+            
+            foreach (var comment in commentControls)
+            {
+                comment.ReplySubmitted += Comment_ReplySubmitted;
+            }
+        }
+        
+        private void DisconnectCommentReplyEvents()
+        {
+            var commentControls = GetAllChildrenOfType<Components.Comment>(CommentsPanel);
+            foreach (var comment in commentControls)
+            {
+                comment.ReplySubmitted -= Comment_ReplySubmitted;
+            }
+        }
+        
+        private void ConnectCommentLikeEvents()
+        {
+            // Disconnect existing events first to avoid duplicates
+            DisconnectCommentLikeEvents();
+            
+            // Get all comment components from the comments panel
+            var commentControls = GetAllChildrenOfType<Components.Comment>(CommentsPanel);
+            
+            foreach (var comment in commentControls)
+            {
+                comment.CommentLiked += Comment_CommentLiked;
+            }
+        }
+        
+        private void DisconnectCommentLikeEvents()
+        {
+            var commentControls = GetAllChildrenOfType<Components.Comment>(CommentsPanel);
+            foreach (var comment in commentControls)
+            {
+                comment.CommentLiked -= Comment_CommentLiked;
+            }
+        }
+        
+        private void Comment_ReplySubmitted(object sender, CommentReplyEventArgs e)
+        {
+            // Add a reply to the comment
+            ViewModel.AddReplyToComment(e.ParentCommentId, e.CommentText);
+        }
+        
+        private void Comment_CommentLiked(object sender, CommentLikedEventArgs e)
+        {
+            // Handle comment liked event (if needed for analytics, etc.)
+            System.Diagnostics.Debug.WriteLine($"Comment liked event received for ID: {e.CommentId}");
+        }
+        
+        // Helper method to get all children of a specific type from a panel
+        private List<T> GetAllChildrenOfType<T>(DependencyObject parent) where T : DependencyObject
+        {
+            var list = new List<T>();
+            var count = VisualTreeHelper.GetChildrenCount(parent);
+            
+            for (int i = 0; i < count; i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+                
+                if (child is T childOfType)
+                {
+                    list.Add(childOfType);
+                }
+                
+                // Recursively search child elements
+                if (child is FrameworkElement)
+                {
+                    var childrenOfType = GetAllChildrenOfType<T>(child);
+                    if (childrenOfType.Any())
+                    {
+                        list.AddRange(childrenOfType);
+                    }
+                }
+            }
+            
+            return list;
         }
     }
 }

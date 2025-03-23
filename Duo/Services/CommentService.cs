@@ -52,26 +52,40 @@ namespace Duo.Services
 
             try
             {
+                System.Diagnostics.Debug.WriteLine($"CommentService: Getting comments for post ID {postId}");
+                
                 var comments = _commentRepository.GetCommentsByPostId(postId);
+                System.Diagnostics.Debug.WriteLine($"CommentService: Retrieved {comments?.Count ?? 0} comments from repository");
 
                 // Add usernames to the comments
-                foreach (var comment in comments)
+                if (comments != null && comments.Count > 0)
                 {
-                    try
+                    foreach (var comment in comments)
                     {
-                        User user = _userService.GetUserById(comment.UserId);
-                        comment.Username = user.Username;
+                        try
+                        {
+                            User user = _userService.GetUserById(comment.UserId);
+                            comment.Username = user.Username;
+                            System.Diagnostics.Debug.WriteLine($"CommentService: Set username '{user.Username}' for comment ID {comment.Id}");
+                        }
+                        catch (Exception ex)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"CommentService: Error getting username for comment ID {comment.Id}: {ex.Message}");
+                            comment.Username = "Unknown User";
+                        }
                     }
-                    catch (Exception)
-                    {
-                        comment.Username = "Unknown User";
-                    }
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine($"CommentService: No comments found for post ID {postId}");
                 }
 
                 return comments;
             }
             catch (Exception ex)
             {
+                System.Diagnostics.Debug.WriteLine($"CommentService: Error retrieving comments: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"CommentService: Stack trace: {ex.StackTrace}");
                 throw new Exception($"Error retrieving comments for post ID {postId}: {ex.Message}", ex);
             }
         }

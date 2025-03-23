@@ -51,6 +51,7 @@ namespace Duo.Views.Components
         }
 
         private bool _isPointerOver;
+        private LikeButton? _likeButton;
 
         public Post()
         {
@@ -58,6 +59,68 @@ namespace Duo.Views.Components
             
             UpdateMoreOptionsVisibility();
             UpdateHighlightState();
+            
+            // Subscribe to the Loaded event
+            Loaded += Post_Loaded;
+        }
+        
+        private void Post_Loaded(object sender, RoutedEventArgs e)
+        {
+            // Find and connect to the LikeButton
+            _likeButton = FindDescendant<LikeButton>(this);
+            if (_likeButton != null)
+            {
+                _likeButton.LikeClicked += LikeButton_LikeClicked;
+            }
+        }
+        
+        // Find a descendant control of a specific type
+        private T FindDescendant<T>(DependencyObject parent) where T : DependencyObject
+        {
+            int childCount = VisualTreeHelper.GetChildrenCount(parent);
+            
+            for (int i = 0; i < childCount; i++)
+            {
+                DependencyObject child = VisualTreeHelper.GetChild(parent, i);
+                
+                if (child is T result)
+                {
+                    return result;
+                }
+                
+                T descendant = FindDescendant<T>(child);
+                if (descendant != null)
+                {
+                    return descendant;
+                }
+            }
+            
+            return null;
+        }
+        
+        private void LikeButton_LikeClicked(object sender, LikeButtonClickedEventArgs e)
+        {
+            if (e.TargetType == LikeTargetType.Post && e.TargetId == PostId)
+            {
+                try
+                {
+                    if (App._postService.LikePost(PostId))
+                    {
+                        LikeCount++;
+                        
+                        if (_likeButton != null)
+                        {
+                            _likeButton.IncrementLikeCount();
+                        }
+                        
+                        System.Diagnostics.Debug.WriteLine($"Post liked: ID {PostId}, new count: {LikeCount}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Error liking post: {ex.Message}");
+                }
+            }
         }
 
         private void UpdateMoreOptionsVisibility()
@@ -290,13 +353,13 @@ namespace Duo.Views.Components
         }
 
         // Event handlers for MarkdownTextBlock
-        private void MarkdownText_MarkdownRendered(object sender, MarkdownRenderedEventArgs e)
+        private void MarkdownText_MarkdownRendered(object sender, CommunityToolkit.WinUI.UI.Controls.MarkdownRenderedEventArgs e)
         {
             // This event is fired when the markdown content is rendered
             // You can perform additional actions here if needed
         }
 
-        private void MarkdownText_LinkClicked(object sender, LinkClickedEventArgs e)
+        private void MarkdownText_LinkClicked(object sender, CommunityToolkit.WinUI.UI.Controls.LinkClickedEventArgs e)
         {
             // Handle link clicks in markdown text
             // For example, you might want to open URLs in the default browser

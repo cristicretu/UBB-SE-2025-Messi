@@ -23,6 +23,7 @@ namespace Duo.ViewModels
         private StackPanel _commentsPanel;
 
         public event PropertyChangedEventHandler PropertyChanged;
+        public event EventHandler CommentsLoaded;
 
         public PostDetailViewModel()
         {
@@ -151,7 +152,12 @@ namespace Duo.ViewModels
                     throw new ArgumentException("Invalid post ID", nameof(postId));
                 }
                 
+                System.Diagnostics.Debug.WriteLine($"Attempting to load comments for post ID: {postId}");
+                
+                // Try to get comments from the comment service
                 var comments = _commentService.GetCommentsByPostId(postId);
+                System.Diagnostics.Debug.WriteLine($"Retrieved {comments?.Count ?? 0} comments from service");
+                
                 Comments.Clear();
                 
                 if (comments != null && comments.Any())
@@ -162,11 +168,13 @@ namespace Duo.ViewModels
                     }
                     
                     var topLevelComments = comments.Where(c => c.ParentCommentId == null).ToList();
+                    System.Diagnostics.Debug.WriteLine($"Found {topLevelComments.Count} top-level comments");
                     
                     var repliesByParentId = comments
                         .Where(c => c.ParentCommentId != null)
                         .GroupBy(c => c.ParentCommentId)
                         .ToDictionary(g => g.Key, g => g.ToList());
+                    System.Diagnostics.Debug.WriteLine($"Found replies for {repliesByParentId.Count} parent comments");
                         
                     foreach (var comment in topLevelComments)
                     {
@@ -174,9 +182,16 @@ namespace Duo.ViewModels
                         commentComponent.SetCommentData(comment, repliesByParentId);
                         CommentsPanel.Children.Add(commentComponent);
                     }
+                    
+                    System.Diagnostics.Debug.WriteLine("Successfully added comments to UI");
+                    
+                    // Raise the comments loaded event
+                    CommentsLoaded?.Invoke(this, EventArgs.Empty);
                 }
                 else
                 {
+                    System.Diagnostics.Debug.WriteLine("No comments found for this post");
+                    
                     TextBlock noCommentsText = new TextBlock
                     {
                         Text = "No comments yet. Be the first to comment!",
@@ -188,6 +203,7 @@ namespace Duo.ViewModels
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error loading comments: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
                 
                 TextBlock errorText = new TextBlock
                 {
@@ -212,6 +228,27 @@ namespace Duo.ViewModels
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error adding comment: {ex.Message}");
+            }
+        }
+        
+        public void AddReplyToComment(int parentCommentId, string replyText)
+        {
+            if (string.IsNullOrWhiteSpace(replyText) || Post == null || Post.Id <= 0 || parentCommentId <= 0)
+                return;
+
+            try
+            {
+                System.Diagnostics.Debug.WriteLine($"Adding reply to comment ID {parentCommentId}: {replyText}");
+                
+                // Create the reply comment with parent ID
+                _commentService.CreateComment(replyText, Post.Id, parentCommentId);
+                
+                // Reload all comments to display the new reply
+                LoadComments(Post.Id);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error adding reply to comment: {ex.Message}");
             }
         }
 

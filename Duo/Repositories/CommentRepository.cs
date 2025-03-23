@@ -69,32 +69,57 @@ namespace Duo.Repositories
                 new SqlParameter("@PostID", postId)
             };
 
+            System.Diagnostics.Debug.WriteLine($"CommentRepository: Getting comments for post ID {postId}");
+            
             DataTable? dataTable = null;
             try
             {
                 dataTable = _dataLink.ExecuteReader("GetCommentsByPostID", parameters);
+                System.Diagnostics.Debug.WriteLine($"CommentRepository: Query executed, retrieved {dataTable?.Rows?.Count ?? 0} rows");
+                
                 if (dataTable.Columns.Count < 8)
+                {
+                    System.Diagnostics.Debug.WriteLine($"CommentRepository: Invalid data structure, only {dataTable.Columns.Count} columns returned");
                     throw new Exception("Invalid data structure returned from database");
+                }
 
                 foreach (DataRow row in dataTable.Rows)
                 {
-                    Comment comment = new Comment(
-                        Convert.ToInt32(row[0]),
-                        row[1]?.ToString() ?? string.Empty,
-                        Convert.ToInt32(row[2]),
-                        Convert.ToInt32(row[3]),
-                        row[4] == DBNull.Value ? 0 : Convert.ToInt32(row[4]),
-                        Convert.ToDateTime(row[5]),
-                        Convert.ToInt32(row[6]),
-                        Convert.ToInt32(row[7])
-                    );
-                    comments.Add(comment);
+                    try
+                    {
+                        int commentId = Convert.ToInt32(row[0]);
+                        Comment comment = new Comment(
+                            commentId,
+                            row[1]?.ToString() ?? string.Empty,
+                            Convert.ToInt32(row[2]),
+                            Convert.ToInt32(row[3]),
+                            row[4] == DBNull.Value ? null : Convert.ToInt32(row[4]),
+                            Convert.ToDateTime(row[5]),
+                            Convert.ToInt32(row[6]),
+                            Convert.ToInt32(row[7])
+                        );
+                        comments.Add(comment);
+                        System.Diagnostics.Debug.WriteLine($"CommentRepository: Added comment ID {commentId} to result list");
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"CommentRepository: Error processing comment row: {ex.Message}");
+                    }
                 }
+                System.Diagnostics.Debug.WriteLine($"CommentRepository: Returning {comments.Count} comments");
                 return comments;
             }
             catch (SqlException ex)
             {
+                System.Diagnostics.Debug.WriteLine($"CommentRepository: SQL error getting comments: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"CommentRepository: SQL error number: {ex.Number}");
                 throw new Exception(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"CommentRepository: General error getting comments: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"CommentRepository: Stack trace: {ex.StackTrace}");
+                throw;
             }
             finally
             {

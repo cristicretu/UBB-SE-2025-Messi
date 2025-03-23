@@ -82,6 +82,12 @@
                     <local:LikeButton x:Name="LikeButton"/>
                     <local:CommentButton x:Name="CommentReplyButton"/>
                 </StackPanel>
+                
+                <local:CommentInput 
+                    x:Name="ReplyInputControl"
+                    CommentSubmitted="ReplyInput_CommentSubmitted"
+                    Visibility="Collapsed"
+                    Margin="0,8,0,0"/>
             </StackPanel>
         </Grid>
         
