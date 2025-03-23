@@ -14,6 +14,7 @@ namespace Duo.Views.Components
         private Models.Comment _commentData;
         private Dictionary<int?, List<Models.Comment>> _commentsByParent;
         private readonly CommentService _commentService;
+        private const int MAX_NESTING_LEVEL = 3; // Maximum allowed nesting level
         
         // Event for when reply is submitted
         public event EventHandler<CommentReplyEventArgs> ReplySubmitted;
@@ -49,13 +50,23 @@ namespace Duo.Views.Components
 
             // Generate the visual indicators for comment level
             var indentationLevels = new List<int>();
-            // We start from 1 because we're adjusting the level to be 0-based for visual indentation
-            // The comment model's Level property is 1-based (1 = top level, 2 = first reply, etc.)
-            for (int i = 1; i < comment.Level; i++)
+            
+            // For each comment, we need to show indentation lines for ALL levels
+            // including its own level if it's not a top-level comment
+            for (int i = 1; i <= comment.Level; i++)
             {
-                indentationLevels.Add(i);
+                if (i < comment.Level || comment.Level == 1)
+                {
+                    indentationLevels.Add(i);
+                }
             }
+            
             LevelLinesRepeater.ItemsSource = indentationLevels;
+
+            // Hide reply button for comments at or beyond the max nesting level
+            CommentReplyButton.Visibility = (comment.Level >= MAX_NESTING_LEVEL) 
+                ? Visibility.Collapsed 
+                : Visibility.Visible;
 
             // Add child comments if any
             if (commentsByParent.ContainsKey(comment.Id))
@@ -72,6 +83,18 @@ namespace Duo.Views.Components
             
             // Hide the reply input if visible
             HideReplyInput();
+        }
+        
+        private void IndentationLine_Click(object sender, RoutedEventArgs e)
+        {
+            // Toggle the expanded state of this comment's replies
+            ChildCommentsExpander.IsExpanded = !ChildCommentsExpander.IsExpanded;
+            
+            // If the sender is a button that contains a level value, we can get the level
+            if (sender is Button button && button.DataContext is int level)
+            {
+                System.Diagnostics.Debug.WriteLine($"Toggled expansion for level {level} comment, ID: {_commentData.Id}");
+            }
         }
         
         private void LikeButton_LikeClicked(object sender, LikeButtonClickedEventArgs e)

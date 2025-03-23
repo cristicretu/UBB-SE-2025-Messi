@@ -6,6 +6,7 @@
     xmlns:local="using:Duo.Views.Components"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:controls="using:Microsoft.UI.Xaml.Controls"
     mc:Ignorable="d"
     HorizontalAlignment="Stretch"
     Margin="0,8,0,0">
@@ -28,13 +29,22 @@
                 HorizontalAlignment="Left">
                 <ItemsRepeater.ItemTemplate>
                     <DataTemplate>
-                        <Border 
-                            Width="1" 
-                            Height="Auto" 
-                            Margin="8,0,0,0"
-                            VerticalAlignment="Stretch" 
-                            Background="{ThemeResource SystemControlForegroundBaseLowBrush}" 
-                            Opacity="0.5"/> 
+                        <Button 
+                            x:Name="IndentationLine"
+                            Width="24" 
+                            Height="Auto"
+                            Background="Transparent"
+                            Padding="0" 
+                            BorderThickness="0"
+                            Click="IndentationLine_Click">
+                            <Border 
+                                Width="1" 
+                                Height="Auto" 
+                                Margin="12,0,0,0"
+                                VerticalAlignment="Stretch" 
+                                Background="{ThemeResource SystemControlForegroundBaseLowBrush}" 
+                                Opacity="0.75"/> 
+                        </Button>
                     </DataTemplate>
                 </ItemsRepeater.ItemTemplate>
                 <ItemsRepeater.Layout>
@@ -92,11 +102,28 @@
             </StackPanel>
         </Grid>
         
-        <!-- Container for child comments - nested directly inside the comment -->
-        <StackPanel 
-            x:Name="ChildCommentsPanel" 
+        <!-- Expander for collapsing/expanding child comments -->
+        <controls:Expander 
+            x:Name="ChildCommentsExpander"
             HorizontalAlignment="Stretch"
-            Margin="16,0,0,0"
-            Spacing="0"/>
+            HorizontalContentAlignment="Stretch"
+            VerticalContentAlignment="Top"
+            IsExpanded="True"
+            Margin="0"
+            Background="Transparent"
+            BorderThickness="0">
+            <controls:Expander.Content>
+                <!-- Container for child comments -->
+                <StackPanel 
+                    x:Name="ChildCommentsPanel" 
+                    HorizontalAlignment="Stretch"
+                    Margin="16,0,0,0"
+                    Spacing="0"/>
+            </controls:Expander.Content>
+            <controls:Expander.Header>
+                <!-- Empty header as we'll control expansion through line clicks -->
+                <Grid Height="0"/>
+            </controls:Expander.Header>
+        </controls:Expander>
     </StackPanel>
 </UserControl> 
