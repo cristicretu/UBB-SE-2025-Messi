@@ -41,6 +41,23 @@ namespace Duo.Views.Components
         public Post()
         {
             InitializeComponent();
+            
+            UpdateMoreOptionsVisibility();
+        }
+
+        private void UpdateMoreOptionsVisibility()
+        {
+            var currentUser = userService.GetCurrentUser();
+            if (currentUser != null)
+            {
+                MoreOptions.Visibility = (this.Username == currentUser.Username) 
+                    ? Visibility.Visible 
+                    : Visibility.Collapsed;
+            }
+            else
+            {
+                MoreOptions.Visibility = Visibility.Collapsed;
+            }
         }
 
         // Handle pointer entered event for hover effects
@@ -245,7 +262,12 @@ namespace Duo.Views.Components
         public string Username
         {
             get => (string)GetValue(UsernameProperty);
-            set => SetValue(UsernameProperty, value);
+            set 
+            { 
+                SetValue(UsernameProperty, value);
+                // Update visibility when username changes
+                UpdateMoreOptionsVisibility();
+            }
         }
 
         public string Date
