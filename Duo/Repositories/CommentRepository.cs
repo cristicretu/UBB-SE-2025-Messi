@@ -141,38 +141,10 @@ namespace Duo.Repositories
             {
                 new SqlParameter("@CommentID", id)
             };
-          
-        public List<Comment> GetRepliesByCommentId(int parentCommentId)
-        {
-            if (parentCommentId <= 0) throw new ArgumentException("Invalid parent comment ID", nameof(parentCommentId));
-
+            
             try
             {
-                // Assuming you want to call a method to get replies here
-                var replies = _dataLink.ExecuteQuery("GetRepliesByCommentId", new { ParentCommentId = parentCommentId });
-                return replies;
-            }
-            catch (SqlException ex)
-            {
-                throw new Exception(ex.Message);
-            }
-        }
-
-        public bool UpdateComment(Comment comment)
-        {
-            if (comment == null) throw new ArgumentNullException(nameof(comment));
-            if (comment.Id <= 0) throw new ArgumentException("Invalid comment ID");
-            if (string.IsNullOrEmpty(comment.Content)) throw new ArgumentException("Content cannot be empty");
-
-            SqlParameter[] parameters = new SqlParameter[]
-            {
-                new SqlParameter("@CommentID", comment.Id),
-                new SqlParameter("@NewContent", comment.Content),
-            };
-
-            try
-            {
-                _dataLink.ExecuteNonQuery("UpdateComment", parameters);
+                _dataLink.ExecuteNonQuery("DeleteComment", parameters);
                 return true;
             }
             catch (SqlException ex)
@@ -224,6 +196,29 @@ namespace Duo.Repositories
             }
         }
 
+        public bool UpdateComment(Comment comment)
+        {
+            if (comment == null) throw new ArgumentNullException(nameof(comment));
+            if (comment.Id <= 0) throw new ArgumentException("Invalid comment ID");
+            if (string.IsNullOrEmpty(comment.Content)) throw new ArgumentException("Content cannot be empty");
+
+            SqlParameter[] parameters = new SqlParameter[]
+            {
+                new SqlParameter("@CommentID", comment.Id),
+                new SqlParameter("@NewContent", comment.Content),
+            };
+
+            try
+            {
+                _dataLink.ExecuteNonQuery("UpdateComment", parameters);
+                return true;
+            }
+            catch (SqlException ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
         public bool IncrementLikeCount(int commentId)
         {
             if (commentId <= 0) throw new ArgumentException("Invalid comment ID", nameof(commentId));
@@ -264,28 +259,6 @@ namespace Duo.Repositories
             {
                 throw new Exception(ex.Message);
             }
-        }
-    }
-
-    public int GetCommentsCountForPost(int postId)
-    {
-        if (postId <= 0) throw new ArgumentException("Invalid post ID", nameof(postId));
-
-        SqlParameter[] parameters = new SqlParameter[]
-        {
-            new SqlParameter("@PostID", postId)
-        };
-
-        try
-        {
-            int? result = _dataLink.ExecuteScalar<int>("GetCommentsCountForPost", parameters);
-            if (result == null)
-                throw new Exception("Failed to get comment count");
-            return result.Value;
-        }
-        catch (SqlException ex)
-        {
-            throw new Exception(ex.Message);
         }
     }
 }
