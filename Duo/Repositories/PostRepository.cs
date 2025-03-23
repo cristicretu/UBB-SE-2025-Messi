@@ -209,5 +209,26 @@ namespace Duo.Repositories
                 dataTable?.Dispose();
             }
         }
+
+        public bool IncrementPostLikeCount(int postId)
+        {
+            if (postId <= 0)
+            {
+                throw new ArgumentException("Invalid post ID.");
+            }
+            SqlParameter[] parameters = new SqlParameter[]
+            {
+                new SqlParameter("@PostID", postId)
+            };
+            try
+            {
+                dataLink.ExecuteNonQuery("IncrementPostLikeCount", parameters);
+                return true;
+            }
+            catch (SqlException ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
     }
 }
