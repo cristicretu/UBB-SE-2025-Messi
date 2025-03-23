@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using CommunityToolkit.WinUI.UI.Controls;
 
 // is this the right way to access userService and its methods?
 using static Duo.App;
@@ -256,6 +257,24 @@ namespace Duo.Views.Components
                     CloseButtonText = "OK"
                 };
                 await successDialog.ShowAsync();
+            }
+        }
+
+        // Event handlers for MarkdownTextBlock
+        private void MarkdownText_MarkdownRendered(object sender, MarkdownRenderedEventArgs e)
+        {
+            // This event is fired when the markdown content is rendered
+            // You can perform additional actions here if needed
+        }
+
+        private void MarkdownText_LinkClicked(object sender, LinkClickedEventArgs e)
+        {
+            // Handle link clicks in markdown text
+            // For example, you might want to open URLs in the default browser
+            if (Uri.TryCreate(e.Link, UriKind.Absolute, out Uri? uri))
+            {
+                // Launch the URI in the default browser
+                Windows.System.Launcher.LaunchUriAsync(uri);
             }
         }
 

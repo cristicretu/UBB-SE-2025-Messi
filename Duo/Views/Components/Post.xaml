@@ -6,6 +6,7 @@
     xmlns:components="using:Duo.Views.Components"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:markdown="using:CommunityToolkit.WinUI.UI.Controls"
     mc:Ignorable="d"
     HorizontalAlignment="Stretch">
 
@@ -88,18 +89,29 @@
             </StackPanel>
 
             <!-- Post Content -->
-            <!-- <TextBlock Text="{x:Bind Content, Mode=OneWay}"
-                      TextWrapping="Wrap"
-                      FontSize="12"/> -->
+            <!-- <RichTextBlock 
+                Margin="6"
+                TextWrapping="Wrap">
+                <Paragraph>
+                    <Run Text="{x:Bind Content, Mode=OneWay}"/>
+                </Paragraph>
+            </RichTextBlock> -->
 
-             <components:MarkdownComponent 
+             <!-- <components:MarkdownComponent 
                     MarkdownText="# Test i am test&#x0A;&#x0A;1. me&#x0A;2. you&#x0A;&#x0A;[acasa](cretu.dev)"
                     HorizontalAlignment="Stretch"
                     MinHeight="200"
                     Margin="0,0,0,16"
                     BorderThickness="0"
                     BorderBrush="Transparent"
-                    Background="Transparent" />
+                    Background="Transparent" /> -->
+
+                <markdown:MarkdownTextBlock
+                    Text="{x:Bind Content, Mode=OneWay}"
+                    MarkdownRendered="MarkdownText_MarkdownRendered"
+                    LinkClicked="MarkdownText_LinkClicked"
+                    Margin="6">
+                </markdown:MarkdownTextBlock>
 
             <!-- Likes Row -->
             <StackPanel Orientation="Horizontal" Spacing="8">
