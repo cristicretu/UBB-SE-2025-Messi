@@ -42,6 +42,7 @@ namespace Duo
         public static CommentRepository _commentRepository;
         public static PostService _postService;
         public static CategoryService _categoryService;
+        public static SearchService _searchService;
 
         /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code
@@ -66,7 +67,8 @@ namespace Duo
             
             // Initialize services
             userService = new UserService(userRepository);
-            _postService = new PostService(_postRepository, _hashtagRepository, userService);
+            _searchService = new SearchService();
+            _postService = new PostService(_postRepository, _hashtagRepository, userService, _searchService);
             _categoryService = new CategoryService(categoryRepository);
         }
 

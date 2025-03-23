@@ -58,8 +58,7 @@ namespace Duo.Views.Components
                 {
                     try 
                     {
-                        var postService = new Duo.Services.PostService(_postRepository, _hashtagRepository, userService);
-                        if (postService.LikePost(PostId))
+                        if (App._postService.LikePost(PostId))
                         {
                             LikeCount++;
                         }

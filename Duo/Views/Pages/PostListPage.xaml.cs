@@ -29,8 +29,8 @@ namespace Duo.Views.Pages
             
             // Use the services from the App class to avoid initialization issues
             // This is more reliable than creating services locally
-            var postService = new PostService(_postRepository, _hashtagRepository, userService);
-            var categoryService = _categoryService;
+            var postService = App._postService;
+            var categoryService = App._categoryService;
             
             // Create and initialize the view model
             _viewModel = new PostListViewModel(postService, categoryService);
