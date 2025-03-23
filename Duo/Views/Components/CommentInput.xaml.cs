@@ -12,11 +12,21 @@ namespace Duo.Views.Components
         {
             this.InitializeComponent();
         }
+        
+        // Property to get the current comment text
+        public string CommentText
+        {
+            get { return CommentTextBox.Text; }
+        }
+        
+        // Method to clear the comment text
+        public void ClearComment()
+        {
+            CommentTextBox.Text = string.Empty;
+        }
 
         private void PostButton_Click(object sender, RoutedEventArgs e)
         {
-            // In the future, this will handle posting the comment
-            // For now, just raise the event
             CommentSubmitted?.Invoke(this, e);
         }
     }
