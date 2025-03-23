@@ -22,7 +22,7 @@ namespace Duo.Models
             _postId = postId;
             _parentCommentId = parentCommentId;
             _createdAt = createdAt;
-            _likeCount = likeCount;
+            _likeCount = 0;
             _level = level;
             _username = string.Empty;
         }
