@@ -142,7 +142,7 @@ namespace Duo.Views.Components
         private async void MoreOptions_EditClicked(object sender, RoutedEventArgs e)
         {
             // Verify that the current user is the owner of the post            
-            if(this.Username != $"u/{userService.GetCurrentUser().Username}")
+            if(this.Username != $"{userService.GetCurrentUser().Username}")
             {
                 // Display an error dialog if the user is not the owner
                 ContentDialog errorDialog = new ContentDialog
@@ -186,8 +186,7 @@ namespace Duo.Views.Components
 
         private async void MoreOptions_DeleteClicked(object sender, RoutedEventArgs e)
         {
-            // Verify that the current user is the owner of the post
-            if(this.Username != $"u/{userService.GetCurrentUser().Username}")
+            if(this.Username != $"{userService.GetCurrentUser().Username}")
             {
                 // Display an error dialog if the user is not the owner
                 ContentDialog errorDialog = new ContentDialog
