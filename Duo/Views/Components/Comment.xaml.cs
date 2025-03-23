@@ -14,6 +14,7 @@ namespace Duo.Views.Components
         private Models.Comment _commentData;
         private Dictionary<int?, List<Models.Comment>> _commentsByParent;
         private readonly CommentService _commentService;
+        private const int MAX_NESTING_LEVEL = 3; // Maximum allowed nesting level
         
         // Event for when reply is submitted
         public event EventHandler<CommentReplyEventArgs> ReplySubmitted;
@@ -47,13 +48,25 @@ namespace Duo.Views.Components
             LikeButton.LikeCount = comment.LikeCount;
             LikeButton.CommentId = comment.Id;
 
-            // Generate lines based on tree level
-            var lineCount = new List<int>();
-            for (int i = 0; i <= comment.Level; i++)
+            // Generate the visual indicators for comment level
+            var indentationLevels = new List<int>();
+            
+            // For each comment, we need to show indentation lines for ALL levels
+            // including its own level if it's not a top-level comment
+            for (int i = 1; i <= comment.Level; i++)
             {
-                lineCount.Add(i);
+                if (i < comment.Level || comment.Level == 1)
+                {
+                    indentationLevels.Add(i);
+                }
             }
-            LevelLinesRepeater.ItemsSource = lineCount;
+            
+            LevelLinesRepeater.ItemsSource = indentationLevels;
+
+            // Hide reply button for comments at or beyond the max nesting level
+            CommentReplyButton.Visibility = (comment.Level >= MAX_NESTING_LEVEL) 
+                ? Visibility.Collapsed 
+                : Visibility.Visible;
 
             // Add child comments if any
             if (commentsByParent.ContainsKey(comment.Id))
@@ -70,6 +83,18 @@ namespace Duo.Views.Components
             
             // Hide the reply input if visible
             HideReplyInput();
+        }
+        
+        private void IndentationLine_Click(object sender, RoutedEventArgs e)
+        {
+            // Toggle the expanded state of this comment's replies
+            ChildCommentsExpander.IsExpanded = !ChildCommentsExpander.IsExpanded;
+            
+            // If the sender is a button that contains a level value, we can get the level
+            if (sender is Button button && button.DataContext is int level)
+            {
+                System.Diagnostics.Debug.WriteLine($"Toggled expansion for level {level} comment, ID: {_commentData.Id}");
+            }
         }
         
         private void LikeButton_LikeClicked(object sender, LikeButtonClickedEventArgs e)
@@ -147,8 +172,29 @@ namespace Duo.Views.Components
         
         private void ChildComment_ReplySubmitted(object sender, CommentReplyEventArgs e)
         {
-            // Forward the event up
-            ReplySubmitted?.Invoke(this, e);
+            // Don't forward the event again, just handle it here
+            // This prevents duplicate event handling when replying to nested comments
+            
+            // Log the event but don't forward it
+            System.Diagnostics.Debug.WriteLine($"Detected reply to child comment {e.ParentCommentId} in parent comment {_commentData.Id}");
+            
+            // Stop event propagation by not calling ReplySubmitted?.Invoke
+            // Only allow the original comment component to raise the event up to the page level
+            if (sender is Comment childComment && childComment != this)
+            {
+                // Hide any open reply input on this level too
+                HideReplyInput();
+                
+                // Do not forward this event upward - this prevents duplicates
+                return;
+            }
+            
+            // Only the original comment component should forward the event
+            if (sender == this)
+            {
+                // Forward the event up to be handled at the top level
+                ReplySubmitted?.Invoke(this, e);
+            }
         }
 
         private string FormatDate(DateTime date)
