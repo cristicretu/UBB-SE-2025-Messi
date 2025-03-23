@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl
+    x:Class="Duo.Views.Components.PostDialogContent"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Duo.Views.Components"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+    
+    <StackPanel VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Spacing="12">
+        <!-- Title Input -->
+        <TextBlock Text="Title" Style="{StaticResource SubtitleTextBlockStyle}" Margin="0,0,0,4"/>
+        <TextBox x:Name="TitleTextBox" PlaceholderText="Enter post title" 
+                 Text="{x:Bind PostTitle, Mode=TwoWay}" 
+                 MaxLength="100" />
+        
+        <!-- Content Input -->
+        <TextBlock Text="Content" Style="{StaticResource SubtitleTextBlockStyle}" Margin="0,8,0,4"/>
+        <TextBox x:Name="ContentTextBox" PlaceholderText="Enter post content" 
+                 Text="{x:Bind PostContent, Mode=TwoWay}" 
+                 TextWrapping="Wrap" MinHeight="100" AcceptsReturn="True" />
+        
+        <!-- Hashtag Input and Add Button -->
+        <TextBlock Text="Hashtags" Style="{StaticResource SubtitleTextBlockStyle}" Margin="0,8,0,4"/>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBox x:Name="HashtagTextBox" PlaceholderText="Enter hashtag" 
+                     Text="{x:Bind CurrentHashtag, Mode=TwoWay}" 
+                     KeyDown="HashtagTextBox_KeyDown" />
+            <Button Grid.Column="1" x:Name="AddHashtagButton" Content="Add" 
+                    Click="AddHashtagButton_Click" Margin="8,0,0,0" />
+        </Grid>
+        
+        <!-- Hashtags List -->
+        <TextBlock Text="Added Hashtags:" Margin="0,8,0,4" 
+                   Visibility="{x:Bind HasHashtags, Mode=OneWay}"/>
+        <ItemsRepeater x:Name="HashtagsRepeater" ItemsSource="{x:Bind Hashtags, Mode=OneWay}">
+            <ItemsRepeater.Layout>
+                <StackLayout Orientation="Horizontal" Spacing="8"/>
+            </ItemsRepeater.Layout>
+            <ItemsRepeater.ItemTemplate>
+                <DataTemplate x:DataType="x:String">
+                    <Button Style="{StaticResource AccentButtonStyle}" Padding="8,4"
+                            Content="{x:Bind}" 
+                            Click="RemoveHashtag_Click" />
+                </DataTemplate>
+            </ItemsRepeater.ItemTemplate>
+        </ItemsRepeater>
+    </StackPanel>
+</UserControl>

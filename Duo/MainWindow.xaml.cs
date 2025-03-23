@@ -18,6 +18,8 @@ using Microsoft.UI;
 using Microsoft.UI.Windowing;
 using Windows.Graphics;
 
+using Duo.Views.Components;
+
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
 
@@ -101,9 +103,9 @@ namespace Duo
             }
         }
 
-        private void CreatePostBtn_CreatePostRequested(object sender, RoutedEventArgs e)
-        {
-            Debug.WriteLine("Create post button clicked");
+        private async void CreatePostBtn_CreatePostRequested(object sender, RoutedEventArgs e) {
+            var dialogComponent = new DialogComponent();
+            var result = await dialogComponent.ShowCreatePostDialog(this.Content.XamlRoot);
         }
     }
 }
