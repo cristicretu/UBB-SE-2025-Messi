@@ -139,8 +139,9 @@ namespace Duo.Views.Pages
         
         private void Comment_CommentLiked(object sender, CommentLikedEventArgs e)
         {
-            // Handle comment liked event (if needed for analytics, etc.)
-            System.Diagnostics.Debug.WriteLine($"Comment liked event received for ID: {e.CommentId}");
+            // REMOVED: Don't increment likes again here - already handled in the Comment component
+            // _commentService.LikeComment(e.CommentId);
+            System.Diagnostics.Debug.WriteLine($"Comment liked event received for ID: {e.CommentId} - not incrementing again");
         }
         
         // Helper method to get all children of a specific type from a panel

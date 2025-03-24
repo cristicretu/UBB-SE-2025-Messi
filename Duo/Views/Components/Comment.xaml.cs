@@ -132,17 +132,24 @@ namespace Duo.Views.Components
         {
             if (e.TargetType == LikeTargetType.Comment && e.TargetId == _commentData.Id)
             {
-                // Update the comment like count in the UI
-                LikeButton.LikeCount++;
-                
-                // Notify parent component about the like
-                CommentLiked?.Invoke(this, new CommentLikedEventArgs(_commentData.Id));
+                try
+                {
+                    if (_commentService.LikeComment(_commentData.Id))
+                    {
+                        LikeButton.LikeCount++;
+                        
+                        CommentLiked?.Invoke(this, new CommentLikedEventArgs(_commentData.Id));
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Error liking comment: {ex.Message}");
+                }
             }
         }
         
         private void ChildComment_CommentLiked(object sender, CommentLikedEventArgs e)
         {
-            // Forward the like event to parent components
             CommentLiked?.Invoke(this, e);
         }
         
