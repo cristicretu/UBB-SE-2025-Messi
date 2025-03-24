@@ -16,6 +16,7 @@ namespace Duo.Services
         private readonly HashtagRepository _hashtagRepository;
         private readonly UserService _userService;
         private readonly SearchService _searchService;
+        private const double FUZZY_SEARCH_SCORE_DEFAULT_THRESHOLD = 0.6;
 
         public PostService(PostRepository postRepository, HashtagRepository hashtagRepository, UserService userService, SearchService searchService)
         {
@@ -271,7 +272,7 @@ namespace Duo.Services
                 return new List<Post>();
 
             List<string> allTitles = _postRepository.GetAllPostTitles();
-            List<string> matchingTitles = _searchService.Search(keyword, allTitles, 0.6);
+            List<string> matchingTitles = _searchService.FindFuzzySearchMatches(keyword, allTitles, 0.6);
 
             List<Post> results = new List<Post>();
             foreach (string title in matchingTitles)

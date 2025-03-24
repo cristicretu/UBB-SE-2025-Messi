@@ -232,7 +232,7 @@ namespace Duo.ViewModels
                     foreach (var post in allMatchingPosts)
                     {
                         // Check if post title matches search term
-                        if (App._searchService.Search(FilterText, new[] { post.Title }).Any())
+                        if (App._searchService.FindFuzzySearchMatches(FilterText, new[] { post.Title }).Any())
                         {
                             searchResults.Add(post);
                         }
