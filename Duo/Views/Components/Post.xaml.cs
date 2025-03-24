@@ -282,9 +282,34 @@ namespace Duo.Views.Components
             {
                 try
                 {
-                    // Update the post in the database or service
-                    // TODO - Implement the EditPost method in the PostService
-                    // _postService.EditPost(this.PostId, result.Title, result.Content, result.Hashtags);
+                    // Get the current post from database
+                    var post = _postService.GetPostById(this.PostId);
+                    if (post == null)
+                    {
+                        throw new Exception("Post not found in database");
+                    }
+                    
+                    // Update post properties
+                    post.Title = result.Title;
+                    post.Description = result.Content; // Content maps to Description
+                    post.UpdatedAt = DateTime.UtcNow;
+                    
+                    // Update the post in the database
+                    _postService.UpdatePost(post);
+                    
+                    // Update hashtags
+                    // First clear existing hashtags and then add new ones
+                    var existingHashtags = _postService.GetHashtagsByPostId(this.PostId);
+                    foreach (var hashtag in existingHashtags)
+                    {
+                        _postService.RemoveHashtagFromPost(this.PostId, hashtag.Id, userService.GetCurrentUser().UserId);
+                    }
+                    
+                    // Add new hashtags
+                    foreach (var hashtag in result.Hashtags)
+                    {
+                        _postService.AddHashtagToPost(this.PostId, hashtag, userService.GetCurrentUser().UserId);
+                    }
                     
                     // Update the UI elements with the new data
                     this.Title = result.Title;
