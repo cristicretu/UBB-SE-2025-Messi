@@ -298,23 +298,50 @@ namespace Duo.Views.Components
                     _postService.UpdatePost(post);
                     
                     // Update hashtags
-                    // First clear existing hashtags and then add new ones
-                    var existingHashtags = _postService.GetHashtagsByPostId(this.PostId);
-                    foreach (var hashtag in existingHashtags)
-                    {
-                        _postService.RemoveHashtagFromPost(this.PostId, hashtag.Id, userService.GetCurrentUser().UserId);
-                    }
+                    try {
+                        // First clear existing hashtags and then add new ones
+                        var existingHashtags = _postService.GetHashtagsByPostId(this.PostId);
+                        foreach (var hashtag in existingHashtags)
+                        {
+                            _postService.RemoveHashtagFromPost(this.PostId, hashtag.Id, userService.GetCurrentUser().UserId);
+                        }
+
+                        // Add new hashtags
+                        foreach (var hashtag in result.Hashtags)
+                        {
+                            try
+                            {
+                                var hashtagRepo = App._hashtagRepository;
+                                var userId = userService.GetCurrentUser().UserId;
+                                
+                                var existingHashtag = hashtagRepo.GetHashtagByName(hashtag);
+                                
+                                if (existingHashtag == null)
+                                {
+                                    var newHashtag = hashtagRepo.CreateHashtag(hashtag);
+                                    hashtagRepo.AddHashtagToPost(this.PostId, newHashtag.Id);
+                                }
+                                else
+                                {
+                                    hashtagRepo.AddHashtagToPost(this.PostId, existingHashtag.Id);
+                                }
+                            }
+                            catch (Exception tagEx)
+                            {
+                                System.Diagnostics.Debug.WriteLine($"Error processing hashtag '{hashtag}': {tagEx.Message}");
+                            }
+                        }
                     
-                    // Add new hashtags
-                    foreach (var hashtag in result.Hashtags)
+                        this.Hashtags = result.Hashtags;
+                    }
+                    catch (Exception hashtagEx)
                     {
-                        _postService.AddHashtagToPost(this.PostId, hashtag, userService.GetCurrentUser().UserId);
+                        System.Diagnostics.Debug.WriteLine($"Error updating hashtags: {hashtagEx.Message}");
                     }
                     
                     // Update the UI elements with the new data
                     this.Title = result.Title;
                     this.Content = result.Content;
-                    this.Hashtags = result.Hashtags;
                     
                     // Show success message
                     ContentDialog successDialog = new ContentDialog

@@ -219,7 +219,14 @@ namespace Duo.Services
                 if (_userService.GetCurrentUser().UserId != userId)
                     throw new Exception("User does not have permission to add hashtags to this post.");
 
-                var hashtag = _hashtagRepository.GetHashtagByName(tagName) ?? _hashtagRepository.CreateHashtag(tagName);
+                Hashtag? hashtag = null;
+                hashtag = _hashtagRepository.GetHashtagByText(tagName);
+
+
+                if (hashtag == null) {
+                    hashtag = _hashtagRepository.CreateHashtag(tagName);
+                }
+
                 return _hashtagRepository.AddHashtagToPost(postId, hashtag.Id);
             }
             catch (Exception ex)

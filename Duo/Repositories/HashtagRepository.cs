@@ -85,7 +85,7 @@ namespace Duo.Repositories
             }
             catch (Exception ex)
             {
-                throw new Exception($"Error - GetHashtagByText: {ex.Message}");
+                return null; 
             }
             finally
             {
