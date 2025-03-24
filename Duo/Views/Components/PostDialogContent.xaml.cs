@@ -191,11 +191,11 @@ namespace Duo.Views.Components
             if (!ValidateHashtag(hashtag))
                 return;
             
-            // Add # if not present
-            if (!hashtag.StartsWith("#"))
-            {
-                hashtag = "#" + hashtag;
-            }
+            // // Add # if not present
+            // if (!hashtag.StartsWith("#"))
+            // {
+            //     hashtag = "#" + hashtag;
+            // }
 
             // Add to collection if not a duplicate
             if (!Hashtags.Contains(hashtag))
