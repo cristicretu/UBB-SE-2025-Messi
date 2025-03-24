@@ -18,13 +18,13 @@ namespace Duo.Repositories
             _dataLink = dataLink ?? throw new ArgumentNullException(nameof(dataLink));
         }
 
-        public Comment GetCommentById(int id)
+        public Comment GetCommentById(int commentId)
         {
-            if (id <= 0) throw new ArgumentException("Invalid comment ID", nameof(id));
+            if (commentId <= 0) throw new ArgumentException("Invalid comment ID", nameof(commentId));
 
             SqlParameter[] parameters = new SqlParameter[]
             {
-                new SqlParameter("@CommentID", id)
+                new SqlParameter("@CommentID", commentId)
             };
 
             DataTable? dataTable = null;
