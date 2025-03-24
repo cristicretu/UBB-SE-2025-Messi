@@ -71,6 +71,7 @@ namespace Duo.Views.Components
                     return;
                 }
                 
+                // Get hashtags from the dialog
                 var hashtagsList = new List<string>(dialogContent.ViewModel.Hashtags);
                 
                 // Debug output for hashtags
@@ -80,8 +81,10 @@ namespace Duo.Views.Components
                     System.Diagnostics.Debug.WriteLine($"  - {tag}");
                 }
                 
+                // Prevent the dialog from closing automatically
                 e.Cancel = true;
                 
+                // Use CreatePostAsync with the collected hashtags
                 bool result = await dialogContent.ViewModel.CreatePostAsync(
                     dialogContent.ViewModel.Title,
                     dialogContent.ViewModel.Content,
@@ -91,14 +94,19 @@ namespace Duo.Views.Components
                 
                 if (result)
                 {
+                    // Successfully created - let the dialog close
                     succeeded = true;
                     
+                    // Manually close the dialog
                     dialog.Hide();
                 }
                 else
                 {
+                    // If there was an error in post creation, show the error
                     if (!string.IsNullOrEmpty(dialogContent.ViewModel.Error))
                     {
+                        // Show error message but keep dialog open
+                        System.Diagnostics.Debug.WriteLine($"DialogComponent: Post creation failed: {dialogContent.ViewModel.Error}");
                     }
                 }
             };

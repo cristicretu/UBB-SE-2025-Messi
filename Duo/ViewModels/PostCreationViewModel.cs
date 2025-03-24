@@ -239,21 +239,22 @@ namespace Duo.ViewModels
             SelectedCategoryId = categoryId;
             
             // Additional detailed debugging
+            System.Diagnostics.Debug.WriteLine($"CreatePostAsync - START - Title: '{title}', Content length: {content?.Length ?? 0}, CategoryID: {categoryId}");
+            System.Diagnostics.Debug.WriteLine($"CreatePostAsync - Received hashtags: {hashtags?.Count ?? 0}");
             if (hashtags != null && hashtags.Count > 0)
             {
                 System.Diagnostics.Debug.WriteLine($"CreatePostAsync - Hashtags to add: {string.Join(", ", hashtags)}");
             }
             
-            // Clear and add hashtags
-            Hashtags.Clear();
+            // Process hashtags
+            List<string> cleanedHashtags = new List<string>();
             if (hashtags != null && hashtags.Count > 0)
             {
-                System.Diagnostics.Debug.WriteLine($"CreatePostAsync - Adding hashtags: {string.Join(", ", hashtags)}");
                 foreach (var hashtag in hashtags)
                 {
                     if (!string.IsNullOrWhiteSpace(hashtag))
                     {
-                        AddHashtag(hashtag);
+                        cleanedHashtags.Add(hashtag.Trim());
                     }
                 }
             }
@@ -278,40 +279,25 @@ namespace Duo.ViewModels
                     UpdatedAt = DateTimeHelper.EnsureUtcKind(DateTime.UtcNow)
                 };
                 
-                // Create post in database using the original CreatePost method
-                int postId = _postService.CreatePost(post);
+                // Create post and add hashtags in a single operation
+                int postId = _postService.CreatePostWithHashtags(post, cleanedHashtags, currentUser.UserId);
                 
-                // Add hashtags if any
-                System.Diagnostics.Debug.WriteLine($"CreatePostAsync - Hashtags count before saving: {Hashtags.Count}");
-                if (Hashtags.Count > 0)
+                // Now that we have a valid post ID, update our hashtags collection
+                Hashtags.Clear();
+                foreach (var hashtag in cleanedHashtags)
                 {
-                    foreach (var tag in Hashtags)
-                    {
-                        try
-                        {
-                            System.Diagnostics.Debug.WriteLine($"CreatePostAsync - Adding hashtag to post: {tag}");
-                            _postService.AddHashtagToPost(postId, tag, currentUser.UserId);
-                        }
-                        catch (Exception ex)
-                        {
-                            Debug.WriteLine($"Error adding hashtag '{tag}' to post: {ex.Message}");
-                            // Continue with other hashtags even if one fails
-                        }
-                    }
+                    _hashtags.Add(hashtag);
                 }
-
+                
                 // Handle success
                 IsSuccess = true;
                 PostCreationSuccessful?.Invoke(this, EventArgs.Empty);
-                
-                // Do NOT clear form here, it will clear hashtags
-                // ClearForm();
                 
                 return true;
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Error creating post: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error creating post: {ex.Message}");
                 Error = $"Failed to create post: {ex.Message}";
                 IsSuccess = false;
                 return false;

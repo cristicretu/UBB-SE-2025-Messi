@@ -11,5 +11,8 @@ BEGIN
     INSERT INTO Posts
         (Title, Description, UserID, CategoryID, CreatedAt, UpdatedAt, LikeCount)
     VALUES
-        (@Title, @Description, @UserID, @CategoryID, @CreatedAt, @UpdatedAt, @LikeCount)
+        (@Title, @Description, @UserID, @CategoryID, @CreatedAt, @UpdatedAt, @LikeCount);
+        
+    -- Return the ID of the newly inserted post
+    SELECT SCOPE_IDENTITY() AS NewPostID;
 END
