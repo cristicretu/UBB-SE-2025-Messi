@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
+using System.Linq;
 using Microsoft.Data.SqlClient;
 using Duo.Models;
 using Duo.Data;
@@ -339,7 +340,19 @@ namespace Duo.Repositories
 
         public List<Post> GetByHashtags(List<string> hashtags, int page, int pageSize)
         {
-            string hashtagsString = string.Join(",", hashtags);
+            if (hashtags == null || hashtags.Count == 0)
+            {
+                return GetPaginatedPosts(page, pageSize);
+            }
+            
+            string hashtagsString = string.Join(",", hashtags.Where(h => !string.IsNullOrWhiteSpace(h)));
+            
+            // If after filtering we have no valid hashtags, return all posts
+            if (string.IsNullOrWhiteSpace(hashtagsString))
+            {
+                return GetPaginatedPosts(page, pageSize);
+            }
+            
             int offset = (page - 1) * pageSize;
 
             SqlParameter[] parameters = new SqlParameter[]
@@ -486,7 +499,18 @@ namespace Duo.Repositories
 
         public int GetPostCountByHashtags(List<string> hashtags)
         {
-            string hashtagsString = string.Join(",", hashtags);
+            if (hashtags == null || hashtags.Count == 0)
+            {
+                return GetTotalPostCount();
+            }
+            
+            string hashtagsString = string.Join(",", hashtags.Where(h => !string.IsNullOrWhiteSpace(h)));
+            
+            // If after filtering we have no valid hashtags, return total count
+            if (string.IsNullOrWhiteSpace(hashtagsString))
+            {
+                return GetTotalPostCount();
+            }
 
             SqlParameter[] parameters = new SqlParameter[]
             {

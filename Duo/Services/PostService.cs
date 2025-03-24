@@ -6,6 +6,7 @@ using Duo.Models;
 using Duo.Services;
 using Duo.Repositories;
 using System.Diagnostics;
+using System.Linq;
 
 namespace Duo.Services
 {
@@ -164,6 +165,19 @@ namespace Duo.Services
 
         public int GetPostCountByHashtags(List<string> hashtags)
         {
+            // Handle empty hashtag list case
+            if (hashtags == null || hashtags.Count == 0)
+            {
+                return GetTotalPostCount();
+            }
+            
+            // Handle invalid hashtag values
+            hashtags = hashtags.Where(h => !string.IsNullOrWhiteSpace(h)).ToList();
+            if (hashtags.Count == 0)
+            {
+                return GetTotalPostCount();
+            }
+            
             try
             {
                 return _postRepository.GetPostCountByHashtags(hashtags);
@@ -227,6 +241,19 @@ namespace Duo.Services
             {
                 throw new ArgumentException("Invalid pagination parameters.");
             }
+            
+            // Handle empty hashtag list case
+            if (hashtags == null || hashtags.Count == 0)
+            {
+                return GetPaginatedPosts(page, pageSize);
+            }
+            
+            // Handle invalid hashtag values
+            hashtags = hashtags.Where(h => !string.IsNullOrWhiteSpace(h)).ToList();
+            if (hashtags.Count == 0)
+            {
+                return GetPaginatedPosts(page, pageSize);
+            }
 
             try
             {
@@ -234,7 +261,7 @@ namespace Duo.Services
             }
             catch (Exception ex)
             {
-                throw new Exception($"Error retrieving posts for hashtag {hashtags}: {ex.Message}");
+                throw new Exception($"Error retrieving posts for hashtags: {ex.Message}");
             }
         }
 
