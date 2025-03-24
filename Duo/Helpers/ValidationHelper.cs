@@ -42,52 +42,43 @@ namespace Duo.Helpers
             return true;
         }
 
-        // Post validation
         public static bool ValidatePost(string content, string? title = null)
         {
-            // Content should not be null or empty
+
             ValidateNotNullOrEmpty(content, nameof(content));
-            
-            // Content should not exceed 4000 characters
+
             ValidateRange(content.Length, 1, 4000, "Post content length");
-            
-            // If title is provided, validate it
+
             if (title != null)
             {
                 ValidateRange(title.Length, 1, 100, "Post title length");
             }
-            
+
             return true;
         }
 
-        // Comment validation
         public static bool ValidateComment(string content)
         {
-            // Comment should not be null or empty
+
             ValidateNotNullOrEmpty(content, nameof(content));
-            
-            // Comment should not exceed 1000 characters
+
             ValidateRange(content.Length, 1, 1000, "Comment length");
-            
+
             return true;
         }
 
-        // Hashtag validation
         public static bool ValidateHashtag(string hashtag)
         {
-            // Hashtag should not be null or empty
+
             ValidateNotNullOrEmpty(hashtag, nameof(hashtag));
-            
-            // Hashtag should not be empty after removing #
+
             ValidateCondition(!string.IsNullOrEmpty(hashtag), "Hashtag cannot be just a # symbol.");
-            
-            // Hashtag should only contain alphanumeric characters
+
             ValidateCondition(Regex.IsMatch(hashtag, @"^[a-zA-Z0-9]+$"), 
                 "Hashtag can only contain letters and numbers.");
-            
-            // Hashtag should not exceed 30 characters
+
             ValidateRange(hashtag.Length, 1, 30, "Hashtag length");
-            
+
             return true;
         }
 
@@ -95,16 +86,13 @@ namespace Duo.Helpers
         {
             ValidateNotNullOrEmpty(username, nameof(username));
 
-            // Username should not exceed 30 characters
             ValidateRange(username.Length, 1, 30, "Username length");
 
-            // Username should only contain alphanumeric characters
             ValidateCondition(Regex.IsMatch(username, @"^[a-zA-Z0-9]+$"), 
                 "Username can only contain letters and numbers.");
 
-            // Username should not contain spaces
             ValidateCondition(!username.Contains(" "), "Username cannot contain spaces.");
-            
+
             return true;
         }
 

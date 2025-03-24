@@ -18,48 +18,6 @@ namespace Duo.Repositories
             _dataLink = dataLink;
         }
 
-        public Hashtag GetHashtagById(int id)
-        {
-            if (id <= 0) throw new Exception("Error - GetHashtagById: Id must be greater than 0");
-
-            DataTable? dataTable = null;
-
-            try
-            {
-                var sqlParameters = new SqlParameter[]
-                {
-                            new SqlParameter("@Id", id)
-                };
-
-                dataTable = _dataLink.ExecuteReader("ReadHashtagById", sqlParameters);
-
-                if (dataTable.Rows.Count == 0) throw new Exception("Error - GetHashtagById: No records found");
-
-                var tag = dataTable.Rows[0]["Tag"]?.ToString();
-
-                if (tag == null)
-                {
-                    throw new Exception("Error - GetHashtagById: Tag is null");
-                }
-
-                Hashtag hashtag = new Hashtag(
-                    Convert.ToInt32(dataTable.Rows[0]["Id"]),
-                    tag
-                );
-
-                return hashtag;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Error - GetHashtagById: {ex.Message}");
-            }
-            finally
-            {
-                dataTable?.Dispose();
-            }
-
-        }
-
         public Hashtag GetHashtagByText(string text)
         {
             if(string.IsNullOrWhiteSpace(text)) throw new Exception("Error - GetHashtagByText: Text cannot be null or empty");
@@ -122,28 +80,6 @@ namespace Duo.Repositories
             }
         }
 
-        public bool DeleteHashtag(int id)
-        {
-            if (id <= 0) throw new Exception("Error - DeleteHashtag: Id must be greater than 0");
-
-            try
-            {
-                var sqlParameters = new SqlParameter[]
-                {
-                    new SqlParameter("@Id", id)
-                };
-                var result = _dataLink.ExecuteNonQuery("DeleteHashtag", sqlParameters);
-
-                if (result == 0) throw new Exception("Error - DeleteHashtag: Hashtag could not be deleted!");
-
-                return true;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Error - DeleteHashtag: {ex.Message}");
-
-            }
-        }
         public List<Hashtag> GetHashtagsByPostId(int postId)
         {
             if (postId <= 0) throw new Exception("Error - GetHashtagsByPostId: PostId must be greater than 0");
@@ -155,7 +91,7 @@ namespace Duo.Repositories
                     new SqlParameter("@PostID", postId)
                 };
                 dataTable = _dataLink.ExecuteReader("GetHashtagsForPost", sqlParameters);
-                // if (dataTable.Rows.Count == 0) throw new Exception("Error - GetHashtagsByPostId: No records found");
+
                 Debug.WriteLine("am aj  ");
                 List<Hashtag> hashtags = new List<Hashtag>();
                 foreach (DataRow row in dataTable.Rows)
@@ -241,7 +177,7 @@ namespace Duo.Repositories
         {
             return GetHashtagByText(name);
         }
-        
+
         public List<Hashtag> GetAllHashtags()
         {
             DataTable? dataTable = null;
@@ -249,9 +185,9 @@ namespace Duo.Repositories
             try
             {
                 dataTable = _dataLink.ExecuteReader("GetAllHashtags");
-                
+
                 List<Hashtag> hashtags = new List<Hashtag>();
-                
+
                 foreach (DataRow row in dataTable.Rows)
                 {
                     var tag = row["Tag"]?.ToString();
@@ -259,14 +195,14 @@ namespace Duo.Repositories
                     {
                         continue;
                     }
-                    
+
                     Hashtag hashtag = new Hashtag(
                         Convert.ToInt32(row["Id"]),
                         tag
                     );
                     hashtags.Add(hashtag);
                 }
-                
+
                 return hashtags;
             }
             catch (Exception ex)
@@ -278,11 +214,11 @@ namespace Duo.Repositories
                 dataTable?.Dispose();
             }
         }
-        
+
         public List<Hashtag> GetHashtagsByCategory(int categoryId)
         {
             if (categoryId <= 0) throw new Exception("Error - GetHashtagsByCategory: CategoryId must be greater than 0");
-            
+
             DataTable? dataTable = null;
 
             try
@@ -291,11 +227,11 @@ namespace Duo.Repositories
                 {
                     new SqlParameter("@CategoryID", categoryId)
                 };
-                
+
                 dataTable = _dataLink.ExecuteReader("GetHashtagsByCategory", sqlParameters);
-                
+
                 List<Hashtag> hashtags = new List<Hashtag>();
-                
+
                 foreach (DataRow row in dataTable.Rows)
                 {
                     var tag = row["Tag"]?.ToString();
@@ -303,14 +239,14 @@ namespace Duo.Repositories
                     {
                         continue;
                     }
-                    
+
                     Hashtag hashtag = new Hashtag(
                         Convert.ToInt32(row["Id"]),
                         tag
                     );
                     hashtags.Add(hashtag);
                 }
-                
+
                 return hashtags;
             }
             catch (Exception ex)

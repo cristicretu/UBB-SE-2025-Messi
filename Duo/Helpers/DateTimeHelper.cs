@@ -9,39 +9,27 @@ namespace Duo.Helpers
     {
         public const string DefaultDateFormat = "yyyy-MM-dd";
         public const string DefaultDateTimeFormat = "yyyy-MM-dd HH:mm:ss";
-        
-        /// <summary>
-        /// get current time
-        /// </summary>
+
         public static DateTime GetCurrentTime()
         {
             return DateTime.Now;
         }
 
-        /// <summary>
-        /// get current time in UTC
-        /// </summary>
         public static DateTime GetCurrentTimeUtc()
         {
             return DateTime.UtcNow;
         }
 
-        /// <summary>
-        /// convert UTC datetime to local timezone
-        /// </summary>
         public static DateTime ConvertUtcToLocal(DateTime utcDateTime)
         {
             if (utcDateTime.Kind != DateTimeKind.Utc)
             {
-                // Force the kind to be UTC if it's not already
+
                 utcDateTime = DateTime.SpecifyKind(utcDateTime, DateTimeKind.Utc);
             }
             return utcDateTime.ToLocalTime();
         }
 
-        /// <summary>
-        /// convert local datetime to UTC
-        /// </summary>
         public static DateTime ConvertLocalToUtc(DateTime localDateTime)
         {
             if (localDateTime.Kind != DateTimeKind.Local)
@@ -72,13 +60,13 @@ namespace Duo.Helpers
                         return result;
                     }
                 }
-                
+
                 if (DateTime.TryParse(dateTimeString, CultureInfo.InvariantCulture, 
                     DateTimeStyles.None, out DateTime parsedDate))
                 {
                     return parsedDate;
                 }
-                
+
                 return null;
             }
             catch
@@ -87,38 +75,26 @@ namespace Duo.Helpers
             }
         }
 
-        /// <summary>
-        /// format a DateTime as a standard date string (yyyy-MM-dd)
-        /// </summary>
         public static string FormatAsDate(DateTime? dateTime)
         {
             return dateTime?.ToString(DefaultDateFormat) ?? string.Empty;
         }
 
-        /// <summary>
-        /// format a DateTime as a standard datetime string (yyyy-MM-dd HH:mm:ss)
-        /// </summary>
         public static string FormatAsDateTime(DateTime? dateTime)
         {
             return dateTime?.ToString(DefaultDateTimeFormat) ?? string.Empty;
         }
 
-        /// <summary>
-        /// format a DateTime using a custom format
-        /// </summary>
         public static string Format(DateTime? dateTime, string format)
         {
             return dateTime?.ToString(format) ?? string.Empty;
         }
 
-        /// <summary>
-        ///human-readable relative time string (e.g., "5 minutes ago")
-        /// </summary>
         public static string GetRelativeTime(DateTime? dateTime)
         {
             if (!dateTime.HasValue)
                 return string.Empty;
-                
+
             var timeSpan = DateTime.Now - dateTime.Value;
 
             if (timeSpan.TotalDays > 365)
@@ -165,30 +141,23 @@ namespace Duo.Helpers
 
             return "Just now";
         }
-        
-        /// <summary>
-        /// ensures that a DateTime is stored in UTC format for database storage
-        /// </summary>
+
         public static DateTime EnsureUtcKind(DateTime dateTime)
         {
             if (dateTime.Kind == DateTimeKind.Utc)
                 return dateTime;
-                
+
             if (dateTime.Kind == DateTimeKind.Local)
                 return dateTime.ToUniversalTime();
-                
-            // Unspecified kind - assume it's already UTC
+
             return DateTime.SpecifyKind(dateTime, DateTimeKind.Utc);
         }
-        
-        /// <summary>
-        /// formats a database (UTC) datetime for display in local timezone
-        /// </summary>
+
         public static string FormatDbDateTimeForDisplay(DateTime? utcDateTime, string? format = null)
         {
             if (!utcDateTime.HasValue)
                 return string.Empty;
-                
+
             var localDateTime = ConvertUtcToLocal(utcDateTime.Value);
             return format == null ? 
                 FormatAsDateTime(localDateTime) : 

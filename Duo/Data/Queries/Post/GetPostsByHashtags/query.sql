@@ -5,12 +5,12 @@ CREATE PROCEDURE GetByHashtags
 AS
 BEGIN
     SET NOCOUNT ON;
-    
+
     DECLARE @HashtagTable TABLE (Hashtag NVARCHAR(100));
-    
+
     INSERT INTO @HashtagTable
     SELECT value FROM STRING_SPLIT(@hashtags, ',');
-    
+
     SELECT DISTINCT p.*
     FROM Posts p
     INNER JOIN PostHashtags ph ON p.Id = ph.PostId

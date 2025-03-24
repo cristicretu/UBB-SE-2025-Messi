@@ -18,9 +18,9 @@ Write-Host "Found $($sqlFiles.Count) SQL files to execute"
 foreach ($file in $sqlFiles) {
     Write-Host "Executing $($file.FullName)"
     $command = "sqlcmd -S `"$sqlInstance`" -d $database -i `"$($file.FullName)`" -E"
-    
+
     Write-Host "Running command: $command"
-    
+
     try {
         Invoke-Expression $command
         Write-Host "Successfully executed $($file.Name)" -ForegroundColor Green

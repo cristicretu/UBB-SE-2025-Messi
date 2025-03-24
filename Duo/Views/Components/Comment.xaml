@@ -14,14 +14,14 @@
     <StackPanel 
         HorizontalAlignment="Stretch" 
         Spacing="0">
-        
+
         <!-- Main comment content -->
         <Grid HorizontalAlignment="Stretch">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            
+
             <!-- Vertical line(s) based on tree level -->
             <ItemsRepeater 
                 x:Name="LevelLinesRepeater" 
@@ -51,28 +51,28 @@
                     <StackLayout Orientation="Horizontal" Spacing="0"/>
                 </ItemsRepeater.Layout>
             </ItemsRepeater>
-            
+
             <!-- Comment content -->
             <StackPanel 
                 Grid.Column="1" 
                 Padding="12" 
                 Spacing="8" 
                 HorizontalAlignment="Stretch">
-                
+
                 <!-- User info and date row -->
                 <Grid HorizontalAlignment="Stretch">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    
+
                     <TextBlock 
                         x:Name="UserTextBlock" 
                         Grid.Column="0"
                         Text="u/username" 
                         FontSize="12" 
                         FontWeight="SemiBold"/>
-                    
+
                     <TextBlock 
                         x:Name="DateTextBlock" 
                         Grid.Column="1"
@@ -80,26 +80,26 @@
                         FontSize="12" 
                         Opacity="0.7"/>
                 </Grid>
-                
+
                 <!-- Comment description -->
                 <TextBlock 
                     x:Name="DescriptionTextBlock" 
                     Text="This is a comment description." 
                     TextWrapping="Wrap" 
                     FontSize="14"/>
-                
+
                 <!-- Action buttons -->
                 <StackPanel Orientation="Horizontal" Spacing="16">
                     <local:LikeButton x:Name="LikeButton"/>
                     <local:CommentButton x:Name="CommentReplyButton"/>
                 </StackPanel>
-                
+
                 <local:CommentInput 
                     x:Name="ReplyInputControl"
                     CommentSubmitted="ReplyInput_CommentSubmitted"
                     Visibility="Collapsed"
                     Margin="0,8,0,0"/>
-                
+
                 <!-- Expand/collapse button -->
                 <Grid HorizontalAlignment="Stretch">
                     <Button 
@@ -117,7 +117,7 @@
                 </Grid>
             </StackPanel>
         </Grid>
-        
+
         <!-- Container for child comments -->
         <StackPanel 
             x:Name="ChildCommentsPanel" 

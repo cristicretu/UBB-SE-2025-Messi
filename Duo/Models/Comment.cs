@@ -27,7 +27,6 @@ namespace Duo.Models
             _username = string.Empty;
         }
 
-        // Parameterless constructor for creating new comments
         public Comment()
         {
             _id = 0;

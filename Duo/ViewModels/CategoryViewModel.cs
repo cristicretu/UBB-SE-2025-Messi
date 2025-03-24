@@ -18,20 +18,6 @@ namespace Duo.ViewModels
         private List<Category> _categories = new List<Category>();
 
         public event PropertyChangedEventHandler PropertyChanged;
-        public event EventHandler LoginSuccessful;
-
-        public string CategoryName
-        {
-            get => _categoryName;
-            set
-            {
-                if (_categoryName != value)
-                {
-                    _categoryName = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
 
         public List<Category> Categories
         {
@@ -57,11 +43,9 @@ namespace Duo.ViewModels
             try
             {
                 Categories = _categoryService.GetAllCategories();
-                Debug.WriteLine($"Successfully loaded {Categories.Count} categories from service");
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Failed to load categories: {ex.Message}");
                 Categories = new List<Category>();
             }
         }

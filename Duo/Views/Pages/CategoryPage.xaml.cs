@@ -23,13 +23,10 @@ namespace Duo.Views.Pages
             {
                 this.InitializeComponent();
 
-                // Initialize ViewModel
                 _viewModel = new CategoryViewModel(App._categoryService);
-                
-                // Set DataContext for data binding
+
                 this.DataContext = _viewModel;
-                
-                // Populate community menu items
+
                 PopulateCommunityMenuItems();
 
                 try
@@ -57,17 +54,15 @@ namespace Duo.Views.Pages
                 Debug.WriteLine($"Page initialization failed: {ex.Message}");
             }
         }
-        
+
         private void PopulateCommunityMenuItems()
         {
             try
             {
                 var categoryNames = _viewModel.GetCategoryNames();
-                
-                // Clear existing items
+
                 CommunityItem.MenuItems.Clear();
-                
-                // Add menu items for each category
+
                 foreach (string categoryName in categoryNames)
                 {
                     var item = new NavigationViewItem
@@ -76,18 +71,15 @@ namespace Duo.Views.Pages
                         Icon = new SymbolIcon(Symbol.Message),
                         Tag = categoryName
                     };
-                    
-                    // Set tooltip after initialization
+
                     ToolTipService.SetToolTip(item, categoryName);
-                    
+
                     CommunityItem.MenuItems.Add(item);
                 }
-                
-                Debug.WriteLine($"Successfully populated {categoryNames.Count} category menu items");
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Failed to populate category menu items: {ex.Message}");
+                
             }
         }
 
@@ -104,12 +96,9 @@ namespace Duo.Views.Pages
 
                     if (selectedItem.MenuItems.Count > 0)
                     {
-                        Debug.WriteLine($"Parent item '{selectedItem.Content}' selected. No navigation performed.");
                         return;
                     }
 
-                    Debug.WriteLine($"Navigating to page with tag: {tag}");
-                    
                     if (IsCategoryTag(tag))
                     {
                         // Save the current category name
@@ -145,7 +134,7 @@ namespace Duo.Views.Pages
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Selection changed error: {ex.Message}");
+
             }
         }
 
@@ -165,11 +154,10 @@ namespace Duo.Views.Pages
             try
             {
                 contentFrame.Navigate(typeof(PostListPage), category);
-                Debug.WriteLine($"Navigated to PostListPage with category: {category}");
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Navigation error: {ex.Message}");
+
             }
         }
 
@@ -178,14 +166,11 @@ namespace Duo.Views.Pages
             try
             {
                 Type? pageType = null;
-                
+
                 switch (tag)
                 {
                     case "MainPage":
                         pageType = typeof(MainPage);
-                        break;
-                    case "SearchPage":
-                        pageType = typeof(SearchPage);
                         break;
                     default:
                         Debug.WriteLine($"Unknown page tag: {tag}");
@@ -193,11 +178,10 @@ namespace Duo.Views.Pages
                 }
 
                 contentFrame.Navigate(pageType);
-                Debug.WriteLine($"Navigated to page: {tag}");
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Navigation error: {ex.Message}");
+
             }
         }
 

@@ -31,7 +31,6 @@ namespace Duo.ViewModels
                 }
             }
         }
-
         public string ErrorMessage
         {
             get => _errorMessage;
@@ -45,7 +44,6 @@ namespace Duo.ViewModels
                 }
             }
         }
-
         public bool HasError
         {
             get => _hasError;
@@ -75,7 +73,6 @@ namespace Duo.ViewModels
             {
                 ErrorMessage = string.Empty;
 
-                // Validate the username
                 if (string.IsNullOrWhiteSpace(Username))
                 {
                     ErrorMessage = "Username cannot be empty";
@@ -90,10 +87,9 @@ namespace Duo.ViewModels
 
                 try
                 {
-                    // Set the user in the service (it will create if needed)
+
                     _userService.setUser(Username);
 
-                    // Notify successful login
                     LoginSuccessful?.Invoke(this, EventArgs.Empty);
                 }
                 catch (Exception ex)
@@ -106,7 +102,6 @@ namespace Duo.ViewModels
                 ErrorMessage = ex.Message;
             }
         }
-
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));

@@ -37,13 +37,13 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    
+
                     <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Left" Spacing="8">
                         <TextBlock Text="{x:Bind Username, Mode=OneWay}"
                               FontWeight="SemiBold" 
                               FontSize="12"
                               Opacity="0.6"/>
-                    
+
                         <TextBlock Text="{x:Bind Date, Mode=OneWay}"
                                 FontSize="10" 
                                 FontWeight="SemiBold"
@@ -87,7 +87,6 @@
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
             </StackPanel>
-
 
                 <markdown:MarkdownTextBlock
                     Text="{x:Bind Content, Mode=OneWay}"

@@ -11,35 +11,33 @@ namespace Duo.Helpers
 
         public static void Debounce(Action method, int delay = 200, string? key = null) {
           key = key ?? method.GetHashCode().ToString();
-          
-          // cancel any existing timer with the same key
+
           if (_activeTimers.TryGetValue(key, out var existingTimer))
           {
               existingTimer.Stop();
               existingTimer.Dispose();
           }
-          
+
           var timer = new System.Timers.Timer(delay);
           _activeTimers[key] = timer;
-          
+
           var dispatcherQueue = DispatcherQueue.GetForCurrentThread();
-          
+
           timer.Elapsed += (sender, e) => {
             timer.Stop();
-            
+
             if (_activeTimers.ContainsKey(key))
             {
                 _activeTimers.Remove(key);
             }
-            
-            // callback runs on the UI thread
+
             dispatcherQueue?.TryEnqueue(() => {
                 method();
             });
-            
+
             timer.Dispose();
           };
-          
+
           timer.Start();
         }
     }

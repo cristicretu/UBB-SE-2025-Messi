@@ -26,14 +26,14 @@
                 HorizontalAlignment="Stretch" 
                 MaxWidth="900"
                 Spacing="0">
-                
+
                 <!-- Back Button -->
                 <Button 
                     x:Name="BackButton"
                     Content="Back"
                     Click="BackButton_Click"
                     Margin="0,16,0,16"/>
-                
+
                 <!-- Main Post Content with Hover Style Always Applied -->
                 <components:Post 
                     x:Name="PostDetail"
@@ -54,7 +54,7 @@
                     CommentSubmitted="CommentInputControl_CommentSubmitted"
                     HorizontalAlignment="Stretch" 
                     Margin="0,16,0,0"/>
-                
+
                 <!-- Comments Section Header -->
                 <TextBlock 
                     Text="Comments" 
@@ -62,7 +62,7 @@
                     FontWeight="SemiBold" 
                     Margin="0,16,0,8" 
                     HorizontalAlignment="Left"/>
-                
+
                 <!-- Comments List -->
                 <StackPanel 
                     x:Name="CommentsPanel" 

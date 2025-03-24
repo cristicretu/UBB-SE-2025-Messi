@@ -12,18 +12,18 @@
     <Grid VerticalAlignment="Center" HorizontalAlignment="Center" Padding="20">
         <StackPanel Orientation="Vertical" Spacing="15" Width="300">
             <TextBlock Text="Welcome to Duo" FontSize="24" HorizontalAlignment="Center" Margin="0,0,0,20"/>
-            
+
             <TextBox x:Name="UsernameTextBox" 
                      PlaceholderText="Username" 
                      Text="{Binding Username, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-            
+
             <TextBlock x:Name="ErrorTextBlock" 
                        Text="{Binding ErrorMessage}" 
                        Foreground="Red" 
                        Visibility="{Binding HasError, Converter={StaticResource BoolToVisibilityConverter}}"
                        TextWrapping="Wrap"
                        MaxWidth="300"/>
-            
+
             <Button x:Name="LoginButton" 
                     Content="Login" 
                     HorizontalAlignment="Stretch"

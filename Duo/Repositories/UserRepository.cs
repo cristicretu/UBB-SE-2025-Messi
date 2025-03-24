@@ -25,13 +25,13 @@ namespace Duo.Repositories
             {
                 throw new ArgumentException("Username cannot be empty.");
             }
-            
+
             var existingUser = GetUserByUsername(user.Username);
             if (existingUser != null)
             {
                 return existingUser.UserId;
             }
-            
+
             SqlParameter[] parameters = new SqlParameter[]
             {
                 new SqlParameter("@Username", user.Username),
@@ -53,10 +53,12 @@ namespace Duo.Repositories
             {
                 throw new ArgumentException("Invalid user ID.");
             }
+
             SqlParameter[] parameters = new SqlParameter[]
             {
                 new SqlParameter("@UserID", id)
             };
+
             DataTable? dataTable = null;
             try
             {
@@ -99,7 +101,9 @@ namespace Duo.Repositories
                 {
                     return null;
                 }
+
                 var row = dataTable.Rows[0];
+                
                 return new User(
                     Convert.ToInt32(row["userID"]),
                     row["username"]?.ToString() ?? string.Empty
@@ -116,5 +120,4 @@ namespace Duo.Repositories
         }
     }
 }
-
 

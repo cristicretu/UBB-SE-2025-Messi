@@ -26,14 +26,14 @@
         HorizontalAlignment="Stretch"
         BorderThickness="0,1,0,1"
         BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}">
-        
+
         <StackPanel Spacing="2">
             <Grid HorizontalAlignment="Stretch">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                
+
                 <TextBox 
                     x:Name="CommentTextBox"
                     Grid.Column="0"
@@ -43,7 +43,7 @@
                     BorderThickness="0"
                     Background="Transparent"
                     Margin="0,0,8,0"/>
-                
+
                 <Button 
                     Grid.Column="1"
                     Content="Post" 
