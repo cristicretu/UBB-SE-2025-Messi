@@ -270,11 +270,27 @@ namespace Duo.Views.Components
             // Handle the edit logic here
             // Display Edit Post dialog with prefilled data
             var dialogComponent = new DialogComponent();
+            
+            var post = _postService.GetPostById(this.PostId);
+            if (post == null)
+            {
+                var errorDialog = new ContentDialog
+                {
+                    XamlRoot = this.XamlRoot,
+                    Title = "Error",
+                    Content = "Post not found in database",
+                    CloseButtonText = "OK"
+                };
+                await errorDialog.ShowAsync();
+                return;
+            }
+            
             var result = await dialogComponent.ShowEditPostDialog(
                 this.XamlRoot, 
                 this.Title,          // Pass the current post title
                 this.Content,        // Pass the current post content
-                [.. this.Hashtags]        // Convert IEnumerable<string> to List<string> before passing
+                [.. this.Hashtags],  // Convert IEnumerable<string> to List<string> before passing
+                post.CategoryID      // Pass the current post's category ID
             );
 
             // If the dialog returned successfully, update the post with the new data
@@ -282,19 +298,13 @@ namespace Duo.Views.Components
             {
                 try
                 {
-                    // Get the current post from database
-                    var post = _postService.GetPostById(this.PostId);
-                    if (post == null)
-                    {
-                        throw new Exception("Post not found in database");
-                    }
-                    
-                    // Update post properties
+                    // Update the post properties
                     post.Title = result.Title;
-                    post.Description = result.Content; // Content maps to Description
+                    post.Description = result.Content;
+                    post.CategoryID = result.CommunityId; // Update the category ID if changed
                     post.UpdatedAt = DateTime.UtcNow;
                     
-                    // Update the post in the database
+                    // Call the service to update the post
                     _postService.UpdatePost(post);
                     
                     // Update hashtags
@@ -433,14 +443,14 @@ namespace Duo.Views.Components
             // You can perform additional actions here if needed
         }
 
-        private void MarkdownText_LinkClicked(object sender, CommunityToolkit.WinUI.UI.Controls.LinkClickedEventArgs e)
+        private async void MarkdownText_LinkClicked(object sender, CommunityToolkit.WinUI.UI.Controls.LinkClickedEventArgs e)
         {
             // Handle link clicks in markdown text
             // For example, you might want to open URLs in the default browser
             if (Uri.TryCreate(e.Link, UriKind.Absolute, out Uri? uri))
             {
                 // Launch the URI in the default browser
-                Windows.System.Launcher.LaunchUriAsync(uri);
+                await Windows.System.Launcher.LaunchUriAsync(uri);
             }
         }
 

@@ -94,7 +94,7 @@ namespace Duo.Views.Components
             return (false, string.Empty, string.Empty, new List<string>(), 0);
         }
 
-        public async Task<(bool Success, string Title, string Content, List<string> Hashtags)> ShowEditPostDialog(XamlRoot xamlRoot, string title = "", string content = "", List<string> hashtags = null, int communityId = 0)
+        public async Task<(bool Success, string Title, string Content, List<string> Hashtags, int CommunityId)> ShowEditPostDialog(XamlRoot xamlRoot, string title = "", string content = "", List<string> hashtags = null, int communityId = 0)
         {
             var dialogContent = new PostDialogContent();
             
@@ -137,7 +137,12 @@ namespace Duo.Views.Components
                 if (!dialogContent.IsFormValid())
                 {
                     e.Cancel = true;
+                    return;
                 }
+                
+                // For edits, just validate and let the dialog close
+                // No need to execute a command, as the edited data will be returned to the caller
+                // We explicitly return here and don't cancel the event, so the dialog will close
             };
             
             ContentDialogResult result = await dialog.ShowAsync();
@@ -147,10 +152,10 @@ namespace Duo.Views.Components
                 // Create a new list to return the hashtags
                 var hashtagsList = new List<string>(dialogContent.ViewModel.Hashtags);
 
-                return (true, dialogContent.ViewModel.Title, dialogContent.ViewModel.Content, hashtagsList);
+                return (true, dialogContent.ViewModel.Title, dialogContent.ViewModel.Content, hashtagsList, dialogContent.ViewModel.SelectedCategoryId);
             }
 
-            return (false, string.Empty, string.Empty, new List<string>());
+            return (false, string.Empty, string.Empty, new List<string>(), 0);
         }
     }
 }
