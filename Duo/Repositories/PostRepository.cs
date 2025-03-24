@@ -399,5 +399,109 @@ namespace Duo.Repositories
                 throw new Exception(ex.Message);
             }
         }
+
+        public List<Post> GetPaginatedPosts(int page, int pageSize)
+        {
+            if (page <= 0)
+            {
+                throw new ArgumentException("Page number must be greater than 0.");
+            }
+
+            if (pageSize <= 0)
+            {
+                throw new ArgumentException("Page size must be greater than 0.");
+            }
+
+            int offset = (page - 1) * pageSize;
+
+            SqlParameter[] parameters = new SqlParameter[]
+            {
+                new SqlParameter("@PageSize", pageSize),
+                new SqlParameter("@Offset", offset)
+            };
+
+            try
+            {
+                DataTable dataTable = dataLink.ExecuteReader("GetPaginatedPosts", parameters);
+                List<Post> posts = new List<Post>();
+
+                foreach (DataRow row in dataTable.Rows)
+                {
+                    posts.Add(new Post
+                    {
+                        Id = Convert.ToInt32(row["Id"]),
+                        Title = Convert.ToString(row["Title"]) ?? string.Empty,
+                        Description = Convert.ToString(row["Description"]) ?? string.Empty,
+                        UserID = Convert.ToInt32(row["UserID"]),
+                        CategoryID = Convert.ToInt32(row["CategoryID"]),
+                        CreatedAt = Convert.ToDateTime(row["CreatedAt"]),
+                        UpdatedAt = Convert.ToDateTime(row["UpdatedAt"]),
+                        LikeCount = Convert.ToInt32(row["LikeCount"])
+                    });
+                }
+
+                return posts;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"GetPaginatedPosts: {ex.Message}");
+            }
+        }
+
+        public int GetTotalPostCount()
+        {
+            try
+            {
+                object result = dataLink.ExecuteScalar<int>("GetTotalPostCount");
+                return result != null ? Convert.ToInt32(result) : 0;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"GetTotalPostCount: {ex.Message}");
+            }
+        }
+
+        public int GetPostCountByCategory(int categoryId)
+        {
+            if (categoryId <= 0)
+            {
+                throw new ArgumentException("Invalid category ID.");
+            }
+
+            SqlParameter[] parameters = new SqlParameter[]
+            {
+                new SqlParameter("@CategoryID", categoryId)
+            };
+
+            try
+            {
+                object result = dataLink.ExecuteScalar<int>("GetPostCountByCategory", parameters);
+                return result != null ? Convert.ToInt32(result) : 0;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"GetPostCountByCategory: {ex.Message}");
+            }
+        }
+
+        public int GetPostCountByHashtags(List<string> hashtags)
+        {
+            string hashtagsString = string.Join(",", hashtags);
+
+            SqlParameter[] parameters = new SqlParameter[]
+            {
+                new SqlParameter("@Hashtags", hashtagsString)
+            };
+
+            try
+            {
+                object result = dataLink.ExecuteScalar<int>("GetPostCountByHashtags", parameters);
+                return result != null ? Convert.ToInt32(result) : 0;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"GetPostCountByHashtags: {ex.Message}");
+            }
+        }
     }
 }

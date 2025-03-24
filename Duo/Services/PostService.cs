@@ -116,6 +116,93 @@ namespace Duo.Services
             return _postRepository.GetAllPosts();
         }
 
+        public List<Post> GetPaginatedPosts(int page, int pageSize)
+        {
+            if (page < 1 || pageSize < 1)
+            {
+                throw new ArgumentException("Invalid pagination parameters.");
+            }
+
+            try
+            {
+                return _postRepository.GetPaginatedPosts(page, pageSize);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error retrieving paginated posts: {ex.Message}");
+            }
+        }
+
+        public int GetTotalPostCount()
+        {
+            try
+            {
+                return _postRepository.GetTotalPostCount();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error retrieving total post count: {ex.Message}");
+            }
+        }
+
+        public int GetPostCountByCategory(int categoryId)
+        {
+            if (categoryId <= 0)
+            {
+                throw new ArgumentException("Invalid Category ID.");
+            }
+
+            try
+            {
+                return _postRepository.GetPostCountByCategory(categoryId);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error retrieving post count for category {categoryId}: {ex.Message}");
+            }
+        }
+
+        public int GetPostCountByHashtags(List<string> hashtags)
+        {
+            try
+            {
+                return _postRepository.GetPostCountByHashtags(hashtags);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error retrieving post count for hashtags: {ex.Message}");
+            }
+        }
+
+        public List<Hashtag> GetAllHashtags()
+        {
+            try
+            {
+                return _hashtagRepository.GetAllHashtags();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error retrieving all hashtags: {ex.Message}");
+            }
+        }
+
+        public List<Hashtag> GetHashtagsByCategory(int categoryId)
+        {
+            if (categoryId <= 0)
+            {
+                throw new ArgumentException("Invalid Category ID.");
+            }
+            
+            try
+            {
+                return _hashtagRepository.GetHashtagsByCategory(categoryId);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error retrieving hashtags for category {categoryId}: {ex.Message}");
+            }
+        }
+
         // Unique methods from alex/PostSearch
         public List<Post> GetPostsByUser(int userId, int page, int pageSize)
         {

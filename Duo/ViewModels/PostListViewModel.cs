@@ -19,12 +19,13 @@ namespace Duo.ViewModels
         private int? _categoryID;
         private string _categoryName;
         private string _filterText;
-        private ObservableCollection<Post> _allPosts;
         private ObservableCollection<Post> _posts;
         private int _currentPage;
         private HashSet<string> _selectedHashtags = new HashSet<string>();
         private const int ItemsPerPage = 5;
         private int _totalPages = 1;
+        private List<string> _allHashtags = new List<string>();
+        private int _totalPostCount = 0;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -33,7 +34,6 @@ namespace Duo.ViewModels
             _postService = postService;
             _categoryService = categoryService;
             _posts = new ObservableCollection<Post>();
-            _allPosts = new ObservableCollection<Post>();
             _currentPage = 1;
             _selectedHashtags.Add("All");
 
@@ -43,6 +43,9 @@ namespace Duo.ViewModels
             PreviousPageCommand = new RelayCommand(PreviousPage);
             FilterPostsCommand = new RelayCommand(FilterPosts);
             ClearFiltersCommand = new RelayCommand(ClearFilters);
+            
+            // Load all available hashtags
+            LoadAllHashtags();
         }
 
         public ObservableCollection<Post> Posts
@@ -51,16 +54,6 @@ namespace Duo.ViewModels
             set
             {
                 _posts = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public ObservableCollection<Post> AllPosts
-        {
-            get => _allPosts;
-            set
-            {
-                _allPosts = value;
                 OnPropertyChanged();
             }
         }
@@ -93,6 +86,9 @@ namespace Duo.ViewModels
             {
                 _categoryID = value;
                 OnPropertyChanged();
+                
+                // Reload hashtags when category changes
+                LoadAllHashtags();
             }
         }
 
@@ -117,6 +113,16 @@ namespace Duo.ViewModels
         }
 
         public HashSet<string> SelectedHashtags => _selectedHashtags;
+        
+        public List<string> AllHashtags 
+        {
+            get => _allHashtags;
+            set
+            {
+                _allHashtags = value;
+                OnPropertyChanged();
+            }
+        }
 
         public ICommand LoadPostsCommand { get; }
         public ICommand NextPageCommand { get; }
@@ -124,59 +130,141 @@ namespace Duo.ViewModels
         public ICommand FilterPostsCommand { get; }
         public ICommand ClearFiltersCommand { get; }
 
+        private void LoadAllHashtags()
+        {
+            if (_postService == null) return;
+            
+            try
+            {
+                _allHashtags.Clear();
+                _allHashtags.Add("All");
+                
+                List<Hashtag> hashtags;
+                
+                // Get hashtags based on category selection
+                if (_categoryID.HasValue && _categoryID.Value > 0)
+                {
+                    // Get hashtags for the specific category
+                    hashtags = _postService.GetHashtagsByCategory(_categoryID.Value);
+                }
+                else
+                {
+                    // Get all hashtags
+                    hashtags = _postService.GetAllHashtags();
+                }
+                
+                // Add hashtags to the list
+                foreach (var hashtag in hashtags)
+                {
+                    if (!_allHashtags.Contains(hashtag.Name))
+                    {
+                        _allHashtags.Add(hashtag.Name);
+                    }
+                }
+                
+                OnPropertyChanged(nameof(AllHashtags));
+            }
+            catch (Exception ex)
+            {
+                // Handle the error
+            }
+        }
+
         public void LoadPosts()
         {
             if (_postService == null) return;
 
-            // Convert to List<Post> to ensure consistent type
-            IEnumerable<Post> postsData = _categoryID.HasValue 
-                ? _postService.GetPostsByCategory(CategoryID, CurrentPage, ItemsPerPage)
-                : _postService.GetAllPosts();
-                
-            AllPosts.Clear();
-            foreach (var post in postsData)
+            Posts.Clear();
+            
+            // Calculate offset for pagination
+            int offset = (CurrentPage - 1) * ItemsPerPage;
+            
+            IEnumerable<Post> postsData;
+            
+            try
             {
-                var user = App.userService.GetUserById(post.UserID);
-                post.Username = user?.Username ?? "Unknown User";
-                
-                post.Date = Helpers.DateTimeHelper.GetRelativeTime(post.CreatedAt);
-                
-                post.Hashtags.Clear();
-                try 
+                // Check if we're filtering by hashtags
+                if (_selectedHashtags.Count > 0 && !_selectedHashtags.Contains("All"))
                 {
-                    var hashtags = _postService.GetHashtagsByPostId(post.Id);
-                    foreach (var hashtag in hashtags)
+                    // Get posts by hashtags with pagination
+                    postsData = _postService.GetPostsByHashtags(_selectedHashtags.ToList(), CurrentPage, ItemsPerPage);
+                    
+                    // Get total count to calculate pages
+                    _totalPostCount = _postService.GetPostCountByHashtags(_selectedHashtags.ToList());
+                }
+                else if (_categoryID.HasValue)
+                {
+                    // Get posts by category with pagination
+                    postsData = _postService.GetPostsByCategory(CategoryID, CurrentPage, ItemsPerPage);
+                    
+                    // Get total count to calculate pages
+                    _totalPostCount = _postService.GetPostCountByCategory(CategoryID);
+                }
+                else
+                {
+                    // Get all posts with pagination
+                    postsData = _postService.GetPaginatedPosts(CurrentPage, ItemsPerPage);
+                    
+                    // Get total count to calculate pages
+                    _totalPostCount = _postService.GetTotalPostCount();
+                }
+                
+                // Process posts for display
+                foreach (var post in postsData)
+                {
+                    // Already set by the query
+                    if (string.IsNullOrEmpty(post.Username))
                     {
-                        post.Hashtags.Add(hashtag.Name);
+                        var user = App.userService.GetUserById(post.UserID);
+                        post.Username = user?.Username ?? "Unknown User";
+                    }
+                    
+                    post.Date = Helpers.DateTimeHelper.GetRelativeTime(post.CreatedAt);
+                    
+                    // Fetch hashtags for the post
+                    post.Hashtags.Clear();
+                    try 
+                    {
+                        var hashtags = _postService.GetHashtagsByPostId(post.Id);
+                        foreach (var hashtag in hashtags)
+                        {
+                            post.Hashtags.Add(hashtag.Name);
+                        }
+                    }
+                    catch
+                    {
+                        // Silently handle errors loading hashtags
+                    }
+                    
+                    // Apply search filter if we have a search term
+                    bool shouldAdd = true;
+                    if (!string.IsNullOrEmpty(FilterText))
+                    {
+                        // Only add posts that match the search term
+                        shouldAdd = App._searchService.Search(FilterText, new[] { post.Title }).Any();
+                    }
+                    
+                    if (shouldAdd)
+                    {
+                        Posts.Add(post);
                     }
                 }
-                catch
+                
+                // If search is active, adjust the count for pagination
+                if (!string.IsNullOrEmpty(FilterText))
                 {
+                    _totalPostCount = Posts.Count;
                 }
                 
-                AllPosts.Add(post);
+                // Calculate total pages (minimum 1)
+                TotalPages = Math.Max(1, (int)Math.Ceiling(_totalPostCount / (double)ItemsPerPage));
+                
+                OnPropertyChanged(nameof(TotalPages));
             }
-            
-            FilterPosts();
-        }
-
-        public void LoadPageItems(int pageIndex)
-        {
-            if (pageIndex < 0 || pageIndex >= TotalPages) return;
-            
-            CurrentPage = pageIndex + 1;
-            
-            var filteredPosts = AllPosts.Where(Filter).ToList();
-            
-            // Calculate start and end indices
-            int startIndex = pageIndex * ItemsPerPage;
-            int endIndex = Math.Min(startIndex + ItemsPerPage, filteredPosts.Count);
-            
-            Posts.Clear();
-            // Add items for the current page
-            for (int i = startIndex; i < endIndex; i++)
+            catch (Exception ex)
             {
-                Posts.Add(filteredPosts[i]);
+                // Handle any errors that occurred during loading
+                // Could display an error message here
             }
         }
 
@@ -185,7 +273,7 @@ namespace Duo.ViewModels
             if (CurrentPage < TotalPages)
             {
                 CurrentPage++;
-                LoadPageItems(CurrentPage - 1);
+                LoadPosts();
             }
         }
 
@@ -194,7 +282,7 @@ namespace Duo.ViewModels
             if (CurrentPage > 1)
             {
                 CurrentPage--;
-                LoadPageItems(CurrentPage - 1);
+                LoadPosts();
             }
         }
 
@@ -227,57 +315,17 @@ namespace Duo.ViewModels
                 }
             }
             
-            FilterPosts();
+            // Reset to first page and reload when hashtags change
+            CurrentPage = 1;
+            LoadPosts();
+            OnPropertyChanged(nameof(SelectedHashtags));
         }
 
         public void FilterPosts()
         {
-            var filteredPosts = AllPosts.Where(Filter).ToList();
-            
-            // Update pagination
-            TotalPages = (int)Math.Ceiling(filteredPosts.Count / (double)ItemsPerPage);
-            
-            // Reset to first page
-            LoadPageItems(0);
-            
-            OnPropertyChanged(nameof(TotalPages));
-        }
-
-        private bool Filter(Post post)
-        {
-            bool titleMatch = string.IsNullOrEmpty(FilterText) || 
-                post.Title.Contains(FilterText, StringComparison.InvariantCultureIgnoreCase);
-            
-            bool hashtagMatch = true;
-            if (_selectedHashtags.Count > 0 && !_selectedHashtags.Contains("All"))
-            {
-                // If "All" is not selected, need to check if post has selected hashtags
-                // Retrieve hashtags for this post
-                if (_postService != null)
-                {
-                    try
-                    {
-                        // Get hashtags for this post
-                        var hashtags = _postService.GetHashtagsByPostId(post.Id);
-                        var hashtagNames = hashtags.Select(h => h.Name).ToList();
-                        
-                        // Ensure all selected hashtags are present in the post
-                        hashtagMatch = _selectedHashtags.All(tag => hashtagNames.Contains(tag));
-                    }
-                    catch
-                    {
-                        // If there's an error retrieving hashtags, don't filter by hashtags
-                        hashtagMatch = false;
-                    }
-                }
-                else
-                {
-                    // If no post service, can't filter by hashtags
-                    hashtagMatch = false;
-                }
-            }
-            
-            return titleMatch && hashtagMatch;
+            // Reset to first page when filtering
+            CurrentPage = 1;
+            LoadPosts();
         }
 
         public void ClearFilters()
@@ -285,7 +333,8 @@ namespace Duo.ViewModels
             FilterText = string.Empty;
             _selectedHashtags.Clear();
             _selectedHashtags.Add("All");
-            FilterPosts();
+            CurrentPage = 1;
+            LoadPosts();
             OnPropertyChanged(nameof(SelectedHashtags));
         }
         
