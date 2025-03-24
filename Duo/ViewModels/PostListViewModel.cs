@@ -185,10 +185,10 @@ namespace Duo.ViewModels
                 // Check if we're filtering by hashtags
                 if (_selectedHashtags.Count > 0 && !_selectedHashtags.Contains("All"))
                 {
-                    // Get all posts that match the hashtag filter (without pagination to allow searching)
-                    allMatchingPosts = _postService.GetPostsByHashtags(_selectedHashtags.ToList(), 1, int.MaxValue);
+                    // Get posts by hashtags WITH pagination - we want to use database pagination here
+                    allMatchingPosts = _postService.GetPostsByHashtags(_selectedHashtags.ToList(), CurrentPage, ItemsPerPage);
                     
-                    // Get total count to calculate pages (this will be adjusted if search is applied)
+                    // Get total count to calculate pages
                     _totalPostCount = _postService.GetPostCountByHashtags(_selectedHashtags.ToList());
                 }
                 else if (_categoryID.HasValue && _categoryID.Value > 0)
@@ -280,6 +280,8 @@ namespace Duo.ViewModels
                     Posts.Add(post);
                 }
                 
+                System.Diagnostics.Debug.WriteLine($"Loaded {Posts.Count} posts for page {CurrentPage} out of {TotalPages} total pages");
+                
                 // Calculate total pages (minimum 1)
                 TotalPages = Math.Max(1, (int)Math.Ceiling(_totalPostCount / (double)ItemsPerPage));
                 
@@ -287,8 +289,8 @@ namespace Duo.ViewModels
             }
             catch (Exception ex)
             {
+                System.Diagnostics.Debug.WriteLine($"Error loading posts: {ex.Message}");
                 // Handle any errors that occurred during loading
-                // Could display an error message here
             }
         }
 
