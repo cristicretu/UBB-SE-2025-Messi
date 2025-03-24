@@ -44,7 +44,7 @@ namespace Duo.Repositories
             }
             catch (Exception ex)
             {
-                throw new Exception($"Error - GetHashtagByText: {ex.Message}");
+                return null; 
             }
             finally
             {
@@ -124,23 +124,33 @@ namespace Duo.Repositories
         {
             if (postId <= 0) throw new Exception("Error - AddHashtagToPost: PostId must be greater than 0");
             if (hashtagId <= 0) throw new Exception("Error - AddHashtagToPost: HashtagId must be greater than 0");
+            
             try
             {
+                // Add the hashtag to the post directly
                 var sqlParameters = new SqlParameter[]
                 {
                     new SqlParameter("@PostID", postId),
                     new SqlParameter("@HashtagID", hashtagId)
                 };
-                Debug.WriteLine("AddHashtagToPost: " + postId + " " + hashtagId);
+                
+                Debug.WriteLine($"AddHashtagToPost: Adding hashtag {hashtagId} to post {postId}");
                 var result = _dataLink.ExecuteNonQuery("AddHashtagToPost", sqlParameters);
-                if (result == 0) throw new Exception("Error - AddHashtagToPost: Hashtag could not be added to post!");
+                
+                if (result == 0)
+                {
+                    Debug.WriteLine("AddHashtagToPost: Hashtag could not be added to post!");
+                    throw new Exception("Error - AddHashtagToPost: Hashtag could not be added to post!");
+                }
+                
+                Debug.WriteLine($"AddHashtagToPost: Successfully added hashtag {hashtagId} to post {postId}");
                 return true;
             }
             catch (Exception ex)
             {
+                Debug.WriteLine($"AddHashtagToPost Error: {ex.Message}");
                 throw new Exception($"Error - AddHashtagToPost: {ex.Message}");
             }
-
         }
         public bool RemoveHashtagFromPost(int postId, int hashtagId)
         {

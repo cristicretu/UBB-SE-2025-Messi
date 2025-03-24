@@ -111,7 +111,8 @@ namespace Duo.ViewModels
 
                     if (string.IsNullOrEmpty(post.Date) && post.CreatedAt != default)
                     {
-                        post.Date = FormatDate(post.CreatedAt);
+                        DateTime localCreatedAt = Helpers.DateTimeHelper.ConvertUtcToLocal(post.CreatedAt);
+                        post.Date = FormatDate(localCreatedAt);
                     }
 
                     var hashtags = _postService.GetHashtagsByPostId(post.Id);
@@ -285,7 +286,8 @@ namespace Duo.ViewModels
 
         private string FormatDate(DateTime date)
         {
-            return date.ToString("MMM dd");
+            // This method assumes date is already in local time
+            return date.ToString("MMM dd, yyyy HH:mm");
         }
 
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)

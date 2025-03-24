@@ -211,7 +211,7 @@ namespace Duo.ViewModels
                     foreach (var post in allMatchingPosts)
                     {
 
-                        if (App._searchService.Search(FilterText, new[] { post.Title }).Any())
+                        if (App._searchService.FindFuzzySearchMatches(FilterText, new[] { post.Title }).Any())
                         {
                             searchResults.Add(post);
                         }
@@ -234,9 +234,10 @@ namespace Duo.ViewModels
                         var user = App.userService.GetUserById(post.UserID);
                         post.Username = user?.Username ?? "Unknown User";
                     }
-
-                    post.Date = Helpers.DateTimeHelper.GetRelativeTime(post.CreatedAt);
-
+                    
+                    DateTime localCreatedAt = Helpers.DateTimeHelper.ConvertUtcToLocal(post.CreatedAt);
+                    post.Date = Helpers.DateTimeHelper.GetRelativeTime(localCreatedAt);
+                    
                     post.Hashtags.Clear();
                     try 
                     {

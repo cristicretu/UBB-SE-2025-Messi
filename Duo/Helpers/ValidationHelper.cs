@@ -95,5 +95,74 @@ namespace Duo.Helpers
 
             return true;
         }
+
+
+        public static (bool IsValid, string ErrorMessage) ValidatePostTitle(string title)
+        {
+            if (string.IsNullOrWhiteSpace(title))
+            {
+                return (false, "Title cannot be empty.");
+            }
+            
+            if (title.Length < 3)
+            {
+                return (false, "Title should be at least 3 characters long.");
+            }
+            
+            if (title.Length > 100)
+            {
+                return (false, "Title cannot exceed 100 characters.");
+            }
+            
+            return (true, string.Empty);
+        }
+
+        public static (bool IsValid, string ErrorMessage) ValidatePostContent(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return (false, "Content cannot be empty.");
+            }
+            
+            if (content.Length < 10)
+            {
+                return (false, "Content should be at least 10 characters long.");
+            }
+            
+            if (content.Length > 4000)
+            {
+                return (false, "Content cannot exceed 4000 characters.");
+            }
+            
+            return (true, string.Empty);
+        }
+
+        public static (bool IsValid, string ErrorMessage) ValidateHashtagInput(string hashtag)
+        {
+            if (string.IsNullOrWhiteSpace(hashtag))
+            {
+                return (true, string.Empty); 
+            }
+            
+            string cleanHashtag = hashtag.StartsWith("#") ? hashtag.Substring(1) : hashtag;
+            
+            if (string.IsNullOrWhiteSpace(cleanHashtag))
+            {
+                return (false, "Hashtag cannot be just a # symbol.");
+            }
+            
+            if (!Regex.IsMatch(cleanHashtag, @"^[a-zA-Z0-9]+$"))
+            {
+                return (false, "Hashtag can only contain letters and numbers.");
+            }
+            
+            if (cleanHashtag.Length > 30)
+            {
+                return (false, "Hashtag cannot exceed 30 characters.");
+            }
+            
+            return (true, string.Empty);
+        }
+
     }
 }
