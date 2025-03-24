@@ -5,6 +5,7 @@ using System.Data;
 using System.Collections.ObjectModel;
 using Duo.Models;
 using Duo.Data;
+using System.Diagnostics;
 
 namespace Duo.Repositories
 {
@@ -155,6 +156,7 @@ namespace Duo.Repositories
                 };
                 dataTable = _dataLink.ExecuteReader("GetHashtagsForPost", sqlParameters);
                 // if (dataTable.Rows.Count == 0) throw new Exception("Error - GetHashtagsByPostId: No records found");
+                Debug.WriteLine("am aj  ");
                 List<Hashtag> hashtags = new List<Hashtag>();
                 foreach (DataRow row in dataTable.Rows)
                 {
@@ -193,6 +195,7 @@ namespace Duo.Repositories
                     new SqlParameter("@PostID", postId),
                     new SqlParameter("@HashtagID", hashtagId)
                 };
+                Debug.WriteLine("AddHashtagToPost: " + postId + " " + hashtagId);
                 var result = _dataLink.ExecuteNonQuery("AddHashtagToPost", sqlParameters);
                 if (result == 0) throw new Exception("Error - AddHashtagToPost: Hashtag could not be added to post!");
                 return true;
@@ -227,6 +230,87 @@ namespace Duo.Repositories
         public Hashtag GetHashtagByName(string name)
         {
             return GetHashtagByText(name);
+        }
+        
+        public List<Hashtag> GetAllHashtags()
+        {
+            DataTable? dataTable = null;
+
+            try
+            {
+                dataTable = _dataLink.ExecuteReader("GetAllHashtags");
+                
+                List<Hashtag> hashtags = new List<Hashtag>();
+                
+                foreach (DataRow row in dataTable.Rows)
+                {
+                    var tag = row["Tag"]?.ToString();
+                    if (tag == null)
+                    {
+                        continue;
+                    }
+                    
+                    Hashtag hashtag = new Hashtag(
+                        Convert.ToInt32(row["Id"]),
+                        tag
+                    );
+                    hashtags.Add(hashtag);
+                }
+                
+                return hashtags;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error - GetAllHashtags: {ex.Message}");
+            }
+            finally
+            {
+                dataTable?.Dispose();
+            }
+        }
+        
+        public List<Hashtag> GetHashtagsByCategory(int categoryId)
+        {
+            if (categoryId <= 0) throw new Exception("Error - GetHashtagsByCategory: CategoryId must be greater than 0");
+            
+            DataTable? dataTable = null;
+
+            try
+            {
+                var sqlParameters = new SqlParameter[]
+                {
+                    new SqlParameter("@CategoryID", categoryId)
+                };
+                
+                dataTable = _dataLink.ExecuteReader("GetHashtagsByCategory", sqlParameters);
+                
+                List<Hashtag> hashtags = new List<Hashtag>();
+                
+                foreach (DataRow row in dataTable.Rows)
+                {
+                    var tag = row["Tag"]?.ToString();
+                    if (tag == null)
+                    {
+                        continue;
+                    }
+                    
+                    Hashtag hashtag = new Hashtag(
+                        Convert.ToInt32(row["Id"]),
+                        tag
+                    );
+                    hashtags.Add(hashtag);
+                }
+                
+                return hashtags;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error - GetHashtagsByCategory: {ex.Message}");
+            }
+            finally
+            {
+                dataTable?.Dispose();
+            }
         }
     }
 }

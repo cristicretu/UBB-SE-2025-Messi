@@ -130,8 +130,11 @@ namespace Duo.Views.Pages
         
         private void Comment_ReplySubmitted(object sender, CommentReplyEventArgs e)
         {
+            // Add debugging to track the event source
+            System.Diagnostics.Debug.WriteLine($"Reply submitted event received from {sender.GetType().Name} for parent comment ID: {e.ParentCommentId}");
+            
             // Add a reply to the comment
-            ViewModel.AddReplyToComment(e.ParentCommentId, e.CommentText);
+            ViewModel.AddReplyToComment(e.ParentCommentId, e.ReplyText);
         }
         
         private void Comment_CommentLiked(object sender, CommentLikedEventArgs e)

@@ -6,8 +6,10 @@
     xmlns:local="using:Duo.Views.Components"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:controls="using:Microsoft.UI.Xaml.Controls"
     mc:Ignorable="d"
-    HorizontalAlignment="Stretch">
+    HorizontalAlignment="Stretch"
+    Margin="0,0,0,0">
 
     <StackPanel 
         HorizontalAlignment="Stretch" 
@@ -24,16 +26,25 @@
             <ItemsRepeater 
                 x:Name="LevelLinesRepeater" 
                 Grid.Column="0" 
-                HorizontalAlignment="Left">
+                HorizontalAlignment="Left"
+                Margin="0">
                 <ItemsRepeater.ItemTemplate>
                     <DataTemplate>
                         <Border 
-                            Width="1" 
-                            Height="Auto" 
-                            Margin="16,0,0,0"
-                            VerticalAlignment="Stretch" 
-                            Background="{ThemeResource SystemControlForegroundBaseLowBrush}" 
-                            Opacity="0.5"/> 
+                            Width="20" 
+                            Height="Auto"
+                            Padding="0"
+                            Margin="0"
+                            VerticalAlignment="Stretch">
+                            <Border 
+                                Width="1" 
+                                MinHeight="100%"
+                                Margin="8,0,0,0"
+                                VerticalAlignment="Stretch" 
+                                HorizontalAlignment="Center"
+                                Background="{ThemeResource SystemControlForegroundBaseLowBrush}" 
+                                Opacity="0.75"/> 
+                        </Border>
                     </DataTemplate>
                 </ItemsRepeater.ItemTemplate>
                 <ItemsRepeater.Layout>
@@ -45,7 +56,7 @@
             <StackPanel 
                 Grid.Column="1" 
                 Padding="12" 
-                Spacing="10" 
+                Spacing="8" 
                 HorizontalAlignment="Stretch">
                 
                 <!-- User info and date row -->
@@ -88,13 +99,29 @@
                     CommentSubmitted="ReplyInput_CommentSubmitted"
                     Visibility="Collapsed"
                     Margin="0,8,0,0"/>
+                
+                <!-- Expand/collapse button -->
+                <Grid HorizontalAlignment="Stretch">
+                    <Button 
+                        x:Name="ToggleChildrenButton"
+                        Click="ToggleChildrenButton_Click"
+                        HorizontalAlignment="Right"
+                        Padding="4"
+                        CornerRadius="999"
+                        Background="Transparent"
+                        BorderThickness="1"
+                        BorderBrush="{ThemeResource SystemBaseMediumLowColor}"
+                        Visibility="Collapsed">
+                        <FontIcon x:Name="ToggleIcon" Glyph="&#xE109;" FontSize="12"/> <!-- Plus icon by default -->
+                    </Button>
+                </Grid>
             </StackPanel>
         </Grid>
         
         <!-- Container for child comments -->
         <StackPanel 
             x:Name="ChildCommentsPanel" 
-            HorizontalAlignment="Stretch" 
+            HorizontalAlignment="Stretch"
             Spacing="0"/>
     </StackPanel>
 </UserControl> 

@@ -107,7 +107,7 @@ namespace Duo.Views.Components
                 {
                     if (App._postService.LikePost(PostId))
                     {
-                        LikeCount++;
+                       // LikeCount++;
                         
                         if (_likeButton != null)
                         {
