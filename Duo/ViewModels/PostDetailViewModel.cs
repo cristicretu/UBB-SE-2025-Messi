@@ -24,6 +24,7 @@ namespace Duo.ViewModels
         private string _lastProcessedReply;
         
         // Dictionary to track collapsed comments by their ID
+        //When adding a comment or reply, the code calls LoadComments(Post.Id) which reloads all comments and resets their collapsed state. We need to track which comments are collapsed and restore this state after reloading.
         public static Dictionary<int, bool> CollapsedComments { get; } = new Dictionary<int, bool>();
 
         public event PropertyChangedEventHandler PropertyChanged;
