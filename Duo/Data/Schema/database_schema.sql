@@ -20,7 +20,6 @@ INSERT INTO Categories (Id, Name) VALUES
 (4, 'Discover'),
 (5, 'Announcements');
 
-
 CREATE TABLE Posts (
     Id INT IDENTITY(1,1) PRIMARY KEY,
     Title NVARCHAR(20) NOT NULL,
@@ -30,7 +29,7 @@ CREATE TABLE Posts (
     CreatedAt DATETIME DEFAULT GETDATE(),
     UpdatedAt DATETIME DEFAULT GETDATE(),
     LikeCount INT DEFAULT 0,
-    
+
     CONSTRAINT fk_user FOREIGN KEY (userID) REFERENCES Users(userID) ON DELETE CASCADE,
     CONSTRAINT fk_category FOREIGN KEY (CategoryID) REFERENCES Categories(Id) ON DELETE CASCADE
 );
@@ -62,13 +61,11 @@ CREATE TABLE Comments (
     CONSTRAINT fk_parent_comment FOREIGN KEY (ParentCommentID) REFERENCES Comments(Id) on delete no action
 );
 
-
 <-- Insert section -->
 
 insert into Users values ('Andrei') , ('Ion'), ('Maria'), ('Alex'), ('Elena'), ('Gabriel'), ('Sofia'), ('Matei'), ('Ana'), ('David'), ('Ioana'), ('Luca'), ('Bianca');
 
 insert into Hashtags values ('a'), ('Mac'), ('Tech'), ('Innovation'), ('AI'), ('MachineLearning'), ('Coding'), ('Cybersecurity'), ('CloudComputing'), ('WebDevelopment'), ('MobileTech'), ('FutureOfTech');
-
 
 INSERT INTO Posts (Title, Description, UserID, CategoryID) VALUES
 ('New Gadget', 'A review of the latest tech gadget.', 1, 1),
@@ -90,8 +87,6 @@ INSERT INTO Posts (Title, Description, UserID, CategoryID) VALUES
 ('New York City Guide', 'My recommendations for visiting New York City.', 3, 2),
 ('Sushi Night', 'Enjoying a delightful sushi dinner.', 2, 3),
 ('VR Development', 'Getting started with Virtual Reality development.', 4, 1);
-
-
 
 INSERT INTO Comments (Content, UserID, PostID, ParentCommentID, Level) VALUES
 ('Great post!', 1, 1, NULL, 1);
@@ -162,8 +157,6 @@ INSERT INTO Comments (Content, UserID, PostID, ParentCommentID, Level) VALUES
 ('Great discussion.', 1, 9, NULL, 1);
 INSERT INTO Comments (Content, UserID, PostID, ParentCommentID, Level) VALUES
 ('Really useful information!', 2, 10, NULL, 1);
-
-
 
 INSERT INTO PostHashtags (PostID, HashtagID) VALUES
 (1, 3),  -- New Gadget -> Tech

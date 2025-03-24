@@ -19,45 +19,14 @@ namespace Duo.Services
             _userService = userService ?? throw new ArgumentNullException(nameof(userService));
         }
 
-        public Comment GetCommentById(int id)
-        {
-            if (id <= 0) throw new ArgumentException("Invalid comment ID", nameof(id));
-
-            try
-            {
-                var comment = _commentRepository.GetCommentById(id);
-
-                // Add username to the comment
-                try
-                {
-                    User user = _userService.GetUserById(comment.UserId);
-                    comment.Username = user.Username;
-                }
-                catch (Exception)
-                {
-                    comment.Username = "Unknown User";
-                }
-
-                return comment;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Error retrieving comment with ID {id}: {ex.Message}", ex);
-            }
-        }
-
         public List<Comment> GetCommentsByPostId(int postId)
         {
             if (postId <= 0) throw new ArgumentException("Invalid post ID", nameof(postId));
 
             try
             {
-                System.Diagnostics.Debug.WriteLine($"CommentService: Getting comments for post ID {postId}");
-                
-                var comments = _commentRepository.GetCommentsByPostId(postId);
-                System.Diagnostics.Debug.WriteLine($"CommentService: Retrieved {comments?.Count ?? 0} comments from repository");
+                var comments = _commentRepository.GetCommentsByPostId(postId);   
 
-                // Add usernames to the comments
                 if (comments != null && comments.Count > 0)
                 {
                     foreach (var comment in comments)
@@ -66,41 +35,24 @@ namespace Duo.Services
                         {
                             User user = _userService.GetUserById(comment.UserId);
                             comment.Username = user.Username;
-                            System.Diagnostics.Debug.WriteLine($"CommentService: Set username '{user.Username}' for comment ID {comment.Id}");
+                            
                         }
                         catch (Exception ex)
                         {
-                            System.Diagnostics.Debug.WriteLine($"CommentService: Error getting username for comment ID {comment.Id}: {ex.Message}");
-                            comment.Username = "Unknown User";
+                            throw new Exception(ex.Message);
                         }
                     }
                 }
                 else
                 {
-                    System.Diagnostics.Debug.WriteLine($"CommentService: No comments found for post ID {postId}");
+                    return new List<Comment>();
                 }
 
                 return comments;
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"CommentService: Error retrieving comments: {ex.Message}");
-                System.Diagnostics.Debug.WriteLine($"CommentService: Stack trace: {ex.StackTrace}");
                 throw new Exception($"Error retrieving comments for post ID {postId}: {ex.Message}", ex);
-            }
-        }
-
-        public List<Comment> GetRepliesByCommentId(int commentId)
-        {
-            if (commentId <= 0) throw new ArgumentException("Invalid comment ID", nameof(commentId));
-
-            try
-            {
-                return _commentRepository.GetRepliesByCommentId(commentId);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Error retrieving replies for comment ID {commentId}: {ex.Message}", ex);
             }
         }
 
@@ -111,11 +63,9 @@ namespace Duo.Services
 
             try
             {
-                // Validate comment count for the post
                 ValidateCommentCount(postId);
 
-                // Determine comment level
-                int level = 1; // Default level for top-level comments
+                int level = 1; 
                 if (parentCommentId.HasValue)
                 {
                     var parentComment = _commentRepository.GetCommentById(parentCommentId.Value);
@@ -124,10 +74,8 @@ namespace Duo.Services
                     level = parentComment.Level + 1;
                 }
 
-                // Retrieve the current user
                 User user = _userService.GetCurrentUser();
 
-                // Create the comment
                 var comment = new Comment
                 {
                     Content = content,
@@ -143,25 +91,6 @@ namespace Duo.Services
             catch (Exception ex)
             {
                 throw new Exception($"Error creating comment: {ex.Message}", ex);
-            }
-        }
-
-        public bool UpdateComment(int commentId, string content)
-        {
-            if (commentId <= 0) throw new ArgumentException("Invalid comment ID", nameof(commentId));
-            if (string.IsNullOrWhiteSpace(content)) throw new ArgumentException("Content cannot be empty", nameof(content));
-
-            try
-            {
-                var comment = _commentRepository.GetCommentById(commentId);
-                if (comment == null) throw new Exception("Comment not found");
-
-                comment.Content = content;
-                return _commentRepository.UpdateComment(comment);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Error updating comment with ID {commentId}: {ex.Message}", ex);
             }
         }
 

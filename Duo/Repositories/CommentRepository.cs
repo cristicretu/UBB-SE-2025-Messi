@@ -69,17 +69,14 @@ namespace Duo.Repositories
                 new SqlParameter("@PostID", postId)
             };
 
-            System.Diagnostics.Debug.WriteLine($"CommentRepository: Getting comments for post ID {postId}");
-            
             DataTable? dataTable = null;
             try
             {
                 dataTable = _dataLink.ExecuteReader("GetCommentsByPostID", parameters);
-                System.Diagnostics.Debug.WriteLine($"CommentRepository: Query executed, retrieved {dataTable?.Rows?.Count ?? 0} rows");
-                
+
                 if (dataTable.Columns.Count < 8)
                 {
-                    System.Diagnostics.Debug.WriteLine($"CommentRepository: Invalid data structure, only {dataTable.Columns.Count} columns returned");
+                    
                     throw new Exception("Invalid data structure returned from database");
                 }
 
@@ -99,27 +96,23 @@ namespace Duo.Repositories
                             Convert.ToInt32(row[6])
                         );
                         comments.Add(comment);
-                        System.Diagnostics.Debug.WriteLine($"CommentRepository: Added comment ID {commentId} to result list");
+                        
                     }
                     catch (Exception ex)
                     {
-                        System.Diagnostics.Debug.WriteLine($"CommentRepository: Error processing comment row: {ex.Message}");
+                        throw new Exception(ex.Message);
                     }
                 }
-                System.Diagnostics.Debug.WriteLine($"CommentRepository: Returning {comments.Count} comments");
+                
                 return comments;
             }
             catch (SqlException ex)
             {
-                System.Diagnostics.Debug.WriteLine($"CommentRepository: SQL error getting comments: {ex.Message}");
-                System.Diagnostics.Debug.WriteLine($"CommentRepository: SQL error number: {ex.Number}");
                 throw new Exception(ex.Message);
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"CommentRepository: General error getting comments: {ex.Message}");
-                System.Diagnostics.Debug.WriteLine($"CommentRepository: Stack trace: {ex.StackTrace}");
-                throw;
+                throw new Exception(ex.Message);
             }
             finally
             {
@@ -166,7 +159,7 @@ namespace Duo.Repositories
             {
                 new SqlParameter("@CommentID", id)
             };
-            
+
             try
             {
                 _dataLink.ExecuteNonQuery("DeleteComment", parameters);
@@ -218,29 +211,6 @@ namespace Duo.Repositories
             finally
             {
                 dataTable?.Dispose();
-            }
-        }
-
-        public bool UpdateComment(Comment comment)
-        {
-            if (comment == null) throw new ArgumentNullException(nameof(comment));
-            if (comment.Id <= 0) throw new ArgumentException("Invalid comment ID");
-            if (string.IsNullOrEmpty(comment.Content)) throw new ArgumentException("Content cannot be empty");
-
-            SqlParameter[] parameters = new SqlParameter[]
-            {
-                new SqlParameter("@CommentID", comment.Id),
-                new SqlParameter("@NewContent", comment.Content),
-            };
-
-            try
-            {
-                _dataLink.ExecuteNonQuery("UpdateComment", parameters);
-                return true;
-            }
-            catch (SqlException ex)
-            {
-                throw new Exception(ex.Message);
             }
         }
 

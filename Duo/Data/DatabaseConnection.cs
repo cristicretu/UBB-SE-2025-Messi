@@ -45,7 +45,7 @@ namespace Duo.Data
                 sqlConnection.Close();
             }
         }
-       
+
         public T? ExecuteScalar<T>(string storedProcedure, SqlParameter[]? sqlParameters = null)
         {
             try
@@ -54,18 +54,18 @@ namespace Duo.Data
                 using (SqlCommand command = new SqlCommand(storedProcedure, sqlConnection))
                 {
                     command.CommandType = CommandType.StoredProcedure;
-                   
+
                     if (sqlParameters != null)
                     {
                         command.Parameters.AddRange(sqlParameters);
                     }
-                   
+
                     var result = command.ExecuteScalar();
                     if (result == DBNull.Value || result == null)
                     {
                         return default;
                     }
-                   
+
                     return (T)Convert.ChangeType(result, typeof(T));
                 }
             }
@@ -87,12 +87,12 @@ namespace Duo.Data
                 using (SqlCommand command = new SqlCommand(storedProcedure, sqlConnection))
                 {
                     command.CommandType = CommandType.StoredProcedure;
-                   
+
                     if (sqlParameters != null)
                     {
                         command.Parameters.AddRange(sqlParameters);
                     }
-                   
+
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
                         DataTable dataTable = new DataTable();
@@ -119,12 +119,12 @@ namespace Duo.Data
                 using (SqlCommand command = new SqlCommand(storedProcedure, sqlConnection))
                 {
                     command.CommandType = CommandType.StoredProcedure;
-                   
+
                     if (sqlParameters != null)
                     {
                         command.Parameters.AddRange(sqlParameters);
                     }
-                   
+
                     return command.ExecuteNonQuery();
                 }
             }

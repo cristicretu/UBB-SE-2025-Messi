@@ -11,7 +11,7 @@ namespace Duo.Models
             Description = string.Empty;
             Hashtags = new List<string>();
         }
-        
+
         public int Id { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
@@ -20,11 +20,10 @@ namespace Duo.Models
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
         public int LikeCount { get; set; }
-        
-        // Added properties to resolve compilation errors
-        public string Content { get => Description; set => Description = value; } // Map Content to Description
-        public string Username { get; set; } // For user display name
-        public string Date { get; set; } // For formatted date display
-        public List<string> Hashtags { get; set; } = new List<string>(); // For storing hashtag strings
+
+        public string Content { get => Description; set => Description = value; } 
+        public string Username { get; set; } 
+        public string Date { get; set; } 
+        public List<string> Hashtags { get; set; } = new List<string>(); 
     }
 }

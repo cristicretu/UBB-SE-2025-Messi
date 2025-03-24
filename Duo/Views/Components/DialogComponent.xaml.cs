@@ -24,7 +24,6 @@ namespace Duo.Views.Components
                 DefaultButton = ContentDialogButton.Primary
             };
 
-            // Apply accent button style to the confirmation button
             dialog.PrimaryButtonStyle = Application.Current.Resources["AccentButtonStyle"] as Style;
 
             ContentDialogResult result = await dialog.ShowAsync();

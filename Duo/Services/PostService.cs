@@ -25,7 +25,6 @@ namespace Duo.Services
             _searchService = searchService;
         }
 
-        // Common methods (unchanged)
         public int CreatePost(Post post)
         {
             if (string.IsNullOrWhiteSpace(post.Title) || string.IsNullOrWhiteSpace(post.Description))
@@ -112,11 +111,6 @@ namespace Duo.Services
             }
         }
 
-        public List<Post> GetAllPosts()
-        {
-            return _postRepository.GetAllPosts();
-        }
-
         public List<Post> GetPaginatedPosts(int page, int pageSize)
         {
             if (page < 1 || pageSize < 1)
@@ -165,19 +159,18 @@ namespace Duo.Services
 
         public int GetPostCountByHashtags(List<string> hashtags)
         {
-            // Handle empty hashtag list case
+
             if (hashtags == null || hashtags.Count == 0)
             {
                 return GetTotalPostCount();
             }
-            
-            // Handle invalid hashtag values
+
             hashtags = hashtags.Where(h => !string.IsNullOrWhiteSpace(h)).ToList();
             if (hashtags.Count == 0)
             {
                 return GetTotalPostCount();
             }
-            
+
             try
             {
                 return _postRepository.GetPostCountByHashtags(hashtags);
@@ -206,7 +199,7 @@ namespace Duo.Services
             {
                 throw new ArgumentException("Invalid Category ID.");
             }
-            
+
             try
             {
                 return _hashtagRepository.GetHashtagsByCategory(categoryId);
@@ -217,38 +210,18 @@ namespace Duo.Services
             }
         }
 
-        // Unique methods from alex/PostSearch
-        public List<Post> GetPostsByUser(int userId, int page, int pageSize)
-        {
-            if (userId <= 0 || page < 1 || pageSize < 1)
-            {
-                throw new ArgumentException("Invalid pagination parameters.");
-            }
-
-            try
-            {
-                return _postRepository.GetByUser(userId, page, pageSize);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Error retrieving posts for user {userId}: {ex.Message}");
-            }
-        }
-
         public List<Post> GetPostsByHashtags(List<string> hashtags, int page, int pageSize)
         {
             if (page < 1 || pageSize < 1)
             {
                 throw new ArgumentException("Invalid pagination parameters.");
             }
-            
-            // Handle empty hashtag list case
+
             if (hashtags == null || hashtags.Count == 0)
             {
                 return GetPaginatedPosts(page, pageSize);
             }
-            
-            // Handle invalid hashtag values
+
             hashtags = hashtags.Where(h => !string.IsNullOrWhiteSpace(h)).ToList();
             if (hashtags.Count == 0)
             {
@@ -265,31 +238,12 @@ namespace Duo.Services
             }
         }
 
-        public List<Post> SearchPostsByKeyword(string keyword)
-        {
-            if (string.IsNullOrEmpty(keyword))
-                return new List<Post>();
-
-            List<string> allTitles = _postRepository.GetAllPostTitles();
-            List<string> matchingTitles = _searchService.Search(keyword, allTitles, 0.6);
-
-            List<Post> results = new List<Post>();
-            foreach (string title in matchingTitles)
-            {
-                List<Post> postsWithTitle = _postRepository.GetByTitle(title);
-                results.AddRange(postsWithTitle);
-            }
-
-            return results;
-        }
-
         public bool ValidatePostOwnership(int currentUserId, int currentPostId)
         {
             int? postUserId = _postRepository.GetUserIdByPostId(currentPostId);
             return currentUserId == postUserId;
         }
 
-        // Unique methods from main
         public List<Hashtag> GetHashtagsByPostId(int postId)
         {
             if (postId <= 0) throw new ArgumentException("Invalid Post ID.");
@@ -315,7 +269,7 @@ namespace Duo.Services
                 if (post == null) throw new Exception("Post not found");
 
                 post.LikeCount++;
-                // Display the post like count
+
                 Debug.WriteLine($"Post like count: {post.LikeCount}");
                 _postRepository.UpdatePost(post);
                 return true;
@@ -362,20 +316,6 @@ namespace Duo.Services
             catch (Exception ex)
             {
                 throw new Exception($"Error removing hashtag from post with ID {postId}: {ex.Message}");
-            }
-        }
-
-        public bool IncrementPostLikeCount(int postId)
-        {
-            if (postId <= 0) throw new ArgumentException("Invalid Post ID.");
-
-            try
-            {
-                return _postRepository.IncrementPostLikeCount(postId);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Error incrementing like count for post with ID {postId}: {ex.Message}");
             }
         }
     }

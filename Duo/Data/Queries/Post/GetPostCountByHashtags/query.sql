@@ -3,12 +3,12 @@ CREATE OR ALTER PROCEDURE GetPostCountByHashtags
 AS
 BEGIN
     SET NOCOUNT ON;
-    
+
     DECLARE @HashtagTable TABLE (Hashtag NVARCHAR(100));
-    
+
     INSERT INTO @HashtagTable
     SELECT value FROM STRING_SPLIT(@Hashtags, ',');
-    
+
     SELECT COUNT(DISTINCT p.Id) AS HashtagPostCount
     FROM Posts p
     INNER JOIN PostHashtags ph ON p.Id = ph.PostId

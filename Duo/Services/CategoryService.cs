@@ -23,7 +23,7 @@ namespace Duo.Services
             catch (Exception ex)
             {
                 Console.WriteLine($"Error fetching categories: {ex.Message}");
-                return new List<Category>(); // Return empty list if error occurs
+                return new List<Category>(); 
             }
         }
 

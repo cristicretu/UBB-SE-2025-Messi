@@ -46,7 +46,6 @@ namespace Duo.Repositories
             return categories;
         }
 
-
         public Category GetCategoryByName(string name)
         {
             try
@@ -73,7 +72,6 @@ namespace Duo.Repositories
                 throw new Exception($"Error fetching category '{name}': {ex.Message}");
             }
         }
-
 
     }
 }

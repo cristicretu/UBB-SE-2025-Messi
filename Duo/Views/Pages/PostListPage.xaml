@@ -56,7 +56,7 @@
                 </Setter.Value>
             </Setter>
         </Style>
-        
+
         <Style x:Key="SelectedHashtagButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="{ThemeResource SystemControlBackgroundAccentBrush}"/>
             <Setter Property="Foreground" Value="White"/>
@@ -149,7 +149,7 @@
                   Margin="0,0,0,6"
                   Fill="{ThemeResource SystemControlForegroundBaseLowBrush}" 
                   HorizontalAlignment="Stretch"/>
-        
+
         <!-- Hashtags ScrollViewer -->
         <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,6">
             <Grid.RowDefinitions>
@@ -160,7 +160,7 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-                       
+
             <ScrollViewer x:Name="HashtagsScrollViewer" Grid.Row="2" Grid.Column="0"
                 Height="60"
                 ZoomMode="Disabled"
@@ -172,7 +172,7 @@
                 VerticalScrollBarVisibility="Disabled"
                 Padding="0,6"
                 Background="Transparent">
-                
+
                 <ItemsControl x:Name="HashtagsContainer">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>

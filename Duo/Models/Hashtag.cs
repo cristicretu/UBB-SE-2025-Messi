@@ -25,8 +25,7 @@ namespace Duo.Models
             get { return _tag; }
             set { _tag = value; }
         }
-        
-        // Add Name property that maps to Tag
+
         public string Name
         {
             get { return _tag; }
