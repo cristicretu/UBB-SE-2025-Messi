@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
+using System.Linq;
 using Microsoft.Data.SqlClient;
 using Duo.Models;
 using Duo.Data;
@@ -339,8 +340,30 @@ namespace Duo.Repositories
 
         public List<Post> GetByHashtags(List<string> hashtags, int page, int pageSize)
         {
+            if (hashtags == null || hashtags.Count == 0)
+            {
+                System.Diagnostics.Debug.WriteLine("GetByHashtags called with empty hashtags, returning all posts");
+                return GetPaginatedPosts(page, pageSize);
+            }
+            
+            // Normalize hashtags to lowercase to avoid case sensitivity issues
+            hashtags = hashtags
+                .Where(h => !string.IsNullOrWhiteSpace(h))
+                .Select(h => h.Trim().ToLowerInvariant())
+                .ToList();
+            
             string hashtagsString = string.Join(",", hashtags);
             int offset = (page - 1) * pageSize;
+            
+            System.Diagnostics.Debug.WriteLine($"GetByHashtags for PAGE {page} with OFFSET {offset}");
+            System.Diagnostics.Debug.WriteLine($"GetByHashtags procedure parameters: Hashtags={hashtagsString}, PageSize={pageSize}, Offset={offset}");
+            
+            // If after filtering we have no valid hashtags, return all posts
+            if (string.IsNullOrWhiteSpace(hashtagsString) || hashtags.Count == 0)
+            {
+                System.Diagnostics.Debug.WriteLine("GetByHashtags: After filtering, no valid hashtags remain");
+                return GetPaginatedPosts(page, pageSize);
+            }
 
             SqlParameter[] parameters = new SqlParameter[]
             {
@@ -351,6 +374,7 @@ namespace Duo.Repositories
 
             try
             {
+                System.Diagnostics.Debug.WriteLine($"Calling SQL procedure 'GetByHashtags' with parameters: @Hashtags='{hashtagsString}', @PageSize={pageSize}, @Offset={offset}");
                 DataTable dataTable = dataLink.ExecuteReader("GetByHashtags", parameters);
                 List<Post> posts = new List<Post>();
 
@@ -369,11 +393,21 @@ namespace Duo.Repositories
                     });
                 }
 
+                System.Diagnostics.Debug.WriteLine($"GetByHashtags returned {posts.Count} posts for page {page}");
+                if (posts.Count > 0)
+                {
+                    System.Diagnostics.Debug.WriteLine($"First post ID: {posts[0].Id}, Title: {posts[0].Title}");
+                }
                 return posts;
             }
             catch (Exception ex)
             {
-                throw new Exception($"GetByHashtags: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"GetByHashtags EXCEPTION: {ex.GetType().Name}: {ex.Message}");
+                if (ex is SqlException sqlEx)
+                {
+                    System.Diagnostics.Debug.WriteLine($"SQL Error Number: {sqlEx.Number}, SQL State: {sqlEx.State}, Procedure: {sqlEx.Procedure}");
+                }
+                throw new Exception($"GetByHashtags: {ex.Message}", ex);
             }
         }
 
@@ -397,6 +431,138 @@ namespace Duo.Repositories
             catch (SqlException ex)
             {
                 throw new Exception(ex.Message);
+            }
+        }
+
+        public List<Post> GetPaginatedPosts(int page, int pageSize)
+        {
+            if (page <= 0)
+            {
+                throw new ArgumentException("Page number must be greater than 0.");
+            }
+
+            if (pageSize <= 0)
+            {
+                throw new ArgumentException("Page size must be greater than 0.");
+            }
+
+            int offset = (page - 1) * pageSize;
+
+            SqlParameter[] parameters = new SqlParameter[]
+            {
+                new SqlParameter("@PageSize", pageSize),
+                new SqlParameter("@Offset", offset)
+            };
+
+            try
+            {
+                DataTable dataTable = dataLink.ExecuteReader("GetPaginatedPosts", parameters);
+                List<Post> posts = new List<Post>();
+
+                foreach (DataRow row in dataTable.Rows)
+                {
+                    posts.Add(new Post
+                    {
+                        Id = Convert.ToInt32(row["Id"]),
+                        Title = Convert.ToString(row["Title"]) ?? string.Empty,
+                        Description = Convert.ToString(row["Description"]) ?? string.Empty,
+                        UserID = Convert.ToInt32(row["UserID"]),
+                        CategoryID = Convert.ToInt32(row["CategoryID"]),
+                        CreatedAt = Convert.ToDateTime(row["CreatedAt"]),
+                        UpdatedAt = Convert.ToDateTime(row["UpdatedAt"]),
+                        LikeCount = Convert.ToInt32(row["LikeCount"])
+                    });
+                }
+
+                return posts;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"GetPaginatedPosts: {ex.Message}");
+            }
+        }
+
+        public int GetTotalPostCount()
+        {
+            try
+            {
+                object result = dataLink.ExecuteScalar<int>("GetTotalPostCount");
+                return result != null ? Convert.ToInt32(result) : 0;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"GetTotalPostCount: {ex.Message}");
+            }
+        }
+
+        public int GetPostCountByCategory(int categoryId)
+        {
+            if (categoryId <= 0)
+            {
+                throw new ArgumentException("Invalid category ID.");
+            }
+
+            SqlParameter[] parameters = new SqlParameter[]
+            {
+                new SqlParameter("@CategoryID", categoryId)
+            };
+
+            try
+            {
+                object result = dataLink.ExecuteScalar<int>("GetPostCountByCategory", parameters);
+                return result != null ? Convert.ToInt32(result) : 0;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"GetPostCountByCategory: {ex.Message}");
+            }
+        }
+
+        public int GetPostCountByHashtags(List<string> hashtags)
+        {
+            if (hashtags == null || hashtags.Count == 0)
+            {
+                System.Diagnostics.Debug.WriteLine("GetPostCountByHashtags called with empty hashtags, returning total count");
+                return GetTotalPostCount();
+            }
+            
+            // Normalize hashtags to lowercase to avoid case sensitivity issues
+            hashtags = hashtags
+                .Where(h => !string.IsNullOrWhiteSpace(h))
+                .Select(h => h.Trim().ToLowerInvariant())
+                .ToList();
+            
+            string hashtagsString = string.Join(",", hashtags);
+            System.Diagnostics.Debug.WriteLine($"GetPostCountByHashtags procedure parameter: Hashtags={hashtagsString}");
+            
+            // If after filtering we have no valid hashtags, return total count
+            if (string.IsNullOrWhiteSpace(hashtagsString) || hashtags.Count == 0)
+            {
+                System.Diagnostics.Debug.WriteLine("GetPostCountByHashtags: After filtering, no valid hashtags remain");
+                return GetTotalPostCount();
+            }
+
+            SqlParameter[] parameters = new SqlParameter[]
+            {
+                new SqlParameter("@Hashtags", hashtagsString)
+            };
+
+            try
+            {
+                System.Diagnostics.Debug.WriteLine($"Calling SQL procedure 'GetPostCountByHashtags' with parameter: @Hashtags='{hashtagsString}'");
+                object result = dataLink.ExecuteScalar<int>("GetPostCountByHashtags", parameters);
+                int count = result != null ? Convert.ToInt32(result) : 0;
+                System.Diagnostics.Debug.WriteLine($"GetPostCountByHashtags returned count: {count}");
+                return count;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"GetPostCountByHashtags EXCEPTION: {ex.GetType().Name}: {ex.Message}");
+                if (ex is SqlException sqlEx)
+                {
+                    System.Diagnostics.Debug.WriteLine($"SQL Error Number: {sqlEx.Number}, SQL State: {sqlEx.State}, Procedure: {sqlEx.Procedure}");
+                }
+                throw new Exception($"GetPostCountByHashtags: {ex.Message}", ex);
             }
         }
     }

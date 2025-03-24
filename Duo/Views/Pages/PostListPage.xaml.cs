@@ -70,54 +70,43 @@ namespace Duo.Views.Pages
             // Load posts
             _viewModel.LoadPosts();
             
-            // Load hashtags after posts are loaded
-            LoadHashtags();
+            // Load hashtags now uses AllHashtags from the ViewModel
+            UpdateHashtagsList();
         }
         
-        private void LoadHashtags()
+        private void UpdateHashtagsList()
         {
             // Clear existing items
             HashtagsContainer.Items.Clear();
             hashtagButtons.Clear();
 
-            // Get all distinct hashtags from posts
-            HashSet<string> distinctHashtags = new HashSet<string>();
-            foreach (var post in _viewModel.AllPosts)
+            // Use the AllHashtags from ViewModel which is now properly populated
+            if (_viewModel.AllHashtags != null)
             {
-                foreach (var hashtag in post.Hashtags)
+                // Create a button for each hashtag
+                foreach (var hashtag in _viewModel.AllHashtags)
                 {
-                    distinctHashtags.Add(hashtag);
+                    Button button = new Button
+                    {
+                        Content = hashtag == "All" ? "All" : $"#{hashtag}",
+                        Tag = hashtag,
+                        Style = _viewModel.SelectedHashtags.Contains(hashtag) ? 
+                            Resources["SelectedHashtagButtonStyle"] as Style : 
+                            Resources["HashtagButtonStyle"] as Style
+                    };
+                    
+                    button.Click += Hashtag_Click;
+                    HashtagsContainer.Items.Add(button);
+                    hashtagButtons[hashtag] = button;
                 }
-            }
-            
-            // Sort hashtags alphabetically
-            var sortedHashtags = distinctHashtags.OrderBy(h => h).ToList();
-            
-            // Add "All" hashtag at the beginning
-            sortedHashtags.Insert(0, "All");
-            
-            // Create a button for each hashtag
-            foreach (var hashtag in sortedHashtags)
-            {
-                Button button = new Button
-                {
-                    Content = hashtag == "All" ? "All" : $"#{hashtag}",
-                    Tag = hashtag,
-                    Style = _viewModel.SelectedHashtags.Contains(hashtag) ? 
-                        Resources["SelectedHashtagButtonStyle"] as Style : 
-                        Resources["HashtagButtonStyle"] as Style
-                };
-                
-                button.Click += Hashtag_Click;
-                HashtagsContainer.Items.Add(button);
-                hashtagButtons[hashtag] = button;
             }
         }
         
         private void PostsPager_SelectedIndexChanged(PipsPager sender, PipsPagerSelectedIndexChangedEventArgs args)
         {
-            // Load the appropriate page of items
-            _viewModel.LoadPageItems(sender.SelectedPageIndex);
+            // Update page in ViewModel and reload posts
+            _viewModel.CurrentPage = sender.SelectedPageIndex + 1;
+            _viewModel.LoadPosts();
         }
 
         private void OnFilterChanged(object sender, TextChangedEventArgs args)
@@ -134,6 +123,10 @@ namespace Duo.Views.Pages
                 
                 // Update UI to reflect changes
                 UpdateHashtagButtonStyles();
+                
+                // Update PipsPager to show correct number of pages
+                PostsPager.NumberOfPages = _viewModel.TotalPages;
+                PostsPager.SelectedPageIndex = _viewModel.CurrentPage - 1;
             }
         }
         
@@ -154,6 +147,10 @@ namespace Duo.Views.Pages
         {
             _viewModel.ClearFilters();
             UpdateHashtagButtonStyles();
+            
+            // Update PipsPager to show correct number of pages
+            PostsPager.NumberOfPages = _viewModel.TotalPages;
+            PostsPager.SelectedPageIndex = _viewModel.CurrentPage - 1;
         }
         
         private void FilteredListView_ItemClick(object sender, ItemClickEventArgs e)
