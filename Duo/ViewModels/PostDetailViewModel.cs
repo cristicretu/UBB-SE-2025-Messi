@@ -373,23 +373,49 @@ namespace Duo.ViewModels
 
         public CommentViewModel FindCommentById(int commentId)
         {
-            // First check top-level comments
+            // First, check top-level comments
             var comment = CommentViewModels.FirstOrDefault(c => c.Id == commentId);
-            
             if (comment != null)
-                return comment;
-                
-            // Check in replies recursively
-            foreach (var topComment in CommentViewModels)
             {
-                var foundComment = FindCommentInReplies(topComment.Replies, commentId);
-                if (foundComment != null)
-                    return foundComment;
+                return comment;
+            }
+            
+            // If not found in top-level, recursively search through replies
+            foreach (var topLevelComment in CommentViewModels)
+            {
+                var foundInReplies = FindCommentInReplies(topLevelComment.Replies, commentId);
+                if (foundInReplies != null)
+                {
+                    return foundInReplies;
+                }
             }
             
             return null;
         }
-        
+
+        public void LikeCommentById(int commentId)
+        {
+            try
+            {
+                // Call the service to persist the like to the database
+                bool success = _commentService.LikeComment(commentId);
+                
+                if (success)
+                {
+                    // Update the UI via the view model
+                    var commentViewModel = FindCommentById(commentId);
+                    if (commentViewModel != null)
+                    {
+                        commentViewModel.LikeComment();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"Failed to like comment: {ex.Message}";
+            }
+        }
+
         private CommentViewModel FindCommentInReplies(IEnumerable<CommentViewModel> replies, int commentId)
         {
             foreach (var reply in replies)

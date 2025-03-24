@@ -124,12 +124,8 @@ namespace Duo.Views.Pages
 
         private void CommentComponent_CommentLiked(object sender, CommentLikedEventArgs e)
         {
-            // Find the comment in our view models
-            var commentViewModel = ViewModel.FindCommentById(e.CommentId);
-            if (commentViewModel != null)
-            {
-                commentViewModel.LikeComment();
-            }
+            // Call the ViewModel method to like the comment and persist it to the database
+            ViewModel.LikeCommentById(e.CommentId);
         }
     }
 }
