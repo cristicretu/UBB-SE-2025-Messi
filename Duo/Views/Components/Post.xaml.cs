@@ -14,6 +14,7 @@ using CommunityToolkit.WinUI.UI.Controls;
 // is this the right way to access userService and its methods?
 using static Duo.App;
 using Duo.Views.Pages;
+using Duo.ViewModels;
 namespace Duo.Views.Components
 {
     public sealed partial class Post : UserControl
@@ -267,30 +268,51 @@ namespace Duo.Views.Components
             }
 
             // Handle the edit logic here
+            // Display Edit Post dialog with prefilled data
+            var dialogComponent = new DialogComponent();
+            var result = await dialogComponent.ShowEditPostDialog(
+                this.XamlRoot, 
+                this.Title,          // Pass the current post title
+                this.Content,        // Pass the current post content
+                [.. this.Hashtags]        // Convert IEnumerable<string> to List<string> before passing
+            );
 
-            bool succesfullyEdited = true; // Placeholder for actual success event
-            
-            if (succesfullyEdited)
+            // If the dialog returned successfully, update the post with the new data
+            if (result.Success)
             {
-                // Send/confirm
-                ContentDialog successDialog = new ContentDialog
+                try
                 {
-                    XamlRoot = this.XamlRoot,
-                    Title = "Edited",
-                    Content = "The item has been successfully edited.",
-                    CloseButtonText = "OK"
-                };
-                await successDialog.ShowAsync();
-            } else {
-                // Handle the error logic here
-                ContentDialog errorDialog = new ContentDialog
+                    // Update the post in the database or service
+                    // TODO - Implement the EditPost method in the PostService
+                    // _postService.EditPost(this.PostId, result.Title, result.Content, result.Hashtags);
+                    
+                    // Update the UI elements with the new data
+                    this.Title = result.Title;
+                    this.Content = result.Content;
+                    this.Hashtags = result.Hashtags;
+                    
+                    // Show success message
+                    ContentDialog successDialog = new ContentDialog
+                    {
+                        XamlRoot = this.XamlRoot,
+                        Title = "Updated",
+                        Content = "The post has been successfully updated.",
+                        CloseButtonText = "OK"
+                    };
+                    await successDialog.ShowAsync();
+                }
+                catch (Exception ex)
                 {
-                    XamlRoot = this.XamlRoot,
-                    Title = "Error",
-                    Content = "An error occurred while editing the item. Please try again.",
-                    CloseButtonText = "OK"
-                };
-                await errorDialog.ShowAsync();
+                    // Handle error
+                    ContentDialog errorDialog = new ContentDialog
+                    {
+                        XamlRoot = this.XamlRoot,
+                        Title = "Error",
+                        Content = "An error occurred while updating the post\n" + ex.Message,
+                        CloseButtonText = "OK"
+                    };
+                    await errorDialog.ShowAsync();
+                }
             }
         }
 

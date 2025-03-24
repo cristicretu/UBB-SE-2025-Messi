@@ -75,5 +75,62 @@ namespace Duo.Views.Components
 
             return (false, string.Empty, string.Empty, new List<string>());
         }
+
+        public async Task<(bool Success, string Title, string Content, List<string> Hashtags)> ShowEditPostDialog(XamlRoot xamlRoot, string title = "", string content = "", List<string> hashtags = null)
+        {
+            var dialogContent = new PostDialogContent();
+            
+            // Prefill the dialog with existing post data
+            dialogContent.PostTitle = title;
+            dialogContent.PostContent = content;
+            
+            // Add existing hashtags if provided
+            if (hashtags != null)
+            {
+                foreach (var hashtag in hashtags)
+                {
+                    dialogContent.Hashtags.Add(hashtag);
+                }
+            }
+
+            ContentDialog dialog = new ContentDialog
+            {
+                XamlRoot = xamlRoot,
+                Title = "Edit Post",
+                Content = dialogContent,
+                PrimaryButtonText = "Save",
+                CloseButtonText = "Cancel",
+                DefaultButton = ContentDialogButton.Primary,
+                MinWidth = 500,
+                MinHeight = 450
+            };
+
+            // Apply accent button style to the save button
+            dialog.PrimaryButtonStyle = Application.Current.Resources["AccentButtonStyle"] as Style;
+            
+            dialog.PrimaryButtonClick += (s, e) => 
+            {
+                if (!dialogContent.IsFormValid())
+                {
+                    e.Cancel = true;
+                }
+            };
+            
+            ContentDialogResult result = await dialog.ShowAsync();
+            
+            if (result == ContentDialogResult.Primary)
+            {
+                // Create a new list to return the hashtags
+                var hashtagsList = new List<string>();
+                foreach (var hashtag in dialogContent.Hashtags)
+                {
+                    hashtagsList.Add(hashtag);
+                }
+
+                return (true, dialogContent.PostTitle, dialogContent.PostContent, hashtagsList);
+            }
+
+            return (false, string.Empty, string.Empty, new List<string>());
+        }
     }
 }
