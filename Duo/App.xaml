@@ -14,6 +14,7 @@
 
             <!-- Converters -->
             <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+            <converters:BoolToInvertedVisibilityConverter x:Key="BoolToInvertedVisibilityConverter" />
 
             <!-- Override button hover and pressed state colors using theme colors -->
             <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="{ThemeResource SystemAccentColorDark1}" />

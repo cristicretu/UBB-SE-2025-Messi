@@ -19,7 +19,6 @@ namespace Duo.ViewModels
         private int _currentCategoryId = 0;
         private string _currentCategoryName = string.Empty;
         private string _username = "Guest";
-        private Type _currentPageType;
 
         public event EventHandler<Type> NavigationRequested;
         public event EventHandler<string> CategoryNavigationRequested;

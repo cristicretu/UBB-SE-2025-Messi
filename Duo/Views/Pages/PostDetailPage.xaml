@@ -17,11 +17,26 @@
     </Page.DataContext>
 
     <Grid HorizontalAlignment="Stretch" MaxWidth="900" Margin="16,0,32,0">
+        <ProgressRing IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}" 
+                      Width="50" Height="50" 
+                      VerticalAlignment="Center" 
+                      HorizontalAlignment="Center"
+                      Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay}"/>
+        
+        <TextBlock Text="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}"
+                   Foreground="Red"
+                   TextWrapping="Wrap"
+                   Visibility="{x:Bind ViewModel.ErrorMessage, Mode=OneWay, Converter={StaticResource BoolToInvertedVisibilityConverter}}"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   Margin="16"/>
+                   
         <ScrollViewer 
             HorizontalAlignment="Stretch" 
             HorizontalContentAlignment="Stretch"
             VerticalScrollBarVisibility="Auto"
-            Padding="0,0,16,0">
+            Padding="0,0,16,0"
+            Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolToInvertedVisibilityConverter}}">
             <StackPanel 
                 HorizontalAlignment="Stretch" 
                 MaxWidth="900"
@@ -34,16 +49,15 @@
                     Click="BackButton_Click"
                     Margin="0,16,0,16"/>
 
-                <!-- Main Post Content with Hover Style Always Applied -->
                 <components:Post 
                     x:Name="PostDetail"
-                    Username="{x:Bind ViewModel.Post.Username, Mode=OneWay}"
-                    Date="{x:Bind ViewModel.Post.Date, Mode=OneWay}"
-                    Title="{x:Bind ViewModel.Post.Title, Mode=OneWay}"
+                    Username="{x:Bind ViewModel.Post.Username, Mode=OneWay, FallbackValue='u/Unknown'}"
+                    Date="{x:Bind ViewModel.Post.Date, Mode=OneWay, FallbackValue='Unknown date'}"
+                    Title="{x:Bind ViewModel.Post.Title, Mode=OneWay, FallbackValue='Loading...'}"
                     Hashtags="{x:Bind ViewModel.Post.Hashtags, Mode=OneWay}"
-                    Content="{x:Bind ViewModel.Post.Description, Mode=OneWay}"
-                    LikeCount="{x:Bind ViewModel.Post.LikeCount, Mode=TwoWay}"
-                    PostId="{x:Bind ViewModel.Post.Id, Mode=OneWay}"
+                    Content="{x:Bind ViewModel.Post.Description, Mode=OneWay, FallbackValue='Loading content...'}"
+                    LikeCount="{x:Bind ViewModel.Post.LikeCount, Mode=TwoWay, FallbackValue=0}"
+                    PostId="{x:Bind ViewModel.Post.Id, Mode=OneWay, FallbackValue=0}"
                     IsAlwaysHighlighted="True"
                     HorizontalAlignment="Stretch"
                     Margin="0,0,0,16"/>
