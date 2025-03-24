@@ -139,7 +139,7 @@ namespace Duo.Views.Pages
         
         private void Comment_CommentLiked(object sender, CommentLikedEventArgs e)
         {
-            // Handle comment liked event (if needed for analytics, etc.)
+            _commentService.LikeComment(e.CommentId);
             System.Diagnostics.Debug.WriteLine($"Comment liked event received for ID: {e.CommentId}");
         }
         

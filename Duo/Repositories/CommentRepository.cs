@@ -95,8 +95,8 @@ namespace Duo.Repositories
                             Convert.ToInt32(row[3]),
                             row[4] == DBNull.Value ? null : Convert.ToInt32(row[4]),
                             Convert.ToDateTime(row[5]),
-                            Convert.ToInt32(row[6]),
-                            Convert.ToInt32(row[7])
+                            Convert.ToInt32(row[7]),
+                            Convert.ToInt32(row[6])
                         );
                         comments.Add(comment);
                         System.Diagnostics.Debug.WriteLine($"CommentRepository: Added comment ID {commentId} to result list");
