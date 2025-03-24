@@ -189,7 +189,7 @@ namespace Duo.ViewModels
                         allMatchingPosts = _postService.GetPostsByCategory(CategoryID, CurrentPage, ItemsPerPage);
                     }
 
-                    _totalPostCount = _postService.GetPostCountByCategory(CategoryID);
+                    _totalPostCount = _postService.GetPostCountByCategoryId(CategoryID);
                 }
                 else
                 {

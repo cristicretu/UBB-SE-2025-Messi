@@ -104,7 +104,7 @@ namespace Duo.Services
 
             try
             {
-                return _postRepository.GetByCategory(categoryId, page, pageSize);
+                return _postRepository.GetPostsByCategoryId(categoryId, page, pageSize);
             }
             catch (Exception ex)
             {
@@ -141,7 +141,7 @@ namespace Duo.Services
             }
         }
 
-        public int GetPostCountByCategory(int categoryId)
+        public int GetPostCountByCategoryId(int categoryId)
         {
             if (categoryId <= 0)
             {
@@ -231,7 +231,7 @@ namespace Duo.Services
 
             try
             {
-                return _postRepository.GetByHashtags(hashtags, page, pageSize);
+                return _postRepository.GetPostsByHashtags(hashtags, page, pageSize);
             }
             catch (Exception ex)
             {
@@ -251,7 +251,6 @@ namespace Duo.Services
 
             try
             {
-                Debug.WriteLine("We are here");
                 return _hashtagRepository.GetHashtagsByPostId(postId);
             }
             catch (Exception ex)
@@ -271,7 +270,6 @@ namespace Duo.Services
 
                 post.LikeCount++;
 
-                Debug.WriteLine($"Post like count: {post.LikeCount}");
                 _postRepository.UpdatePost(post);
                 return true;
             }
@@ -285,58 +283,42 @@ namespace Duo.Services
         {
             if (postId <= 0)
             {
-                System.Diagnostics.Debug.WriteLine($"AddHashtagToPost failed: Invalid Post ID {postId}");
                 throw new ArgumentException("Invalid Post ID.");
             }
             
             if (string.IsNullOrWhiteSpace(tagName))
             {
-                System.Diagnostics.Debug.WriteLine("AddHashtagToPost failed: Tag name cannot be empty");
                 throw new ArgumentException("Tag name cannot be empty.");
             }
             
             if (userId <= 0)
             {
-                System.Diagnostics.Debug.WriteLine($"AddHashtagToPost failed: Invalid User ID {userId}");
                 throw new ArgumentException("Invalid User ID.");
             }
 
             try
             {
-                // Validate the post exists
                 var post = _postRepository.GetPostById(postId);
                 if (post == null)
                 {
-                    System.Diagnostics.Debug.WriteLine($"AddHashtagToPost failed: Post with ID {postId} not found");
                     throw new Exception($"Post with ID {postId} not found");
                 }
                 
                 if (_userService.GetCurrentUser().UserId != userId)
                 {
-                    System.Diagnostics.Debug.WriteLine($"AddHashtagToPost failed: User {userId} does not have permission");
                     throw new Exception("User does not have permission to add hashtags to this post.");
                 }
 
                 Hashtag? hashtag = null;
                 hashtag = _hashtagRepository.GetHashtagByText(tagName);
 
-                if (hashtag == null)
-                {
-                    System.Diagnostics.Debug.WriteLine($"AddHashtagToPost: Creating new hashtag '{tagName}'");
-                    hashtag = _hashtagRepository.CreateHashtag(tagName);
-                }
-                else
-                {
-                    System.Diagnostics.Debug.WriteLine($"AddHashtagToPost: Using existing hashtag '{tagName}' with ID {hashtag.Id}");
-                }
+                hashtag = _hashtagRepository.CreateHashtag(tagName);
 
                 bool result = _hashtagRepository.AddHashtagToPost(postId, hashtag.Id);
-                System.Diagnostics.Debug.WriteLine($"AddHashtagToPost: Result={result} for post {postId}, hashtag {tagName}");
                 return result;
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"AddHashtagToPost error: {ex.Message}");
                 throw new Exception($"Error adding hashtag to post with ID {postId}: {ex.Message}");
             }
         }
@@ -360,105 +342,56 @@ namespace Duo.Services
             }
         }
 
-
-        // New method to create a post with hashtags in a single operation
         public int CreatePostWithHashtags(Post post, List<string> hashtags, int userId)
         {
             if (string.IsNullOrWhiteSpace(post.Title) || string.IsNullOrWhiteSpace(post.Description))
             {
-                System.Diagnostics.Debug.WriteLine("CreatePostWithHashtags: Title or Description is empty");
                 throw new ArgumentException("Title and Description cannot be empty.");
             }
 
             try
             {
-                System.Diagnostics.Debug.WriteLine($"CreatePostWithHashtags: Starting process for post with Title={post.Title}, User={userId}");
-                System.Diagnostics.Debug.WriteLine($"CreatePostWithHashtags: Post has {hashtags?.Count ?? 0} hashtags to add");
-                
-                // First create the post
-                System.Diagnostics.Debug.WriteLine("CreatePostWithHashtags: About to call _postRepository.CreatePost");
                 int postId = _postRepository.CreatePost(post);
                 
-                // Check if post was created successfully
                 if (postId <= 0)
                 {
-                    System.Diagnostics.Debug.WriteLine($"CreatePostWithHashtags: Failed to create post - Invalid ID returned: {postId}");
                     throw new Exception("Failed to create post: Invalid post ID returned from database");
                 }
                 
-                System.Diagnostics.Debug.WriteLine($"CreatePostWithHashtags: Post created successfully with ID: {postId}");
-                
-                // Optionally verify the post exists in the database
                 try
                 {
                     var createdPost = _postRepository.GetPostById(postId);
-                    if (createdPost != null)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"CreatePostWithHashtags: Verified post {postId} exists in database with Title={createdPost.Title}");
-                    }
-                    else
-                    {
-                        System.Diagnostics.Debug.WriteLine($"CreatePostWithHashtags: WARNING - Could not verify post {postId} exists!");
-                    }
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine($"CreatePostWithHashtags: Error verifying post exists: {ex.Message}");
-                    // Continue anyway, as we have a post ID
+
                 }
                 
-                // Now add hashtags if provided
                 if (hashtags != null && hashtags.Count > 0)
-                {
-                    System.Diagnostics.Debug.WriteLine($"CreatePostWithHashtags: Adding {hashtags.Count} hashtags to post {postId}");
-                    
+                {    
                     foreach (var tagName in hashtags)
                     {
                         try
                         {
-                            if (string.IsNullOrWhiteSpace(tagName))
-                            {
-                                System.Diagnostics.Debug.WriteLine("CreatePostWithHashtags: Skipping empty hashtag");
-                                continue;
-                            }
-                                
-                            System.Diagnostics.Debug.WriteLine($"CreatePostWithHashtags: Processing hashtag '{tagName}' for post {postId}");
-                            
-                            // Get or create the hashtag
                             Hashtag? hashtag = _hashtagRepository.GetHashtagByText(tagName);
-                            if (hashtag == null)
-                            {
-                                System.Diagnostics.Debug.WriteLine($"CreatePostWithHashtags: Hashtag '{tagName}' not found, creating new one");
-                                hashtag = _hashtagRepository.CreateHashtag(tagName);
-                                System.Diagnostics.Debug.WriteLine($"CreatePostWithHashtags: Created hashtag with ID: {hashtag.Id}");
-                            }
-                            else
-                            {
-                                System.Diagnostics.Debug.WriteLine($"CreatePostWithHashtags: Using existing hashtag '{tagName}' with ID {hashtag.Id}");
-                            }
+                            hashtag = _hashtagRepository.CreateHashtag(tagName);
                             
-                            // Associate hashtag with post
-                            System.Diagnostics.Debug.WriteLine($"CreatePostWithHashtags: Adding hashtag {hashtag.Id} to post {postId}");
                             bool success = _hashtagRepository.AddHashtagToPost(postId, hashtag.Id);
-                            System.Diagnostics.Debug.WriteLine($"CreatePostWithHashtags: Hashtag added successfully: {success}");
                         }
                         catch (Exception ex)
                         {
-                            System.Diagnostics.Debug.WriteLine($"CreatePostWithHashtags: Error adding hashtag '{tagName}' to post {postId}: {ex.Message}");
-                            // Continue with other hashtags even if one fails
+                        
                         }
                     }
                 }
                 
-                System.Diagnostics.Debug.WriteLine($"CreatePostWithHashtags: Process completed successfully for post {postId}");
                 return postId;
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"CreatePostWithHashtags ERROR: {ex.Message}");
                 if (ex.InnerException != null)
                 {
-                    System.Diagnostics.Debug.WriteLine($"CreatePostWithHashtags INNER ERROR: {ex.InnerException.Message}");
+                
                 }
                 throw new Exception($"Error creating post with hashtags: {ex.Message}", ex);
             }
