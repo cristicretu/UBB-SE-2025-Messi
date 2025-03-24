@@ -32,9 +32,21 @@ namespace Duo.Views.Components
             return result == ContentDialogResult.Primary;
         }
 
-        public async Task<(bool Success, string Title, string Content, List<string> Hashtags)> ShowCreatePostDialog(XamlRoot xamlRoot)
+        public async Task<(bool Success, string Title, string Content, List<string> Hashtags, int CommunityId)> ShowCreatePostDialog(XamlRoot xamlRoot, int selectedCommunityId = 0)
         {
             var dialogContent = new PostDialogContent();
+            
+            // Set the initially selected community if provided
+            if (selectedCommunityId > 0)
+            {
+                dialogContent.SetSelectedCommunity(selectedCommunityId);
+            }
+
+            // Add a success handler that will close the dialog
+            bool succeeded = false;
+            dialogContent.ViewModel.PostCreationSuccessful += (s, e) => {
+                succeeded = true;
+            };
 
             ContentDialog dialog = new ContentDialog
             {
@@ -56,41 +68,53 @@ namespace Duo.Views.Components
                 if (!dialogContent.IsFormValid())
                 {
                     e.Cancel = true;
+                    return;
+                }
+                
+                // Trigger the create post command from the ViewModel
+                dialogContent.ViewModel.CreatePostCommand.Execute(null);
+                
+                // If there was an error in post creation, cancel the dialog close
+                if (!string.IsNullOrEmpty(dialogContent.ViewModel.Error))
+                {
+                    e.Cancel = true;
                 }
             };
             
             ContentDialogResult result = await dialog.ShowAsync();
             
-            if (result == ContentDialogResult.Primary)
+            if (result == ContentDialogResult.Primary || succeeded)
             {
                 // Create a new list to return the hashtags
-                var hashtagsList = new List<string>();
-                foreach (var hashtag in dialogContent.Hashtags)
-                {
-                    hashtagsList.Add(hashtag);
-                }
+                var hashtagsList = new List<string>(dialogContent.ViewModel.Hashtags);
 
-                return (true, dialogContent.PostTitle, dialogContent.PostContent, hashtagsList);
+                return (true, dialogContent.ViewModel.Title, dialogContent.ViewModel.Content, hashtagsList, dialogContent.ViewModel.SelectedCategoryId);
             }
 
-            return (false, string.Empty, string.Empty, new List<string>());
+            return (false, string.Empty, string.Empty, new List<string>(), 0);
         }
 
-        public async Task<(bool Success, string Title, string Content, List<string> Hashtags)> ShowEditPostDialog(XamlRoot xamlRoot, string title = "", string content = "", List<string> hashtags = null)
+        public async Task<(bool Success, string Title, string Content, List<string> Hashtags)> ShowEditPostDialog(XamlRoot xamlRoot, string title = "", string content = "", List<string> hashtags = null, int communityId = 0)
         {
             var dialogContent = new PostDialogContent();
             
             // Prefill the dialog with existing post data
-            dialogContent.PostTitle = title;
-            dialogContent.PostContent = content;
+            dialogContent.ViewModel.Title = title;
+            dialogContent.ViewModel.Content = content;
             
             // Add existing hashtags if provided
             if (hashtags != null)
             {
                 foreach (var hashtag in hashtags)
                 {
-                    dialogContent.Hashtags.Add(hashtag);
+                    dialogContent.ViewModel.AddHashtag(hashtag);
                 }
+            }
+            
+            // Set community if provided
+            if (communityId > 0)
+            {
+                dialogContent.SetSelectedCommunity(communityId);
             }
 
             ContentDialog dialog = new ContentDialog
@@ -121,13 +145,9 @@ namespace Duo.Views.Components
             if (result == ContentDialogResult.Primary)
             {
                 // Create a new list to return the hashtags
-                var hashtagsList = new List<string>();
-                foreach (var hashtag in dialogContent.Hashtags)
-                {
-                    hashtagsList.Add(hashtag);
-                }
+                var hashtagsList = new List<string>(dialogContent.ViewModel.Hashtags);
 
-                return (true, dialogContent.PostTitle, dialogContent.PostContent, hashtagsList);
+                return (true, dialogContent.ViewModel.Title, dialogContent.ViewModel.Content, hashtagsList);
             }
 
             return (false, string.Empty, string.Empty, new List<string>());

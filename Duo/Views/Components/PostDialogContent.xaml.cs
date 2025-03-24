@@ -6,75 +6,169 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System;
 using Duo.Helpers;
+using Duo.Models;
+using static Duo.App;
+using System.Collections.Generic;
+using Microsoft.UI.Xaml.Media;
+using Microsoft.UI;
+using Microsoft.UI.Xaml.Data;
+using Duo.ViewModels;
 
 namespace Duo.Views.Components
 {
-    public sealed partial class PostDialogContent : UserControl, INotifyPropertyChanged
+    // Community item class with selection state
+    public class CommunityItem : INotifyPropertyChanged
     {
-        private string _postTitle = string.Empty;
-        private string _postContent = string.Empty;
-        private string _currentHashtag = string.Empty;
-        private ObservableCollection<string> _hashtags = new ObservableCollection<string>();
+        private int _id;
+        private string _name;
+        private bool _isSelected;
 
-        // Validation state properties
+        public int Id 
+        { 
+            get => _id; 
+            set 
+            { 
+                if (_id != value)
+                {
+                    _id = value;
+                    OnPropertyChanged();
+                }
+            } 
+        }
+        
+        public string Name 
+        { 
+            get => _name; 
+            set 
+            { 
+                if (_name != value)
+                {
+                    _name = value;
+                    OnPropertyChanged();
+                }
+            } 
+        }
+        
+        public bool IsSelected 
+        { 
+            get => _isSelected; 
+            set 
+            { 
+                if (_isSelected != value)
+                {
+                    _isSelected = value;
+                    OnPropertyChanged();
+                }
+            } 
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+    }
+
+    // Bool to background color converter
+    public class BoolToBackgroundConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, string language)
+        {
+            if (value is bool isSelected && isSelected)
+            {
+                return new SolidColorBrush(Colors.DodgerBlue);
+            }
+            return new SolidColorBrush(Colors.LightGray);
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, string language)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    // Integer to visibility converter
+    public class IntToVisConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, string language)
+        {
+            if (value is int count)
+            {
+                return count > 0 ? Visibility.Visible : Visibility.Collapsed;
+            }
+            return Visibility.Collapsed;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, string language)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public sealed partial class PostDialogContent : UserControl
+    {
+        // Validation TextBlocks
         private bool _isTitleValid = true;
         private bool _isContentValid = true;
         private bool _isHashtagValid = true;
 
-        public string PostTitle
+        // ViewModel
+        private PostCreationViewModel _viewModel;
+        
+        public PostCreationViewModel ViewModel
         {
-            get => _postTitle;
+            get { return _viewModel; }
             set
             {
-                if (_postTitle != value)
+                if (_viewModel != null)
                 {
-                    _postTitle = value;
-                    OnPropertyChanged();
+                    _viewModel.PropertyChanged -= ViewModel_PropertyChanged;
                 }
+                
+                _viewModel = value;
+                DataContext = _viewModel;
+                
+                if (_viewModel != null)
+                {
+                    _viewModel.PropertyChanged += ViewModel_PropertyChanged;
+                }
+                
+                UpdateUIVisibility();
             }
         }
-
-        public string PostContent
-        {
-            get => _postContent;
-            set
-            {
-                if (_postContent != value)
-                {
-                    _postContent = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-
-        public string CurrentHashtag
-        {
-            get => _currentHashtag;
-            set
-            {
-                if (_currentHashtag != value)
-                {
-                    _currentHashtag = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-
-        public ObservableCollection<string> Hashtags => _hashtags;
-
-        public bool HasHashtags => Hashtags.Count > 0;
-
-        public event PropertyChangedEventHandler PropertyChanged;
 
         public PostDialogContent()
         {
             this.InitializeComponent();
-            Hashtags.CollectionChanged += (s, e) => OnPropertyChanged(nameof(HasHashtags));
+            
+            // Initialize ViewModel
+            ViewModel = new PostCreationViewModel();
+            
+            // Subscribe to the post creation success event
+            ViewModel.PostCreationSuccessful += ViewModel_PostCreationSuccessful;
+            
+            // Ensure UI is updated
+            UpdateUIVisibility();
         }
 
-        private void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        private void ViewModel_PostCreationSuccessful(object sender, EventArgs e)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            // This method can be used to handle successful post creation
+            // For example, close the dialog or show a success message
+        }
+
+        public void SetSelectedCommunity(int communityId)
+        {
+            ViewModel.SelectedCategoryId = communityId;
+        }
+
+        private void CommunityButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && button.Tag is int communityId)
+            {
+                ViewModel.SelectCommunity(communityId);
+            }
         }
 
         #region Validation Methods
@@ -83,7 +177,7 @@ namespace Duo.Views.Components
         {
             HideError(TitleErrorTextBlock);
             
-            var (isValid, errorMessage) = ValidationHelper.ValidatePostTitle(PostTitle);
+            var (isValid, errorMessage) = ValidationHelper.ValidatePostTitle(ViewModel.Title);
             
             if (!isValid)
             {
@@ -98,7 +192,7 @@ namespace Duo.Views.Components
         {
             HideError(ContentErrorTextBlock);
             
-            var (isValid, errorMessage) = ValidationHelper.ValidatePostContent(PostContent);
+            var (isValid, errorMessage) = ValidationHelper.ValidatePostContent(ViewModel.Content);
             
             if (!isValid)
             {
@@ -141,13 +235,14 @@ namespace Duo.Views.Components
             bool isTitleValid = ValidateTitle();
             bool isContentValid = ValidateContent();
             bool isHashtagValid = true;
+            bool isCommunitySelected = ViewModel.SelectedCategoryId > 0;
             
-            if (!string.IsNullOrEmpty(CurrentHashtag))
+            if (!string.IsNullOrEmpty(HashtagTextBox.Text))
             {
-                isHashtagValid = ValidateHashtag(CurrentHashtag);
+                isHashtagValid = ValidateHashtag(HashtagTextBox.Text);
             }
             
-            return isTitleValid && isContentValid && isHashtagValid;
+            return isTitleValid && isContentValid && isHashtagValid && isCommunitySelected;
         }
         #endregion
 
@@ -164,7 +259,7 @@ namespace Duo.Views.Components
         
         private void HashtagTextBox_LostFocus(object sender, RoutedEventArgs e)
         {
-            _isHashtagValid = ValidateHashtag(CurrentHashtag);
+            _isHashtagValid = ValidateHashtag(HashtagTextBox.Text);
         }
         
         private void AddHashtagButton_Click(object sender, RoutedEventArgs e)
@@ -183,38 +278,65 @@ namespace Duo.Views.Components
 
         private void AddHashtag()
         {
-            string hashtag = CurrentHashtag.Trim();
+            string hashtag = HashtagTextBox.Text.Trim();
             
             if (string.IsNullOrEmpty(hashtag))
                 return;
                 
             if (!ValidateHashtag(hashtag))
                 return;
-            
-            // // Add # if not present
-            // if (!hashtag.StartsWith("#"))
-            // {
-            //     hashtag = "#" + hashtag;
-            // }
 
             // Add to collection if not a duplicate
-            if (!Hashtags.Contains(hashtag))
-            {
-                Hashtags.Add(hashtag);
-            }
+            ViewModel.AddHashtag(hashtag);
+            
+            // Debug output
+            System.Diagnostics.Debug.WriteLine($"Added hashtag: {hashtag}, Count now: {ViewModel.Hashtags.Count}");
 
             // Clear the input
-            CurrentHashtag = string.Empty;
+            HashtagTextBox.Text = string.Empty;
             HideError(HashtagErrorTextBlock);
+            
+            // Force UI update
+            UpdateUIVisibility();
         }
 
         private void RemoveHashtag_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button button && button.Content is string hashtag)
             {
-                Hashtags.Remove(hashtag);
+                ViewModel.RemoveHashtag(hashtag);
+                System.Diagnostics.Debug.WriteLine($"Removed hashtag: {hashtag}, Count now: {ViewModel.Hashtags.Count}");
+                
+                // Force UI update
+                UpdateUIVisibility();
             }
         }
         #endregion
+
+        private void UpdateUIVisibility()
+        {
+            // Debug output
+            System.Diagnostics.Debug.WriteLine($"UpdateUIVisibility called. Hashtags count: {ViewModel?.Hashtags?.Count ?? 0}");
+            
+            // Update hashtags header visibility
+            HashtagsHeader.Visibility = (ViewModel != null && ViewModel.Hashtags != null && ViewModel.Hashtags.Count > 0) 
+                ? Visibility.Visible : Visibility.Collapsed;
+            
+            // Update error TextBlock visibility
+            ErrorTextBlock.Visibility = (ViewModel != null && !string.IsNullOrWhiteSpace(ViewModel.Error)) 
+                ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        private void ViewModel_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            System.Diagnostics.Debug.WriteLine($"Property changed: {e.PropertyName}");
+            
+            if (e.PropertyName == nameof(ViewModel.Hashtags) || 
+                e.PropertyName == nameof(ViewModel.Error) ||
+                e.PropertyName == "Item[]") // This can be fired for collection changes
+            {
+                UpdateUIVisibility();
+            }
+        }
     }
 }
