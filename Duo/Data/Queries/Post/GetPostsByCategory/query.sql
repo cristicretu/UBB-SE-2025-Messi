@@ -16,9 +16,9 @@ BEGIN
         p.UpdatedAt, 
         p.LikeCount, 
         u.Username, 
-        c.CategoryName
+        c.Name
     FROM Posts p
-    JOIN Users u ON p.UserID = u.Id  
+    JOIN Users u ON p.UserID = u.userId  
     JOIN Categories c ON p.CategoryID = c.Id 
     WHERE p.CategoryID = @CategoryID
     ORDER BY p.CreatedAt DESC  
