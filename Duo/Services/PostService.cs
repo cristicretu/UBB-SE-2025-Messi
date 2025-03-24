@@ -5,6 +5,7 @@ using Microsoft.Data.SqlClient;
 using Duo.Models;
 using Duo.Services;
 using Duo.Repositories;
+using System.Diagnostics;
 
 namespace Duo.Services
 {
@@ -181,6 +182,7 @@ namespace Duo.Services
 
             try
             {
+                Debug.WriteLine("We are here");
                 return _hashtagRepository.GetHashtagsByPostId(postId);
             }
             catch (Exception ex)
@@ -199,6 +201,8 @@ namespace Duo.Services
                 if (post == null) throw new Exception("Post not found");
 
                 post.LikeCount++;
+                // Display the post like count
+                Debug.WriteLine($"Post like count: {post.LikeCount}");
                 _postRepository.UpdatePost(post);
                 return true;
             }

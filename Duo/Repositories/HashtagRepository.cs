@@ -5,6 +5,7 @@ using System.Data;
 using System.Collections.ObjectModel;
 using Duo.Models;
 using Duo.Data;
+using System.Diagnostics;
 
 namespace Duo.Repositories
 {
@@ -155,6 +156,7 @@ namespace Duo.Repositories
                 };
                 dataTable = _dataLink.ExecuteReader("GetHashtagsForPost", sqlParameters);
                 // if (dataTable.Rows.Count == 0) throw new Exception("Error - GetHashtagsByPostId: No records found");
+                Debug.WriteLine("am aj  ");
                 List<Hashtag> hashtags = new List<Hashtag>();
                 foreach (DataRow row in dataTable.Rows)
                 {
@@ -193,6 +195,7 @@ namespace Duo.Repositories
                     new SqlParameter("@PostID", postId),
                     new SqlParameter("@HashtagID", hashtagId)
                 };
+                Debug.WriteLine("AddHashtagToPost: " + postId + " " + hashtagId);
                 var result = _dataLink.ExecuteNonQuery("AddHashtagToPost", sqlParameters);
                 if (result == 0) throw new Exception("Error - AddHashtagToPost: Hashtag could not be added to post!");
                 return true;

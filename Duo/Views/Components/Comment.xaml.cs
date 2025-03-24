@@ -32,6 +32,8 @@ namespace Duo.Views.Components
             CommentReplyButton.Click += CommentReplyButton_Click;
             
             LikeButton.LikeClicked += LikeButton_LikeClicked;
+            
+            ReplyInputControl.CommentSubmitted += ReplyInput_CommentSubmitted;
         }
 
         public void SetCommentData(Models.Comment comment, Dictionary<int?, List<Models.Comment>> commentsByParent)
@@ -172,29 +174,11 @@ namespace Duo.Views.Components
         
         private void ChildComment_ReplySubmitted(object sender, CommentReplyEventArgs e)
         {
-            // Don't forward the event again, just handle it here
-            // This prevents duplicate event handling when replying to nested comments
-            
-            // Log the event but don't forward it
             System.Diagnostics.Debug.WriteLine($"Detected reply to child comment {e.ParentCommentId} in parent comment {_commentData.Id}");
             
-            // Stop event propagation by not calling ReplySubmitted?.Invoke
-            // Only allow the original comment component to raise the event up to the page level
-            if (sender is Comment childComment && childComment != this)
-            {
-                // Hide any open reply input on this level too
-                HideReplyInput();
-                
-                // Do not forward this event upward - this prevents duplicates
-                return;
-            }
+            ReplySubmitted?.Invoke(this, e);
             
-            // Only the original comment component should forward the event
-            if (sender == this)
-            {
-                // Forward the event up to be handled at the top level
-                ReplySubmitted?.Invoke(this, e);
-            }
+            HideReplyInput();
         }
 
         private string FormatDate(DateTime date)
