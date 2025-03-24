@@ -190,6 +190,7 @@ namespace Duo.ViewModels
                     }
 
                     _totalPostCount = _postService.GetPostCountByCategoryId(CategoryID);
+
                 }
                 else
                 {

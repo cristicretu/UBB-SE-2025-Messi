@@ -342,6 +342,7 @@ namespace Duo.Services
             }
         }
 
+
         public int CreatePostWithHashtags(Post post, List<string> hashtags, int userId)
         {
             if (string.IsNullOrWhiteSpace(post.Title) || string.IsNullOrWhiteSpace(post.Description))

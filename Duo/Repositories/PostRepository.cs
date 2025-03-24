@@ -345,6 +345,7 @@ namespace Duo.Repositories
 
             try
             {
+
                 DataTable dataTable = dataLink.ExecuteReader("GetByHashtags", parameters);
                 List<Post> posts = new List<Post>();
 
