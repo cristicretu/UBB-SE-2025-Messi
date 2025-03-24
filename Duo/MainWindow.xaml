@@ -10,7 +10,6 @@
     xmlns:pages="using:Duo.Views.Pages"
     mc:Ignorable="d"
     Title="Duo">
-
     <Grid>
         <Grid x:Name="ContentRoot">
             <pages:CategoryPage />

@@ -22,19 +22,24 @@ namespace Duo.Repositories
         {
             if (post == null)
             {
+                System.Diagnostics.Debug.WriteLine("CreatePost: Post is null");
                 throw new ArgumentNullException(nameof(post), "Post cannot be null.");
             }
 
             if (string.IsNullOrWhiteSpace(post.Title) || string.IsNullOrWhiteSpace(post.Description))
             {
+                System.Diagnostics.Debug.WriteLine("CreatePost: Title or Description is empty");
                 throw new ArgumentException("Title and Description cannot be empty.");
             }
 
             if (post.UserID <= 0 || post.CategoryID <= 0)
             {
+                System.Diagnostics.Debug.WriteLine($"CreatePost: Invalid UserID={post.UserID} or CategoryID={post.CategoryID}");
                 throw new ArgumentException("Invalid UserID or CategoryID.");
             }
 
+            System.Diagnostics.Debug.WriteLine($"CreatePost: Creating post with Title={post.Title}, UserID={post.UserID}, CategoryID={post.CategoryID}");
+            
             SqlParameter[] parameters = new SqlParameter[]
             {
                 new SqlParameter("@Title", post.Title),
@@ -48,12 +53,35 @@ namespace Duo.Repositories
 
             try
             {
+                System.Diagnostics.Debug.WriteLine("CreatePost: Calling dataLink.ExecuteScalar");
                 int? result = dataLink.ExecuteScalar<int>("CreatePost", parameters);
-                return result ?? 0;
+                
+                if (result.HasValue)
+                {
+                    System.Diagnostics.Debug.WriteLine($"CreatePost: ExecuteScalar returned value: {result.Value}");
+                    
+                    if (result.Value <= 0)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"CreatePost: WARNING - Invalid post ID returned: {result.Value}");
+                    }
+                    
+                    return result.Value;
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine("CreatePost: ExecuteScalar returned null");
+                    return 0;
+                }
             }
             catch (SqlException ex)
             {
+                System.Diagnostics.Debug.WriteLine($"CreatePost: SqlException occurred: {ex.Message}");
                 throw new Exception($"Database error: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"CreatePost: Unexpected exception: {ex.Message}");
+                throw;
             }
         }
 

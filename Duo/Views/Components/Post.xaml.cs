@@ -14,6 +14,7 @@ using CommunityToolkit.WinUI.UI.Controls;
 // is this the right way to access userService and its methods?
 using static Duo.App;
 using Duo.Views.Pages;
+using Duo.ViewModels;
 namespace Duo.Views.Components
 {
     public sealed partial class Post : UserControl
@@ -267,30 +268,126 @@ namespace Duo.Views.Components
             }
 
             // Handle the edit logic here
-
-            bool succesfullyEdited = true; // Placeholder for actual success event
+            // Display Edit Post dialog with prefilled data
+            var dialogComponent = new DialogComponent();
             
-            if (succesfullyEdited)
+            var post = _postService.GetPostById(this.PostId);
+            if (post == null)
             {
-                // Send/confirm
-                ContentDialog successDialog = new ContentDialog
-                {
-                    XamlRoot = this.XamlRoot,
-                    Title = "Edited",
-                    Content = "The item has been successfully edited.",
-                    CloseButtonText = "OK"
-                };
-                await successDialog.ShowAsync();
-            } else {
-                // Handle the error logic here
-                ContentDialog errorDialog = new ContentDialog
+                var errorDialog = new ContentDialog
                 {
                     XamlRoot = this.XamlRoot,
                     Title = "Error",
-                    Content = "An error occurred while editing the item. Please try again.",
+                    Content = "Post not found in database",
                     CloseButtonText = "OK"
                 };
                 await errorDialog.ShowAsync();
+                return;
+            }
+            
+            var result = await dialogComponent.ShowEditPostDialog(
+                this.XamlRoot, 
+                this.Title,          // Pass the current post title
+                this.Content,        // Pass the current post content
+                [.. this.Hashtags],  // Convert IEnumerable<string> to List<string> before passing
+                post.CategoryID      // Pass the current post's category ID
+            );
+
+            // If the dialog returned successfully, update the post with the new data
+            if (result.Success)
+            {
+                try
+                {
+                    // Check if category was changed (should not be possible with UI changes, but double-check)
+                    if (post.CategoryID != result.CommunityId)
+                    {
+                        ContentDialog errorDialog = new ContentDialog
+                        {
+                            XamlRoot = this.XamlRoot,
+                            Title = "Error",
+                            Content = "Changing the post's community/category is not allowed.",
+                            CloseButtonText = "OK"
+                        };
+                        await errorDialog.ShowAsync();
+                        return;
+                    }
+                    
+                    // Update the post properties
+                    post.Title = result.Title;
+                    post.Description = result.Content;
+                    post.UpdatedAt = DateTime.UtcNow;
+                    
+                    // Call the service to update the post
+                    _postService.UpdatePost(post);
+                    
+                    // Update hashtags
+                    try {
+                        // First clear existing hashtags and then add new ones
+                        var existingHashtags = _postService.GetHashtagsByPostId(this.PostId);
+                        foreach (var hashtag in existingHashtags)
+                        {
+                            _postService.RemoveHashtagFromPost(this.PostId, hashtag.Id, userService.GetCurrentUser().UserId);
+                        }
+
+                        // Add new hashtags
+                        foreach (var hashtag in result.Hashtags)
+                        {
+                            try
+                            {
+                                var hashtagRepo = App._hashtagRepository;
+                                var userId = userService.GetCurrentUser().UserId;
+                                
+                                var existingHashtag = hashtagRepo.GetHashtagByName(hashtag);
+                                
+                                if (existingHashtag == null)
+                                {
+                                    var newHashtag = hashtagRepo.CreateHashtag(hashtag);
+                                    hashtagRepo.AddHashtagToPost(this.PostId, newHashtag.Id);
+                                }
+                                else
+                                {
+                                    hashtagRepo.AddHashtagToPost(this.PostId, existingHashtag.Id);
+                                }
+                            }
+                            catch (Exception tagEx)
+                            {
+                                System.Diagnostics.Debug.WriteLine($"Error processing hashtag '{hashtag}': {tagEx.Message}");
+                            }
+                        }
+                    
+                        this.Hashtags = result.Hashtags;
+                    }
+                    catch (Exception hashtagEx)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Error updating hashtags: {hashtagEx.Message}");
+                    }
+                    
+                    // Update the UI elements with the new data
+                    this.Title = result.Title;
+                    this.Content = result.Content;
+                    
+                    // Show success message
+                    ContentDialog successDialog = new ContentDialog
+                    {
+                        XamlRoot = this.XamlRoot,
+                        Title = "Updated",
+                        Content = "The post has been successfully updated.",
+                        CloseButtonText = "OK"
+                    };
+                    await successDialog.ShowAsync();
+                }
+                catch (Exception ex)
+                {
+                    // Handle error
+                    ContentDialog errorDialog = new ContentDialog
+                    {
+                        XamlRoot = this.XamlRoot,
+                        Title = "Error",
+                        Content = "An error occurred while updating the post\n" + ex.Message,
+                        CloseButtonText = "OK"
+                    };
+                    await errorDialog.ShowAsync();
+                }
             }
         }
 
@@ -359,14 +456,14 @@ namespace Duo.Views.Components
             // You can perform additional actions here if needed
         }
 
-        private void MarkdownText_LinkClicked(object sender, CommunityToolkit.WinUI.UI.Controls.LinkClickedEventArgs e)
+        private async void MarkdownText_LinkClicked(object sender, CommunityToolkit.WinUI.UI.Controls.LinkClickedEventArgs e)
         {
             // Handle link clicks in markdown text
             // For example, you might want to open URLs in the default browser
             if (Uri.TryCreate(e.Link, UriKind.Absolute, out Uri? uri))
             {
                 // Launch the URI in the default browser
-                Windows.System.Launcher.LaunchUriAsync(uri);
+                await Windows.System.Launcher.LaunchUriAsync(uri);
             }
         }
 
