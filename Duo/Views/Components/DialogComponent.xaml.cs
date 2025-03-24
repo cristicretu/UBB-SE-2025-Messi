@@ -63,7 +63,7 @@ namespace Duo.Views.Components
             // Apply accent button style to the create button
             dialog.PrimaryButtonStyle = Application.Current.Resources["AccentButtonStyle"] as Style;
             
-            dialog.PrimaryButtonClick += (s, e) => 
+            dialog.PrimaryButtonClick += async (s, e) => 
             {
                 if (!dialogContent.IsFormValid())
                 {
@@ -71,13 +71,35 @@ namespace Duo.Views.Components
                     return;
                 }
                 
-                // Trigger the create post command from the ViewModel
-                dialogContent.ViewModel.CreatePostCommand.Execute(null);
+                var hashtagsList = new List<string>(dialogContent.ViewModel.Hashtags);
                 
-                // If there was an error in post creation, cancel the dialog close
-                if (!string.IsNullOrEmpty(dialogContent.ViewModel.Error))
+                // Debug output for hashtags
+                System.Diagnostics.Debug.WriteLine($"DialogComponent: Creating post with {hashtagsList.Count} hashtags:");
+                foreach (var tag in hashtagsList)
                 {
-                    e.Cancel = true;
+                    System.Diagnostics.Debug.WriteLine($"  - {tag}");
+                }
+                
+                e.Cancel = true;
+                
+                bool result = await dialogContent.ViewModel.CreatePostAsync(
+                    dialogContent.ViewModel.Title,
+                    dialogContent.ViewModel.Content,
+                    dialogContent.ViewModel.SelectedCategoryId,
+                    hashtagsList
+                );
+                
+                if (result)
+                {
+                    succeeded = true;
+                    
+                    dialog.Hide();
+                }
+                else
+                {
+                    if (!string.IsNullOrEmpty(dialogContent.ViewModel.Error))
+                    {
+                    }
                 }
             };
             
@@ -111,10 +133,12 @@ namespace Duo.Views.Components
                 }
             }
             
-            // Set community if provided
+            // Set community if provided and disable changing it
             if (communityId > 0)
             {
                 dialogContent.SetSelectedCommunity(communityId);
+                // Disable changing community in edit mode
+                dialogContent.DisableCommunitySelection();
             }
 
             ContentDialog dialog = new ContentDialog
@@ -136,6 +160,14 @@ namespace Duo.Views.Components
             {
                 if (!dialogContent.IsFormValid())
                 {
+                    e.Cancel = true;
+                    return;
+                }
+                
+                // Check if user tried to change the category (comparing with original communityId)
+                if (communityId > 0 && dialogContent.ViewModel.SelectedCategoryId != communityId)
+                {
+                    dialogContent.ViewModel.Error = "Changing community/category is not allowed when editing a post.";
                     e.Cancel = true;
                     return;
                 }

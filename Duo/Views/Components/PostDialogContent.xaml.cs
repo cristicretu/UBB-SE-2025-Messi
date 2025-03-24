@@ -163,6 +163,28 @@ namespace Duo.Views.Components
             ViewModel.SelectedCategoryId = communityId;
         }
 
+        public void DisableCommunitySelection()
+        {
+            // Make communities non-clickable
+            if (CommunitiesRepeater != null)
+            {
+                // Disable all community buttons by finding each element in the ItemsRepeater
+                for (int i = 0; i < ViewModel.Communities.Count; i++)
+                {
+                    if (CommunitiesRepeater.TryGetElement(i) is Button button)
+                    {
+                        button.IsEnabled = false;
+                    }
+                }
+            }
+            
+            // Add visual indicator that community cannot be changed
+            if (CommunitiesTitle != null)
+            {
+                CommunitiesTitle.Text = "Community (cannot be changed)";
+            }
+        }
+
         private void CommunityButton_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button button && button.Tag is int communityId)
@@ -252,6 +274,16 @@ namespace Duo.Views.Components
                 isHashtagValid = ValidateHashtag(HashtagTextBox.Text);
             }
             
+            // Display error if no community is selected
+            if (!isCommunitySelected)
+            {
+                ViewModel.Error = "Please select a community for your post.";
+            }
+            else if (isTitleValid && isContentValid && isHashtagValid)
+            {
+                ViewModel.Error = string.Empty;
+            }
+            
             return isTitleValid && isContentValid && isHashtagValid && isCommunitySelected;
         }
         #endregion
@@ -311,18 +343,44 @@ namespace Duo.Views.Components
         {
             string hashtag = HashtagTextBox.Text.Trim();
             
+            System.Diagnostics.Debug.WriteLine($"PostDialogContent.AddHashtag - Input text: '{hashtag}'");
+            
             if (string.IsNullOrEmpty(hashtag))
+            {
+                System.Diagnostics.Debug.WriteLine("PostDialogContent.AddHashtag - Empty input, returning");
                 return;
+            }
                 
             if (!ValidateHashtag(hashtag))
+            {
+                System.Diagnostics.Debug.WriteLine($"PostDialogContent.AddHashtag - Validation failed for '{hashtag}'");
                 return;
+            }
+                
+            // Check if maximum hashtag limit is reached
+            if (ViewModel.Hashtags.Count >= 5)
+            {
+                System.Diagnostics.Debug.WriteLine("PostDialogContent.AddHashtag - Max hashtags (5) reached");
+                ShowError(HashtagErrorTextBlock, "Maximum of 5 hashtags allowed per post.");
+                return;
+            }
 
             // Add to collection if not a duplicate
-            ViewModel.AddHashtag(hashtag);
-            
-            // Debug output
-            System.Diagnostics.Debug.WriteLine($"Added hashtag: {hashtag}, Count now: {ViewModel.Hashtags.Count}");
-
+            if (!ViewModel.Hashtags.Contains(hashtag))
+            {
+                ViewModel.AddHashtag(hashtag);
+                
+                // Debug output
+                System.Diagnostics.Debug.WriteLine($"PostDialogContent.AddHashtag - Added hashtag: {hashtag}, Count now: {ViewModel.Hashtags.Count}");
+                
+                // Explicitly check UI visibility
+                HashtagsHeader.Visibility = ViewModel.Hashtags.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine($"PostDialogContent.AddHashtag - Hashtag '{hashtag}' already exists");
+            }
+                     
             // Clear the input
             HashtagTextBox.Text = string.Empty;
             HideError(HashtagErrorTextBlock);
@@ -349,13 +407,20 @@ namespace Duo.Views.Components
             // Debug output
             System.Diagnostics.Debug.WriteLine($"UpdateUIVisibility called. Hashtags count: {ViewModel?.Hashtags?.Count ?? 0}");
             
-            // Update hashtags header visibility
-            HashtagsHeader.Visibility = (ViewModel != null && ViewModel.Hashtags != null && ViewModel.Hashtags.Count > 0) 
-                ? Visibility.Visible : Visibility.Collapsed;
+            // Explicitly update the hashtags header visibility
+            if (HashtagsHeader != null)
+            {
+                bool hasHashtags = ViewModel != null && ViewModel.Hashtags != null && ViewModel.Hashtags.Count > 0;
+                System.Diagnostics.Debug.WriteLine($"Setting HashtagsHeader visibility: {(hasHashtags ? "Visible" : "Collapsed")}");
+                HashtagsHeader.Visibility = hasHashtags ? Visibility.Visible : Visibility.Collapsed;
+            }
             
             // Update error TextBlock visibility
-            ErrorTextBlock.Visibility = (ViewModel != null && !string.IsNullOrWhiteSpace(ViewModel.Error)) 
-                ? Visibility.Visible : Visibility.Collapsed;
+            if (ErrorTextBlock != null)
+            {
+                ErrorTextBlock.Visibility = (ViewModel != null && !string.IsNullOrWhiteSpace(ViewModel.Error)) 
+                    ? Visibility.Visible : Visibility.Collapsed;
+            }
         }
 
         private void ViewModel_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)

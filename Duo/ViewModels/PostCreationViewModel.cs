@@ -238,13 +238,23 @@ namespace Duo.ViewModels
             Content = content;
             SelectedCategoryId = categoryId;
             
+            // Additional detailed debugging
+            if (hashtags != null && hashtags.Count > 0)
+            {
+                System.Diagnostics.Debug.WriteLine($"CreatePostAsync - Hashtags to add: {string.Join(", ", hashtags)}");
+            }
+            
             // Clear and add hashtags
             Hashtags.Clear();
-            if (hashtags != null)
+            if (hashtags != null && hashtags.Count > 0)
             {
+                System.Diagnostics.Debug.WriteLine($"CreatePostAsync - Adding hashtags: {string.Join(", ", hashtags)}");
                 foreach (var hashtag in hashtags)
                 {
-                    AddHashtag(hashtag);
+                    if (!string.IsNullOrWhiteSpace(hashtag))
+                    {
+                        AddHashtag(hashtag);
+                    }
                 }
             }
             
@@ -272,12 +282,14 @@ namespace Duo.ViewModels
                 int postId = _postService.CreatePost(post);
                 
                 // Add hashtags if any
+                System.Diagnostics.Debug.WriteLine($"CreatePostAsync - Hashtags count before saving: {Hashtags.Count}");
                 if (Hashtags.Count > 0)
                 {
                     foreach (var tag in Hashtags)
                     {
                         try
                         {
+                            System.Diagnostics.Debug.WriteLine($"CreatePostAsync - Adding hashtag to post: {tag}");
                             _postService.AddHashtagToPost(postId, tag, currentUser.UserId);
                         }
                         catch (Exception ex)
@@ -292,8 +304,8 @@ namespace Duo.ViewModels
                 IsSuccess = true;
                 PostCreationSuccessful?.Invoke(this, EventArgs.Empty);
                 
-                // Clear form
-                ClearForm();
+                // Do NOT clear form here, it will clear hashtags
+                // ClearForm();
                 
                 return true;
             }
@@ -313,20 +325,28 @@ namespace Duo.ViewModels
         public void AddHashtag(string hashtag)
         {
             if (string.IsNullOrWhiteSpace(hashtag))
+            {
+                System.Diagnostics.Debug.WriteLine("AddHashtag - Empty hashtag provided, ignoring");
                 return;
+            }
 
             string trimmedHashtag = hashtag.Trim();
             
             // Add the hashtag if it doesn't already exist
             if (!Hashtags.Contains(trimmedHashtag))
             {
-                Hashtags.Add(trimmedHashtag);
+                // Add directly to the collection
+                _hashtags.Add(trimmedHashtag);
                 
                 // Debug output
                 System.Diagnostics.Debug.WriteLine($"Added hashtag to ViewModel: {trimmedHashtag}, Count now: {Hashtags.Count}");
                 
                 // Explicitly notify that the Hashtags collection has changed
                 OnPropertyChanged(nameof(Hashtags));
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine($"Hashtag '{trimmedHashtag}' already exists in collection, not adding duplicate");
             }
         }
 

@@ -298,10 +298,23 @@ namespace Duo.Views.Components
             {
                 try
                 {
+                    // Check if category was changed (should not be possible with UI changes, but double-check)
+                    if (post.CategoryID != result.CommunityId)
+                    {
+                        ContentDialog errorDialog = new ContentDialog
+                        {
+                            XamlRoot = this.XamlRoot,
+                            Title = "Error",
+                            Content = "Changing the post's community/category is not allowed.",
+                            CloseButtonText = "OK"
+                        };
+                        await errorDialog.ShowAsync();
+                        return;
+                    }
+                    
                     // Update the post properties
                     post.Title = result.Title;
                     post.Description = result.Content;
-                    post.CategoryID = result.CommunityId; // Update the category ID if changed
                     post.UpdatedAt = DateTime.UtcNow;
                     
                     // Call the service to update the post
