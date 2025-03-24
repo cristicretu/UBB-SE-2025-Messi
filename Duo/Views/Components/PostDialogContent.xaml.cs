@@ -177,6 +177,9 @@ namespace Duo.Views.Components
         {
             HideError(TitleErrorTextBlock);
             
+            if (string.IsNullOrWhiteSpace(ViewModel.Title))
+                return true;
+                
             var (isValid, errorMessage) = ValidationHelper.ValidatePostTitle(ViewModel.Title);
             
             if (!isValid)
@@ -192,6 +195,9 @@ namespace Duo.Views.Components
         {
             HideError(ContentErrorTextBlock);
             
+            if (string.IsNullOrWhiteSpace(ViewModel.Content))
+                return true;
+                
             var (isValid, errorMessage) = ValidationHelper.ValidatePostContent(ViewModel.Content);
             
             if (!isValid)
@@ -207,6 +213,10 @@ namespace Duo.Views.Components
         {
             HideError(HashtagErrorTextBlock);
             
+            // Only validate if there is content to validate
+            if (string.IsNullOrWhiteSpace(hashtag))
+                return true;
+                
             var (isValid, errorMessage) = ValidationHelper.ValidateHashtagInput(hashtag);
             
             if (!isValid)
@@ -232,8 +242,8 @@ namespace Duo.Views.Components
         
         public bool IsFormValid()
         {
-            bool isTitleValid = ValidateTitle();
-            bool isContentValid = ValidateContent();
+            bool isTitleValid = !string.IsNullOrWhiteSpace(ViewModel.Title) && ValidateTitle();
+            bool isContentValid = !string.IsNullOrWhiteSpace(ViewModel.Content) && ValidateContent();
             bool isHashtagValid = true;
             bool isCommunitySelected = ViewModel.SelectedCategoryId > 0;
             
@@ -249,17 +259,38 @@ namespace Duo.Views.Components
         #region Event Handlers
         private void TitleTextBox_LostFocus(object sender, RoutedEventArgs e)
         {
-            _isTitleValid = ValidateTitle();
+            if (!string.IsNullOrWhiteSpace(ViewModel.Title))
+            {
+                _isTitleValid = ValidateTitle();
+            }
+            else
+            {
+                HideError(TitleErrorTextBlock);
+            }
         }
 
         private void ContentTextBox_LostFocus(object sender, RoutedEventArgs e)
         {
-            _isContentValid = ValidateContent();
+            if (!string.IsNullOrWhiteSpace(ViewModel.Content))
+            {
+                _isContentValid = ValidateContent();
+            }
+            else
+            {
+                HideError(ContentErrorTextBlock);
+            }
         }
         
         private void HashtagTextBox_LostFocus(object sender, RoutedEventArgs e)
         {
-            _isHashtagValid = ValidateHashtag(HashtagTextBox.Text);
+            if (!string.IsNullOrWhiteSpace(HashtagTextBox.Text))
+            {
+                _isHashtagValid = ValidateHashtag(HashtagTextBox.Text);
+            }
+            else
+            {
+                HideError(HashtagErrorTextBlock);
+            }
         }
         
         private void AddHashtagButton_Click(object sender, RoutedEventArgs e)

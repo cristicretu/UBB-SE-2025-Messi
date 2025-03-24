@@ -12,6 +12,7 @@ using static Duo.App;
 using System.Collections.ObjectModel;
 using Duo.Views.Components;
 using System.Threading.Tasks;
+using Duo.Helpers;
 
 namespace Duo.ViewModels
 {
@@ -54,7 +55,6 @@ namespace Duo.ViewModels
         public event PropertyChangedEventHandler PropertyChanged;
         public event EventHandler PostCreationSuccessful;
 
-        #region Public Properties
 
         public string Title
         {
@@ -139,7 +139,6 @@ namespace Duo.ViewModels
             }
         }
 
-        #endregion
 
         public PostCreationViewModel()
         {
@@ -189,8 +188,8 @@ namespace Duo.ViewModels
                     Description = Content,
                     UserID = currentUser.UserId,
                     CategoryID = SelectedCategoryId,
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
+                    CreatedAt = DateTimeHelper.EnsureUtcKind(DateTime.UtcNow),
+                    UpdatedAt = DateTimeHelper.EnsureUtcKind(DateTime.UtcNow)
                 };
                 
                 // Create post in database using the original CreatePost method
@@ -265,8 +264,8 @@ namespace Duo.ViewModels
                     Description = Content,
                     UserID = currentUser.UserId,
                     CategoryID = SelectedCategoryId,
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
+                    CreatedAt = DateTimeHelper.EnsureUtcKind(DateTime.UtcNow),
+                    UpdatedAt = DateTimeHelper.EnsureUtcKind(DateTime.UtcNow)
                 };
                 
                 // Create post in database using the original CreatePost method
@@ -363,7 +362,6 @@ namespace Duo.ViewModels
 
         #endregion
 
-        #region Private Methods
 
         private void LoadCommunities()
         {
@@ -402,6 +400,5 @@ namespace Duo.ViewModels
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        #endregion
     }
 }

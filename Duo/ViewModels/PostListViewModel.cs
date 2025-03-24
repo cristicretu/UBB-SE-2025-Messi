@@ -260,7 +260,8 @@ namespace Duo.ViewModels
                         post.Username = user?.Username ?? "Unknown User";
                     }
                     
-                    post.Date = Helpers.DateTimeHelper.GetRelativeTime(post.CreatedAt);
+                    DateTime localCreatedAt = Helpers.DateTimeHelper.ConvertUtcToLocal(post.CreatedAt);
+                    post.Date = Helpers.DateTimeHelper.GetRelativeTime(localCreatedAt);
                     
                     // Fetch hashtags for the post
                     post.Hashtags.Clear();
