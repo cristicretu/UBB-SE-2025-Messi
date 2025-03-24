@@ -5,6 +5,7 @@ using System.Diagnostics;
 using Duo.Models;
 using System.Collections.Generic;
 using Duo.ViewModels;
+using Duo.Views.Components;
 
 namespace Duo.Views.Pages
 {
@@ -171,6 +172,12 @@ namespace Duo.Views.Pages
             {
                 Debug.WriteLine($"Navigation error: {ex.Message}");
             }
+        }
+
+        private async void CreatePostBtn_CreatePostRequested(object sender, RoutedEventArgs e) 
+        {
+            var dialogComponent = new DialogComponent();
+            var result = await dialogComponent.ShowCreatePostDialog(this.XamlRoot);
         }
     }
 }

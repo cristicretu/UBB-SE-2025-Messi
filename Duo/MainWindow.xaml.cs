@@ -18,8 +18,6 @@ using Microsoft.UI;
 using Microsoft.UI.Windowing;
 using Windows.Graphics;
 
-using Duo.Views.Components;
-
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
 
@@ -30,6 +28,15 @@ namespace Duo
     /// </summary>
     public sealed partial class MainWindow : Window
     {
+        public static event EventHandler LoggedIn;
+        public static void RaiseLoggedInEvent()
+        {
+            LoggedIn?.Invoke(null, EventArgs.Empty);
+        }
+
+        private AppWindow _apw;
+        private OverlappedPresenter _presenter;
+
         private const int TitleBarHeight = 32;
         
         public MainWindow()
@@ -101,11 +108,69 @@ namespace Duo
             {
                 Debug.WriteLine($"Titlebar customization not supported: {ex.Message}");
             }
+
+            // Size and position window
+            IntPtr hWnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
+            WindowId windowId = Win32Interop.GetWindowIdFromWindow(hWnd);
+            _apw = AppWindow.GetFromWindowId(windowId);
+            _presenter = _apw.Presenter as OverlappedPresenter;
+            
+            SetDefaultWindowPosition();
+            SetCustomWindowStyle();
+            
+            LoggedIn += OnLoginSuccess;
         }
 
-        private async void CreatePostBtn_CreatePostRequested(object sender, RoutedEventArgs e) {
-            var dialogComponent = new DialogComponent();
-            var result = await dialogComponent.ShowCreatePostDialog(this.Content.XamlRoot);
+        private void OnLoginSuccess(object sender, EventArgs e)
+        {
+            // Update UI
+        }
+
+        private void SetDefaultWindowPosition()
+        {
+            try
+            {
+                // Center window on screen
+                var displayArea = DisplayArea.GetFromWindowId(
+                    _apw.Id, DisplayAreaFallback.Primary);
+                
+                // Calculate center position based on desired window size
+                int desiredWidth = 1200;
+                int desiredHeight = 700;
+                
+                var centerX = (displayArea.WorkArea.Width - desiredWidth) / 2;
+                var centerY = (displayArea.WorkArea.Height - desiredHeight) / 2;
+                
+                // Set window size and position
+                _apw.MoveAndResize(new RectInt32(
+                    centerX, 
+                    centerY, 
+                    desiredWidth, 
+                    desiredHeight));
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error setting window position: {ex.Message}");
+            }
+        }
+        
+        private void SetCustomWindowStyle()
+        {
+            try
+            {
+                if (_presenter != null)
+                {
+                    // Set default size constraints
+                    _presenter.IsResizable = true;
+                    _presenter.IsMaximizable = true;
+                    _presenter.IsMinimizable = true;
+                    _presenter.SetBorderAndTitleBar(true, true);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error setting window style: {ex.Message}");
+            }
         }
     }
 }

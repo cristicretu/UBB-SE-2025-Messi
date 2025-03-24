@@ -7,6 +7,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewmodels="using:Duo.ViewModels"
+    xmlns:components="using:Duo.Views.Components"
     mc:Ignorable="d">
 
     <Page.Resources>
@@ -15,31 +16,36 @@
         </DataTemplate>
     </Page.Resources>
 
-    <NavigationView x:Name="NavigationView"
-        Height="Auto"
-        PaneDisplayMode="Left"
-        PaneTitle="Duo"
-        IsTabStop="False"
-        ExpandedModeThresholdWidth="300"
-        SelectionChanged="NavigationView_SelectionChanged">
+    <Grid>
+        <NavigationView x:Name="NavigationView"
+            Height="Auto"
+            PaneDisplayMode="Left"
+            PaneTitle="Duo"
+            IsTabStop="False"
+            ExpandedModeThresholdWidth="300"
+            SelectionChanged="NavigationView_SelectionChanged">
 
-        <NavigationView.MenuItems>
-            <NavigationViewItem Content="Courses" Icon="Library" ToolTipService.ToolTip="Courses" Tag="CoursesParent">
-            </NavigationViewItem> 
-            <NavigationViewItem Content="Quiz" Icon="Help" ToolTipService.ToolTip="Quiz" Tag="QuizParent">
-            </NavigationViewItem>
-            <NavigationViewItem x:Name="CommunityItem" Content="Community" Icon="Folder" ToolTipService.ToolTip="Community" Tag="CommunityParent">
-            </NavigationViewItem>
-        </NavigationView.MenuItems>
+            <NavigationView.MenuItems>
+                <NavigationViewItem Content="Courses" Icon="Library" ToolTipService.ToolTip="Courses" Tag="CoursesParent">
+                </NavigationViewItem> 
+                <NavigationViewItem Content="Quiz" Icon="Help" ToolTipService.ToolTip="Quiz" Tag="QuizParent">
+                </NavigationViewItem>
+                <NavigationViewItem x:Name="CommunityItem" Content="Community" Icon="Folder" ToolTipService.ToolTip="Community" Tag="CommunityParent">
+                </NavigationViewItem>
+            </NavigationView.MenuItems>
 
-        <NavigationView.PaneFooter>
-            <StackPanel Orientation="Horizontal" Margin="14,10" VerticalAlignment="Center">
-                <PersonPicture ProfilePicture="/Assets/UserIcon.png" Width="24" Height="24" Margin="0,0,10,0"/>
-                <TextBlock x:Name="UsernameTextBlock" Text="Loading..." VerticalAlignment="Center" />
-            </StackPanel>
-        </NavigationView.PaneFooter>
+            <NavigationView.PaneFooter>
+                <StackPanel Orientation="Horizontal" Margin="14,10" VerticalAlignment="Center">
+                    <PersonPicture ProfilePicture="/Assets/UserIcon.png" Width="24" Height="24" Margin="0,0,10,0"/>
+                    <TextBlock x:Name="UsernameTextBlock" Text="Loading..." VerticalAlignment="Center" />
+                </StackPanel>
+            </NavigationView.PaneFooter>
 
-        <Frame x:Name="contentFrame" />
-    </NavigationView>
-
+            <Frame x:Name="contentFrame" />
+        </NavigationView>
+        
+        <components:CreatePostButton x:Name="CreatePostBtn" 
+                                    CreatePostRequested="CreatePostBtn_CreatePostRequested"
+                                    ToolTipService.ToolTip="Create post"/>
+    </Grid>
 </Page>

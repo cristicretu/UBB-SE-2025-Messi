@@ -14,7 +14,5 @@
         <Grid x:Name="ContentRoot">
             <pages:CategoryPage />
         </Grid>
-        <components:CreatePostButton x:Name="CreatePostBtn" 
-                                   CreatePostRequested="CreatePostBtn_CreatePostRequested"/>
     </Grid>
 </Window>
