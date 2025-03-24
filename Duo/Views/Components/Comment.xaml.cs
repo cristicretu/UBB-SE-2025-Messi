@@ -17,24 +17,27 @@ namespace Duo.Views.Components
         private readonly CommentService _commentService;
         private const int MAX_NESTING_LEVEL = 3; // Maximum allowed nesting level
         private bool _childrenVisible = true; // Track children visibility state
-        
+
         // Event for when reply is submitted
         public event EventHandler<CommentReplyEventArgs> ReplySubmitted;
-        
+
         // Event for when a comment is liked
         public event EventHandler<CommentLikedEventArgs> CommentLiked;
+
+        // Event for when a comment is deleted
+        public event EventHandler<CommentDeletedEventArgs> CommentDeleted;
 
         public Comment()
         {
             this.InitializeComponent();
-            
+
             // Initialize services
             _commentService = new CommentService(_commentRepository, _postRepository, userService);
-            
+
             CommentReplyButton.Click += CommentReplyButton_Click;
-            
+
             LikeButton.LikeClicked += LikeButton_LikeClicked;
-            
+
             ReplyInputControl.CommentSubmitted += ReplyInput_CommentSubmitted;
         }
 
@@ -47,25 +50,41 @@ namespace Duo.Views.Components
             UserTextBlock.Text = $"u/{comment.Username}";
             DescriptionTextBlock.Text = comment.Content;
             DateTextBlock.Text = FormatDate(comment.CreatedAt);
-            
+
             // Set like count and comment ID for the like button
             LikeButton.LikeCount = comment.LikeCount;
             LikeButton.CommentId = comment.Id;
 
+            // Check if the current user is the author of this comment
+            try
+            {
+                var currentUser = userService.GetCurrentUser();
+                if (currentUser != null && currentUser.UserId == comment.UserId)
+                {
+                    // Show delete button if the current user is the author
+                    DeleteButton.Visibility = Visibility.Visible;
+                }
+            }
+            catch (Exception)
+            {
+                // If there's any error getting the current user, hide the delete button
+                DeleteButton.Visibility = Visibility.Collapsed;
+            }
+
             // Generate the visual indicators for comment level
             var indentationLevels = new List<int>();
-            
+
             // For each comment, we show indentation lines for all previous levels
             for (int i = 1; i <= comment.Level; i++)
             {
                 indentationLevels.Add(i);
             }
-            
+
             LevelLinesRepeater.ItemsSource = indentationLevels;
 
             // Hide reply button for comments at or beyond the max nesting level
-            CommentReplyButton.Visibility = (comment.Level >= MAX_NESTING_LEVEL) 
-                ? Visibility.Collapsed 
+            CommentReplyButton.Visibility = (comment.Level >= MAX_NESTING_LEVEL)
+                ? Visibility.Collapsed
                 : Visibility.Visible;
 
             // Add child comments if any
@@ -77,9 +96,10 @@ namespace Duo.Views.Components
                     childCommentControl.SetCommentData(childComment, commentsByParent);
                     childCommentControl.ReplySubmitted += ChildComment_ReplySubmitted;
                     childCommentControl.CommentLiked += ChildComment_CommentLiked;
+                    childCommentControl.CommentDeleted += ChildComment_CommentDeleted;
                     ChildCommentsPanel.Children.Add(childCommentControl);
                 }
-                
+
                 // Show the toggle button only if this comment has children
                 ToggleChildrenButton.Visibility = Visibility.Visible;
                 // Set initial icon to minus (collapse) since children are visible by default
@@ -90,11 +110,11 @@ namespace Duo.Views.Components
                 // Hide the toggle button if there are no children
                 ToggleChildrenButton.Visibility = Visibility.Collapsed;
             }
-            
+
             // Hide the reply input if visible
             HideReplyInput();
         }
-        
+
         /// <summary>
         /// Sets the collapsed state of child comments programmatically
         /// </summary>
@@ -109,17 +129,17 @@ namespace Duo.Views.Components
                 ToggleIcon.Glyph = _childrenVisible ? "\uE108" : "\uE109"; // Minus or Plus icon
             }
         }
-        
+
         private void ToggleChildrenButton_Click(object sender, RoutedEventArgs e)
         {
             _childrenVisible = !_childrenVisible;
-            
+
             // Update the visibility of child comments
             ChildCommentsPanel.Visibility = _childrenVisible ? Visibility.Visible : Visibility.Collapsed;
-            
+
             // Change the icon based on state
             ToggleIcon.Glyph = _childrenVisible ? "\uE108" : "\uE109"; // Minus or Plus icon
-            
+
             // Track the collapsed state in the PostDetailViewModel
             if (_commentData != null)
             {
@@ -127,7 +147,7 @@ namespace Duo.Views.Components
                 System.Diagnostics.Debug.WriteLine($"Comment {_commentData.Id} collapse state set to {!_childrenVisible}");
             }
         }
-        
+
         private void LikeButton_LikeClicked(object sender, LikeButtonClickedEventArgs e)
         {
             if (e.TargetType == LikeTargetType.Comment && e.TargetId == _commentData.Id)
@@ -137,7 +157,7 @@ namespace Duo.Views.Components
                     if (_commentService.LikeComment(_commentData.Id))
                     {
                         LikeButton.LikeCount++;
-                        
+
                         CommentLiked?.Invoke(this, new CommentLikedEventArgs(_commentData.Id));
                     }
                 }
@@ -147,73 +167,80 @@ namespace Duo.Views.Components
                 }
             }
         }
-        
+
         private void ChildComment_CommentLiked(object sender, CommentLikedEventArgs e)
         {
             CommentLiked?.Invoke(this, e);
         }
-        
+
         private void CommentReplyButton_Click(object sender, RoutedEventArgs e)
         {
             ShowReplyInput();
         }
-        
+
         private void ReplyInput_CommentSubmitted(object sender, RoutedEventArgs e)
         {
             if (sender is Components.CommentInput commentInput && !string.IsNullOrWhiteSpace(commentInput.CommentText))
             {
                 // Trigger the reply submitted event
                 ReplySubmitted?.Invoke(this, new CommentReplyEventArgs(_commentData.Id, commentInput.CommentText));
-                
+
                 // Clear the reply input and hide it
                 commentInput.ClearComment();
                 HideReplyInput();
             }
         }
-        
+
         private void ChildComment_ReplySubmitted(object sender, CommentReplyEventArgs e)
         {
             // Forward the reply event to the parent
             ReplySubmitted?.Invoke(this, e);
         }
-        
+
         public void AddReplyComment(Models.Comment replyComment)
         {
             var childCommentControl = new Comment();
             childCommentControl.SetCommentData(replyComment, _commentsByParent);
             childCommentControl.ReplySubmitted += ChildComment_ReplySubmitted;
             childCommentControl.CommentLiked += ChildComment_CommentLiked;
+            childCommentControl.CommentDeleted += ChildComment_CommentDeleted;
             ChildCommentsPanel.Children.Add(childCommentControl);
-            
+
             // Add the reply to the local comments dictionary
             if (!_commentsByParent.ContainsKey(_commentData.Id))
             {
                 _commentsByParent[_commentData.Id] = new List<Models.Comment>();
             }
-            
+
             _commentsByParent[_commentData.Id].Add(replyComment);
-            
+
             // Ensure the toggle button is visible now that we have children
             ToggleChildrenButton.Visibility = Visibility.Visible;
-            
+
             // Set the icon to minus (collapse) and make sure children are visible
             ToggleIcon.Glyph = "\uE108"; // Minus icon
             _childrenVisible = true;
             ChildCommentsPanel.Visibility = Visibility.Visible;
         }
-        
+
+        private void ChildComment_CommentDeleted(object sender, CommentDeletedEventArgs e)
+        {
+            // Forward the delete event to the parent
+            CommentDeleted?.Invoke(this, e);
+        }
+
         private void ShowReplyInput()
         {
             ReplyInputControl.Visibility = Visibility.Visible;
             ReplyInputControl.Focus(FocusState.Programmatic);
         }
-        
+
         private void HideReplyInput()
         {
             ReplyInputControl.Visibility = Visibility.Collapsed;
             ReplyInputControl.ClearComment();
         }
-        
+
         private string FormatDate(DateTime dateTime)
         {
             if (dateTime.Date == DateTime.Today)
@@ -233,29 +260,81 @@ namespace Duo.Views.Components
                 return dateTime.ToString("MMM d"); // Month and day
             }
         }
+
+        private void DeleteButton_Click(object sender, RoutedEventArgs e)
+        {
+            ShowDeleteConfirmation();
+        }
+
+        private async void ShowDeleteConfirmation()
+        {
+            var dialog = new ContentDialog
+            {
+                Title = "Delete Comment",
+                Content = "Are you sure you want to delete this comment? This action cannot be undone.",
+                PrimaryButtonText = "Delete",
+                CloseButtonText = "Cancel",
+                DefaultButton = ContentDialogButton.Close
+            };
+
+            // Use XamlRoot from a XAML element to make the dialog work correctly in WinUI 3
+            dialog.XamlRoot = this.XamlRoot;
+
+            var result = await dialog.ShowAsync();
+
+            if (result == ContentDialogResult.Primary)
+            {
+                // User confirmed deletion
+                try
+                {
+                    var currentUser = userService.GetCurrentUser();
+                    if (currentUser != null)
+                    {
+                        // Raise the comment deleted event
+                        CommentDeleted?.Invoke(this, new CommentDeletedEventArgs(_commentData.Id));
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Handle error
+                    System.Diagnostics.Debug.WriteLine($"Error deleting comment: {ex.Message}");
+                }
+            }
+        }
     }
-    
+
     // Event args for comment reply events
     public class CommentReplyEventArgs : EventArgs
     {
         public int ParentCommentId { get; private set; }
         public string ReplyText { get; private set; }
-        
+
         public CommentReplyEventArgs(int parentCommentId, string replyText)
         {
             ParentCommentId = parentCommentId;
             ReplyText = replyText;
         }
     }
-    
-    // Event args for comment liked events
+
+    // Event args for comment like events
     public class CommentLikedEventArgs : EventArgs
     {
         public int CommentId { get; private set; }
-        
+
         public CommentLikedEventArgs(int commentId)
         {
             CommentId = commentId;
         }
     }
-} 
+
+    // Event args for comment delete events
+    public class CommentDeletedEventArgs : EventArgs
+    {
+        public int CommentId { get; private set; }
+
+        public CommentDeletedEventArgs(int commentId)
+        {
+            CommentId = commentId;
+        }
+    }
+}

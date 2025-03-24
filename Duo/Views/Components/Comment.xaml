@@ -11,98 +11,106 @@
     HorizontalAlignment="Stretch"
     Margin="0,0,0,0">
 
-    <StackPanel 
-        HorizontalAlignment="Stretch" 
+    <StackPanel
+        HorizontalAlignment="Stretch"
         Spacing="0">
-        
+
         <!-- Main comment content -->
         <Grid HorizontalAlignment="Stretch">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            
+
             <!-- Vertical line(s) based on tree level -->
-            <ItemsRepeater 
-                x:Name="LevelLinesRepeater" 
-                Grid.Column="0" 
+            <ItemsRepeater
+                x:Name="LevelLinesRepeater"
+                Grid.Column="0"
                 HorizontalAlignment="Left"
                 Margin="0">
                 <ItemsRepeater.ItemTemplate>
                     <DataTemplate>
-                        <Border 
-                            Width="20" 
+                        <Border
+                            Width="20"
                             Height="Auto"
                             Padding="0"
                             Margin="0"
                             VerticalAlignment="Stretch">
-                            <Border 
-                                Width="1" 
+                            <Border
+                                Width="1"
                                 MinHeight="100%"
                                 Margin="8,0,0,0"
-                                VerticalAlignment="Stretch" 
+                                VerticalAlignment="Stretch"
                                 HorizontalAlignment="Center"
-                                Background="{ThemeResource SystemControlForegroundBaseLowBrush}" 
-                                Opacity="0.75"/> 
+                                Background="{ThemeResource SystemControlForegroundBaseLowBrush}"
+                                Opacity="0.75"/>
                         </Border>
                     </DataTemplate>
                 </ItemsRepeater.ItemTemplate>
                 <ItemsRepeater.Layout>
-                    <StackLayout Orientation="Horizontal" Spacing="0"/>
+                    <StackLayout Orientation="Horizontal"
+                                 Spacing="0"/>
                 </ItemsRepeater.Layout>
             </ItemsRepeater>
-            
+
             <!-- Comment content -->
-            <StackPanel 
-                Grid.Column="1" 
-                Padding="12" 
-                Spacing="8" 
+            <StackPanel
+                Grid.Column="1"
+                Padding="12"
+                Spacing="8"
                 HorizontalAlignment="Stretch">
-                
+
                 <!-- User info and date row -->
                 <Grid HorizontalAlignment="Stretch">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    
-                    <TextBlock 
-                        x:Name="UserTextBlock" 
+
+                    <TextBlock
+                        x:Name="UserTextBlock"
                         Grid.Column="0"
-                        Text="u/username" 
-                        FontSize="12" 
+                        Text="u/username"
+                        FontSize="12"
                         FontWeight="SemiBold"/>
-                    
-                    <TextBlock 
-                        x:Name="DateTextBlock" 
+
+                    <TextBlock
+                        x:Name="DateTextBlock"
                         Grid.Column="1"
-                        Text="Mar 14" 
-                        FontSize="12" 
+                        Text="Mar 14"
+                        FontSize="12"
                         Opacity="0.7"/>
                 </Grid>
-                
+
                 <!-- Comment description -->
-                <TextBlock 
-                    x:Name="DescriptionTextBlock" 
-                    Text="This is a comment description." 
-                    TextWrapping="Wrap" 
+                <TextBlock
+                    x:Name="DescriptionTextBlock"
+                    Text="This is a comment description."
+                    TextWrapping="Wrap"
                     FontSize="14"/>
-                
+
                 <!-- Action buttons -->
-                <StackPanel Orientation="Horizontal" Spacing="16">
+                <StackPanel Orientation="Horizontal"
+                            Spacing="16">
                     <local:LikeButton x:Name="LikeButton"/>
                     <local:CommentButton x:Name="CommentReplyButton"/>
+                    <Button
+                        x:Name="DeleteButton"
+                        Content="Delete"
+                        Click="DeleteButton_Click"
+                        Visibility="Collapsed"
+                        Style="{ThemeResource TextBlockButtonStyle}"/>
                 </StackPanel>
-                
-                <local:CommentInput 
+
+                <local:CommentInput
                     x:Name="ReplyInputControl"
                     CommentSubmitted="ReplyInput_CommentSubmitted"
                     Visibility="Collapsed"
                     Margin="0,8,0,0"/>
-                
+
                 <!-- Expand/collapse button -->
                 <Grid HorizontalAlignment="Stretch">
-                    <Button 
+                    <Button
                         x:Name="ToggleChildrenButton"
                         Click="ToggleChildrenButton_Click"
                         HorizontalAlignment="Right"
@@ -112,15 +120,18 @@
                         BorderThickness="1"
                         BorderBrush="{ThemeResource SystemBaseMediumLowColor}"
                         Visibility="Collapsed">
-                        <FontIcon x:Name="ToggleIcon" Glyph="&#xE109;" FontSize="12"/> <!-- Plus icon by default -->
+                        <FontIcon x:Name="ToggleIcon"
+                                  Glyph="&#xE109;"
+                                  FontSize="12"/>
+                        <!-- Plus icon by default -->
                     </Button>
                 </Grid>
             </StackPanel>
         </Grid>
-        
+
         <!-- Container for child comments -->
-        <StackPanel 
-            x:Name="ChildCommentsPanel" 
+        <StackPanel
+            x:Name="ChildCommentsPanel"
             HorizontalAlignment="Stretch"
             Spacing="0"/>
     </StackPanel>

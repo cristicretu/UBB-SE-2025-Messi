@@ -53,7 +53,7 @@ namespace Duo.Services
             try
             {
                 System.Diagnostics.Debug.WriteLine($"CommentService: Getting comments for post ID {postId}");
-                
+
                 var comments = _commentRepository.GetCommentsByPostId(postId);
                 System.Diagnostics.Debug.WriteLine($"CommentService: Retrieved {comments?.Count ?? 0} comments from repository");
 

@@ -22,7 +22,7 @@ namespace Duo.ViewModels
         private bool _isLoading;
         private StackPanel _commentsPanel;
         private string _lastProcessedReply;
-        
+
         // Dictionary to track collapsed comments by their ID
         //When adding a comment or reply, the code calls LoadComments(Post.Id) which reloads all comments and resets their collapsed state. We need to track which comments are collapsed and restore this state after reloading.
         public static Dictionary<int, bool> CollapsedComments { get; } = new Dictionary<int, bool>();
@@ -34,11 +34,11 @@ namespace Duo.ViewModels
         {
             _postService = _postService ?? App._postService;
             _commentService = _commentService ?? new CommentService(_commentRepository, _postRepository, userService);
-            
+
             _post = new Post { Title = "", Description = "" };
-            
+
             Comments = new ObservableCollection<Comment>();
-            
+
             LoadPostDetailsCommand = new RelayCommandWithParameter<int>(LoadPostDetails);
             AddCommentCommand = new RelayCommandWithParameter<string>(AddComment);
         }
@@ -72,7 +72,7 @@ namespace Duo.ViewModels
                 OnPropertyChanged();
             }
         }
-        
+
         public StackPanel CommentsPanel
         {
             get => _commentsPanel;
@@ -99,7 +99,7 @@ namespace Duo.ViewModels
                 {
                     throw new ArgumentException("Invalid post ID", nameof(postId));
                 }
-                
+
                 var post = _postService.GetPostById(postId);
                 if (post != null)
                 {
@@ -107,24 +107,24 @@ namespace Duo.ViewModels
                     {
                         post.Id = postId;
                     }
-                    
+
                     var user = userService.GetUserById(post.UserID);
                     post.Username = $"u/{user?.Username ?? "Unknown User"}";
-                    
+
                     if (string.IsNullOrEmpty(post.Date) && post.CreatedAt != default)
                     {
                         DateTime localCreatedAt = Helpers.DateTimeHelper.ConvertUtcToLocal(post.CreatedAt);
                         post.Date = FormatDate(localCreatedAt);
                     }
-                    
+
                     var hashtags = _postService.GetHashtagsByPostId(post.Id);
                     if (hashtags != null)
                     {
                         post.Hashtags = hashtags.Select(h => h.Name ?? h.Tag).ToList();
                     }
-                    
+
                     Post = post;
-                    
+
                     if (CommentsPanel != null)
                     {
                         LoadComments(post.Id);
@@ -148,7 +148,7 @@ namespace Duo.ViewModels
         public void LoadComments(int postId)
         {
             if (CommentsPanel == null) return;
-            
+
             CommentsPanel.Children.Clear();
 
             try
@@ -157,36 +157,36 @@ namespace Duo.ViewModels
                 {
                     throw new ArgumentException("Invalid post ID", nameof(postId));
                 }
-                
+
                 System.Diagnostics.Debug.WriteLine($"Attempting to load comments for post ID: {postId}");
-                
+
                 // Try to get comments from the comment service
                 var comments = _commentService.GetCommentsByPostId(postId);
                 System.Diagnostics.Debug.WriteLine($"Retrieved {comments?.Count ?? 0} comments from service");
-                
+
                 Comments.Clear();
-                
+
                 if (comments != null && comments.Any())
                 {
                     foreach (var comment in comments)
                     {
                         Comments.Add(comment);
                     }
-                    
+
                     var topLevelComments = comments.Where(c => c.ParentCommentId == null).ToList();
                     System.Diagnostics.Debug.WriteLine($"Found {topLevelComments.Count} top-level comments");
-                    
+
                     var repliesByParentId = comments
                         .Where(c => c.ParentCommentId != null)
                         .GroupBy(c => c.ParentCommentId)
                         .ToDictionary(g => g.Key, g => g.ToList());
                     System.Diagnostics.Debug.WriteLine($"Found replies for {repliesByParentId.Count} parent comments");
-                    
+
                     foreach (var comment in topLevelComments)
                     {
                         comment.Level = 1;
                     }
-                    
+
                     foreach (var parentId in repliesByParentId.Keys)
                     {
                         var parentComment = comments.FirstOrDefault(c => c.Id == parentId);
@@ -198,30 +198,30 @@ namespace Duo.ViewModels
                             }
                         }
                     }
-                        
+
                     foreach (var comment in topLevelComments)
                     {
                         var commentComponent = new Views.Components.Comment();
                         commentComponent.SetCommentData(comment, repliesByParentId);
-                        
+
                         // Set initial collapse state if the comment is in the collapsed tracking dictionary
                         if (CollapsedComments.TryGetValue(comment.Id, out bool isCollapsed) && isCollapsed)
                         {
                             commentComponent.SetChildrenCollapsed(true);
                         }
-                        
+
                         CommentsPanel.Children.Add(commentComponent);
                     }
-                    
+
                     System.Diagnostics.Debug.WriteLine("Successfully added comments to UI");
-                    
+
                     // Raise the comments loaded event
                     CommentsLoaded?.Invoke(this, EventArgs.Empty);
                 }
                 else
                 {
                     System.Diagnostics.Debug.WriteLine("No comments found for this post");
-                    
+
                     TextBlock noCommentsText = new TextBlock
                     {
                         Text = "No comments yet. Be the first to comment!",
@@ -234,7 +234,7 @@ namespace Duo.ViewModels
             {
                 System.Diagnostics.Debug.WriteLine($"Error loading comments: {ex.Message}");
                 System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
-                
+
                 TextBlock errorText = new TextBlock
                 {
                     Text = "Could not load comments. " + ex.Message,
@@ -252,7 +252,7 @@ namespace Duo.ViewModels
             try
             {
                 _commentService.CreateComment(commentText, Post.Id, null);
-                
+
                 LoadComments(Post.Id);
             }
             catch (Exception ex)
@@ -260,7 +260,37 @@ namespace Duo.ViewModels
                 System.Diagnostics.Debug.WriteLine($"Error adding comment: {ex.Message}");
             }
         }
-        
+
+        public void DeleteComment(int commentId)
+        {
+            if (commentId <= 0 || Post == null || Post.Id <= 0)
+                return;
+
+            try
+            {
+                User currentUser = userService.GetCurrentUser();
+                if (currentUser != null)
+                {
+                    bool success = _commentService.DeleteComment(commentId, currentUser.UserId);
+                    if (success)
+                    {
+                        // If the comment was in the collapsed dictionary, remove it
+                        if (CollapsedComments.ContainsKey(commentId))
+                        {
+                            CollapsedComments.Remove(commentId);
+                        }
+
+                        // Reload comments after deletion
+                        LoadComments(Post.Id);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error deleting comment: {ex.Message}");
+            }
+        }
+
         public void AddReplyToComment(int parentCommentId, string replyText)
         {
             if (string.IsNullOrWhiteSpace(replyText) || Post == null || Post.Id <= 0 || parentCommentId <= 0)
@@ -269,15 +299,15 @@ namespace Duo.ViewModels
             try
             {
                 System.Diagnostics.Debug.WriteLine($"Adding reply to comment ID {parentCommentId}: {replyText}");
-                
+
                 // Create a more robust signature to detect duplicates
                 string replySignature = $"{parentCommentId}_{replyText}";
-                
+
                 // Check for duplicates in current Comments collection
                 bool isDuplicate = false;
                 foreach (var comment in Comments)
                 {
-                    if (comment.ParentCommentId == parentCommentId && 
+                    if (comment.ParentCommentId == parentCommentId &&
                         comment.Content.Equals(replyText, StringComparison.OrdinalIgnoreCase))
                     {
                         System.Diagnostics.Debug.WriteLine($"Detected duplicate reply in Comments collection, ignoring: {replySignature}");
@@ -285,24 +315,24 @@ namespace Duo.ViewModels
                         break;
                     }
                 }
-                
+
                 // Also check the last processed reply signature
                 if (_lastProcessedReply == replySignature)
                 {
                     System.Diagnostics.Debug.WriteLine($"Detected duplicate reply submission, ignoring: {replySignature}");
                     isDuplicate = true;
                 }
-                
+
                 if (isDuplicate)
                 {
                     return;
                 }
-                
+
                 _lastProcessedReply = replySignature;
-                
+
                 // Create the reply comment with parent ID
                 _commentService.CreateComment(replyText, Post.Id, parentCommentId);
-                
+
                 // Reload all comments to display the new reply
                 LoadComments(Post.Id);
             }
@@ -323,4 +353,4 @@ namespace Duo.ViewModels
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
-} 
+}

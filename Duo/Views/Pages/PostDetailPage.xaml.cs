@@ -21,15 +21,15 @@ namespace Duo.Views.Pages
     public sealed partial class PostDetailPage : Page
     {
         private readonly CommentService _commentService;
-        
+
         public PostDetailPage()
         {
             this.InitializeComponent();
-            
+
             _commentService = new CommentService(_commentRepository, _postRepository, userService);
-            
+
             ViewModel.CommentsPanel = CommentsPanel;
-            
+
             ViewModel.CommentsLoaded += ViewModel_CommentsLoaded;
         }
 
@@ -54,7 +54,7 @@ namespace Duo.Views.Pages
                 CommentsPanel.Children.Add(errorText);
             }
         }
-        
+
         private void BackButton_Click(object sender, RoutedEventArgs e)
         {
             if (this.Frame.CanGoBack)
@@ -62,7 +62,7 @@ namespace Duo.Views.Pages
                 this.Frame.GoBack();
             }
         }
-        
+
         private void CommentInputControl_CommentSubmitted(object sender, RoutedEventArgs e)
         {
             if (sender is Components.CommentInput commentInput && commentInput.CommentText != null)
@@ -70,32 +70,34 @@ namespace Duo.Views.Pages
                 if (ViewModel.AddCommentCommand.CanExecute(commentInput.CommentText))
                 {
                     ViewModel.AddCommentCommand.Execute(commentInput.CommentText);
-                    
+
                     // Clear the comment input after submission
                     commentInput.ClearComment();
                 }
             }
         }
-        
+
         private void ViewModel_CommentsLoaded(object sender, EventArgs e)
         {
             ConnectCommentReplyEvents();
-            
+
             ConnectCommentLikeEvents();
+
+            ConnectCommentDeleteEvents();
         }
-        
+
         private void ConnectCommentReplyEvents()
         {
             DisconnectCommentReplyEvents();
-            
+
             var commentControls = GetAllChildrenOfType<Components.Comment>(CommentsPanel);
-            
+
             foreach (var comment in commentControls)
             {
                 comment.ReplySubmitted += Comment_ReplySubmitted;
             }
         }
-        
+
         private void DisconnectCommentReplyEvents()
         {
             var commentControls = GetAllChildrenOfType<Components.Comment>(CommentsPanel);
@@ -104,21 +106,19 @@ namespace Duo.Views.Pages
                 comment.ReplySubmitted -= Comment_ReplySubmitted;
             }
         }
-        
+
         private void ConnectCommentLikeEvents()
         {
-            // Disconnect existing events first to avoid duplicates
             DisconnectCommentLikeEvents();
-            
-            // Get all comment components from the comments panel
+
             var commentControls = GetAllChildrenOfType<Components.Comment>(CommentsPanel);
-            
+
             foreach (var comment in commentControls)
             {
                 comment.CommentLiked += Comment_CommentLiked;
             }
         }
-        
+
         private void DisconnectCommentLikeEvents()
         {
             var commentControls = GetAllChildrenOfType<Components.Comment>(CommentsPanel);
@@ -127,38 +127,67 @@ namespace Duo.Views.Pages
                 comment.CommentLiked -= Comment_CommentLiked;
             }
         }
-        
+
+        private void ConnectCommentDeleteEvents()
+        {
+            DisconnectCommentDeleteEvents();
+
+            var commentControls = GetAllChildrenOfType<Components.Comment>(CommentsPanel);
+
+            foreach (var comment in commentControls)
+            {
+                comment.CommentDeleted += Comment_CommentDeleted;
+            }
+        }
+
+        private void DisconnectCommentDeleteEvents()
+        {
+            var commentControls = GetAllChildrenOfType<Components.Comment>(CommentsPanel);
+            foreach (var comment in commentControls)
+            {
+                comment.CommentDeleted -= Comment_CommentDeleted;
+            }
+        }
+
         private void Comment_ReplySubmitted(object sender, CommentReplyEventArgs e)
         {
             // Add debugging to track the event source
             System.Diagnostics.Debug.WriteLine($"Reply submitted event received from {sender.GetType().Name} for parent comment ID: {e.ParentCommentId}");
-            
+
             // Add a reply to the comment
             ViewModel.AddReplyToComment(e.ParentCommentId, e.ReplyText);
         }
-        
+
         private void Comment_CommentLiked(object sender, CommentLikedEventArgs e)
         {
             // REMOVED: Don't increment likes again here - already handled in the Comment component
             // _commentService.LikeComment(e.CommentId);
             System.Diagnostics.Debug.WriteLine($"Comment liked event received for ID: {e.CommentId} - not incrementing again");
         }
-        
+
+        private void Comment_CommentDeleted(object sender, Components.CommentDeletedEventArgs e)
+        {
+            if (e.CommentId > 0)
+            {
+                ViewModel.DeleteComment(e.CommentId);
+            }
+        }
+
         // Helper method to get all children of a specific type from a panel
         private List<T> GetAllChildrenOfType<T>(DependencyObject parent) where T : DependencyObject
         {
             var list = new List<T>();
             var count = VisualTreeHelper.GetChildrenCount(parent);
-            
+
             for (int i = 0; i < count; i++)
             {
                 var child = VisualTreeHelper.GetChild(parent, i);
-                
+
                 if (child is T childOfType)
                 {
                     list.Add(childOfType);
                 }
-                
+
                 // Recursively search child elements
                 if (child is FrameworkElement)
                 {
@@ -169,7 +198,7 @@ namespace Duo.Views.Pages
                     }
                 }
             }
-            
+
             return list;
         }
     }

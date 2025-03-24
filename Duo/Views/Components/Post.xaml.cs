@@ -19,30 +19,30 @@ namespace Duo.Views.Components
 {
     public sealed partial class Post : UserControl
     {
-        public static readonly DependencyProperty UsernameProperty = 
+        public static readonly DependencyProperty UsernameProperty =
             DependencyProperty.Register(nameof(Username), typeof(string), typeof(Post), new PropertyMetadata(""));
-        
-        public static readonly DependencyProperty DateProperty = 
+
+        public static readonly DependencyProperty DateProperty =
             DependencyProperty.Register(nameof(Date), typeof(string), typeof(Post), new PropertyMetadata(""));
-        
-        public static readonly DependencyProperty TitleProperty = 
+
+        public static readonly DependencyProperty TitleProperty =
             DependencyProperty.Register(nameof(Title), typeof(string), typeof(Post), new PropertyMetadata(""));
-        
-        public static new readonly DependencyProperty ContentProperty = 
+
+        public static new readonly DependencyProperty ContentProperty =
             DependencyProperty.Register(nameof(Content), typeof(string), typeof(Post), new PropertyMetadata(""));
-        
-        public static readonly DependencyProperty LikeCountProperty = 
+
+        public static readonly DependencyProperty LikeCountProperty =
             DependencyProperty.Register(nameof(LikeCount), typeof(int), typeof(Post), new PropertyMetadata(0));
-        
-        public static readonly DependencyProperty HashtagsProperty = 
+
+        public static readonly DependencyProperty HashtagsProperty =
             DependencyProperty.Register(nameof(Hashtags), typeof(IEnumerable<string>), typeof(Post), new PropertyMetadata(null));
 
-        public static readonly DependencyProperty PostIdProperty = 
+        public static readonly DependencyProperty PostIdProperty =
             DependencyProperty.Register(nameof(PostId), typeof(int), typeof(Post), new PropertyMetadata(0));
 
-        public static readonly DependencyProperty IsAlwaysHighlightedProperty = 
+        public static readonly DependencyProperty IsAlwaysHighlightedProperty =
             DependencyProperty.Register(nameof(IsAlwaysHighlighted), typeof(bool), typeof(Post), new PropertyMetadata(false, OnIsAlwaysHighlightedChanged));
-            
+
         private static void OnIsAlwaysHighlightedChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is Post post)
@@ -57,14 +57,14 @@ namespace Duo.Views.Components
         public Post()
         {
             InitializeComponent();
-            
+
             UpdateMoreOptionsVisibility();
             UpdateHighlightState();
-            
+
             // Subscribe to the Loaded event
             Loaded += Post_Loaded;
         }
-        
+
         private void Post_Loaded(object sender, RoutedEventArgs e)
         {
             // Find and connect to the LikeButton
@@ -74,31 +74,31 @@ namespace Duo.Views.Components
                 _likeButton.LikeClicked += LikeButton_LikeClicked;
             }
         }
-        
+
         // Find a descendant control of a specific type
         private T FindDescendant<T>(DependencyObject parent) where T : DependencyObject
         {
             int childCount = VisualTreeHelper.GetChildrenCount(parent);
-            
+
             for (int i = 0; i < childCount; i++)
             {
                 DependencyObject child = VisualTreeHelper.GetChild(parent, i);
-                
+
                 if (child is T result)
                 {
                     return result;
                 }
-                
+
                 T descendant = FindDescendant<T>(child);
                 if (descendant != null)
                 {
                     return descendant;
                 }
             }
-            
+
             return null;
         }
-        
+
         private void LikeButton_LikeClicked(object sender, LikeButtonClickedEventArgs e)
         {
             if (e.TargetType == LikeTargetType.Post && e.TargetId == PostId)
@@ -107,13 +107,13 @@ namespace Duo.Views.Components
                 {
                     if (App._postService.LikePost(PostId))
                     {
-                       // LikeCount++;
-                        
+                        // LikeCount++;
+
                         if (_likeButton != null)
                         {
                             _likeButton.IncrementLikeCount();
                         }
-                        
+
                         System.Diagnostics.Debug.WriteLine($"Post liked: ID {PostId}, new count: {LikeCount}");
                     }
                 }
@@ -129,8 +129,8 @@ namespace Duo.Views.Components
             var currentUser = userService.GetCurrentUser();
             if (currentUser != null)
             {
-                MoreOptions.Visibility = (this.Username == currentUser.Username) 
-                    ? Visibility.Visible 
+                MoreOptions.Visibility = (this.Username == currentUser.Username)
+                    ? Visibility.Visible
                     : Visibility.Collapsed;
             }
             else
@@ -143,8 +143,8 @@ namespace Duo.Views.Components
         private void PostBorder_PointerEntered(object sender, PointerRoutedEventArgs e)
         {
             _isPointerOver = true;
-            
-            if (!IsAlwaysHighlighted) 
+
+            if (!IsAlwaysHighlighted)
             {
                 if (sender is Border border)
                 {
@@ -158,8 +158,8 @@ namespace Duo.Views.Components
         private void PostBorder_PointerExited(object sender, PointerRoutedEventArgs e)
         {
             _isPointerOver = false;
-            
-            if (!IsAlwaysHighlighted) 
+
+            if (!IsAlwaysHighlighted)
             {
                 if (sender is Border border)
                 {
@@ -178,14 +178,14 @@ namespace Duo.Views.Components
             {
                 return;
             }
-            
+
             // Check if the tap originated from a LikeButton or its children
             if (IsLikeButtonTap(e.OriginalSource as DependencyObject))
             {
                 // Skip navigation if the tap was on the like button
                 return;
             }
-            
+
             // Get the parent frame for navigation
             var frame = FindParentFrame();
             if (frame != null)
@@ -213,28 +213,28 @@ namespace Duo.Views.Components
                 frame.Navigate(typeof(PostDetailPage), post);
             }
         }
-        
+
         // Helper method to determine if a tap originated from the LikeButton
         private bool IsLikeButtonTap(DependencyObject element)
         {
             // If null, it can't be the LikeButton
             if (element == null)
                 return false;
-                
+
             // Check if the element is a LikeButton
             if (element is LikeButton)
                 return true;
-                
+
             // Check parent hierarchy
             DependencyObject parent = VisualTreeHelper.GetParent(element);
             while (parent != null && !(parent is Post))
             {
                 if (parent is LikeButton)
                     return true;
-                    
+
                 parent = VisualTreeHelper.GetParent(parent);
             }
-            
+
             return false;
         }
 
@@ -253,7 +253,7 @@ namespace Duo.Views.Components
         private async void MoreOptions_EditClicked(object sender, RoutedEventArgs e)
         {
             // Verify that the current user is the owner of the post            
-            if(this.Username != $"{userService.GetCurrentUser().Username}")
+            if (this.Username != $"{userService.GetCurrentUser().Username}")
             {
                 // Display an error dialog if the user is not the owner
                 ContentDialog errorDialog = new ContentDialog
@@ -270,7 +270,7 @@ namespace Duo.Views.Components
             // Handle the edit logic here
             // Display Edit Post dialog with prefilled data
             var dialogComponent = new DialogComponent();
-            
+
             var post = _postService.GetPostById(this.PostId);
             if (post == null)
             {
@@ -284,9 +284,9 @@ namespace Duo.Views.Components
                 await errorDialog.ShowAsync();
                 return;
             }
-            
+
             var result = await dialogComponent.ShowEditPostDialog(
-                this.XamlRoot, 
+                this.XamlRoot,
                 this.Title,          // Pass the current post title
                 this.Content,        // Pass the current post content
                 [.. this.Hashtags],  // Convert IEnumerable<string> to List<string> before passing
@@ -311,17 +311,18 @@ namespace Duo.Views.Components
                         await errorDialog.ShowAsync();
                         return;
                     }
-                    
+
                     // Update the post properties
                     post.Title = result.Title;
                     post.Description = result.Content;
                     post.UpdatedAt = DateTime.UtcNow;
-                    
+
                     // Call the service to update the post
                     _postService.UpdatePost(post);
-                    
+
                     // Update hashtags
-                    try {
+                    try
+                    {
                         // First clear existing hashtags and then add new ones
                         var existingHashtags = _postService.GetHashtagsByPostId(this.PostId);
                         foreach (var hashtag in existingHashtags)
@@ -336,9 +337,9 @@ namespace Duo.Views.Components
                             {
                                 var hashtagRepo = App._hashtagRepository;
                                 var userId = userService.GetCurrentUser().UserId;
-                                
+
                                 var existingHashtag = hashtagRepo.GetHashtagByName(hashtag);
-                                
+
                                 if (existingHashtag == null)
                                 {
                                     var newHashtag = hashtagRepo.CreateHashtag(hashtag);
@@ -354,18 +355,18 @@ namespace Duo.Views.Components
                                 System.Diagnostics.Debug.WriteLine($"Error processing hashtag '{hashtag}': {tagEx.Message}");
                             }
                         }
-                    
+
                         this.Hashtags = result.Hashtags;
                     }
                     catch (Exception hashtagEx)
                     {
                         System.Diagnostics.Debug.WriteLine($"Error updating hashtags: {hashtagEx.Message}");
                     }
-                    
+
                     // Update the UI elements with the new data
                     this.Title = result.Title;
                     this.Content = result.Content;
-                    
+
                     // Show success message
                     ContentDialog successDialog = new ContentDialog
                     {
@@ -393,7 +394,7 @@ namespace Duo.Views.Components
 
         private async void MoreOptions_DeleteClicked(object sender, RoutedEventArgs e)
         {
-            if(this.Username != $"{userService.GetCurrentUser().Username}")
+            if (this.Username != $"{userService.GetCurrentUser().Username}")
             {
                 // Display an error dialog if the user is not the owner
                 ContentDialog errorDialog = new ContentDialog
@@ -416,13 +417,14 @@ namespace Duo.Views.Components
                 "Are you sure you want to delete this item?",
                 this.XamlRoot
             );
-                
+
             // if User confirms...
             if (isConfirmed)
             {
                 // Handle the deletion logic here
-                try {
-                _postService.DeletePost(this.PostId);
+                try
+                {
+                    _postService.DeletePost(this.PostId);
                 }
                 catch (Exception ex)
                 {
@@ -446,6 +448,35 @@ namespace Duo.Views.Components
                     CloseButtonText = "OK"
                 };
                 await successDialog.ShowAsync();
+
+                // Refresh the page or navigate back after deletion
+                var frame = FindParentFrame();
+                if (frame != null)
+                {
+                    // Check if we're in a detail page or list page
+                    if (frame.Content is Duo.Views.Pages.PostDetailPage)
+                    {
+                        // If we're in a detail page, navigate back
+                        if (frame.CanGoBack)
+                        {
+                            frame.GoBack();
+                        }
+                    }
+                    else if (frame.Content is Duo.Views.Pages.PostListPage postListPage)
+                    {
+                        // If we're in a list page, refresh the page
+                        var viewModel = postListPage.DataContext as Duo.ViewModels.PostListViewModel;
+                        if (viewModel != null)
+                        {
+                            viewModel.LoadPosts();
+                        }
+                    }
+                    else if (frame.Content is Duo.Views.Pages.CategoryPage categoryPage)
+                    {
+                        // If we're in a category page with embedded posts, refresh that page
+                        categoryPage.RefreshCurrentView();
+                    }
+                }
             }
         }
 
@@ -489,8 +520,8 @@ namespace Duo.Views.Components
         public string Username
         {
             get => (string)GetValue(UsernameProperty);
-            set 
-            { 
+            set
+            {
                 SetValue(UsernameProperty, value);
                 // Update visibility when username changes
                 UpdateMoreOptionsVisibility();
@@ -532,11 +563,11 @@ namespace Duo.Views.Components
             get { return (int)GetValue(PostIdProperty); }
             set { SetValue(PostIdProperty, value); }
         }
-        
+
         public bool IsAlwaysHighlighted
         {
             get { return (bool)GetValue(IsAlwaysHighlightedProperty); }
             set { SetValue(IsAlwaysHighlightedProperty, value); }
         }
     }
-} 
+}

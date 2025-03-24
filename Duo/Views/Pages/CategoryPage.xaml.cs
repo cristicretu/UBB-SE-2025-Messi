@@ -25,10 +25,10 @@ namespace Duo.Views.Pages
 
                 // Initialize ViewModel
                 _viewModel = new CategoryViewModel(App._categoryService);
-                
+
                 // Set DataContext for data binding
                 this.DataContext = _viewModel;
-                
+
                 // Populate community menu items
                 PopulateCommunityMenuItems();
 
@@ -57,16 +57,38 @@ namespace Duo.Views.Pages
                 Debug.WriteLine($"Page initialization failed: {ex.Message}");
             }
         }
-        
+
+        // Add a public method to refresh the current view
+        public void RefreshCurrentView()
+        {
+            try
+            {
+                // If we're viewing a category, refresh the post list for that category
+                if (!string.IsNullOrEmpty(_currentCategoryName))
+                {
+                    NavigateToPostListPage(_currentCategoryName);
+                }
+                // Otherwise, if we're on the main page, refresh it
+                else if (contentFrame.Content is MainPage)
+                {
+                    contentFrame.Navigate(typeof(MainPage));
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Failed to refresh view: {ex.Message}");
+            }
+        }
+
         private void PopulateCommunityMenuItems()
         {
             try
             {
                 var categoryNames = _viewModel.GetCategoryNames();
-                
+
                 // Clear existing items
                 CommunityItem.MenuItems.Clear();
-                
+
                 // Add menu items for each category
                 foreach (string categoryName in categoryNames)
                 {
@@ -76,13 +98,13 @@ namespace Duo.Views.Pages
                         Icon = new SymbolIcon(Symbol.Message),
                         Tag = categoryName
                     };
-                    
+
                     // Set tooltip after initialization
                     ToolTipService.SetToolTip(item, categoryName);
-                    
+
                     CommunityItem.MenuItems.Add(item);
                 }
-                
+
                 Debug.WriteLine($"Successfully populated {categoryNames.Count} category menu items");
             }
             catch (Exception ex)
@@ -109,12 +131,12 @@ namespace Duo.Views.Pages
                     }
 
                     Debug.WriteLine($"Navigating to page with tag: {tag}");
-                    
+
                     if (IsCategoryTag(tag))
                     {
                         // Save the current category name
                         _currentCategoryName = tag;
-                        
+
                         // Get category ID from name
                         if (!string.IsNullOrEmpty(_currentCategoryName))
                         {
@@ -131,7 +153,7 @@ namespace Duo.Views.Pages
                                 Debug.WriteLine($"Error getting category ID: {ex.Message}");
                             }
                         }
-                        
+
                         NavigateToPostListPage(tag);
                     }
                     else
@@ -178,7 +200,7 @@ namespace Duo.Views.Pages
             try
             {
                 Type? pageType = null;
-                
+
                 switch (tag)
                 {
                     case "MainPage":
@@ -201,17 +223,17 @@ namespace Duo.Views.Pages
             }
         }
 
-        private async void CreatePostBtn_CreatePostRequested(object sender, RoutedEventArgs e) 
+        private async void CreatePostBtn_CreatePostRequested(object sender, RoutedEventArgs e)
         {
             // First approach: Use the dialog with the embedded ViewModel
             var dialogComponent = new DialogComponent();
             var result = await dialogComponent.ShowCreatePostDialog(this.XamlRoot, _currentCategoryId);
-            
+
             if (result.Success)
             {
                 // The post is already created in the database through the ViewModel
                 // Just show the success message and refresh the page
-                
+
                 // Show success message
                 ContentDialog successDialog = new ContentDialog
                 {
@@ -221,17 +243,17 @@ namespace Duo.Views.Pages
                     CloseButtonText = "OK"
                 };
                 await successDialog.ShowAsync();
-                
+
                 // Refresh the current page if we're on a category page
                 if (!string.IsNullOrEmpty(_currentCategoryName))
                 {
                     NavigateToPostListPage(_currentCategoryName);
                 }
             }
-            
+
             // Alternative approach: Use the ViewModel directly without the dialog
             // This is commented out as an example of how to use the ViewModel directly
-            
+
             /*
             // Create a new ViewModel instance
             var postViewModel = new ViewModels.PostCreationViewModel();
