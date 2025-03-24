@@ -22,6 +22,10 @@ namespace Duo.ViewModels
         private bool _isLoading;
         private StackPanel _commentsPanel;
         private string _lastProcessedReply;
+        
+        // Dictionary to track collapsed comments by their ID
+        //When adding a comment or reply, the code calls LoadComments(Post.Id) which reloads all comments and resets their collapsed state. We need to track which comments are collapsed and restore this state after reloading.
+        public static Dictionary<int, bool> CollapsedComments { get; } = new Dictionary<int, bool>();
 
         public event PropertyChangedEventHandler PropertyChanged;
         public event EventHandler CommentsLoaded;
@@ -198,6 +202,13 @@ namespace Duo.ViewModels
                     {
                         var commentComponent = new Views.Components.Comment();
                         commentComponent.SetCommentData(comment, repliesByParentId);
+                        
+                        // Set initial collapse state if the comment is in the collapsed tracking dictionary
+                        if (CollapsedComments.TryGetValue(comment.Id, out bool isCollapsed) && isCollapsed)
+                        {
+                            commentComponent.SetChildrenCollapsed(true);
+                        }
+                        
                         CommentsPanel.Children.Add(commentComponent);
                     }
                     

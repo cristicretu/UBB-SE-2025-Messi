@@ -5,6 +5,7 @@ using Microsoft.UI.Xaml.Controls;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Duo.ViewModels;
 using static Duo.App;
 
 namespace Duo.Views.Components
@@ -15,6 +16,7 @@ namespace Duo.Views.Components
         private Dictionary<int?, List<Models.Comment>> _commentsByParent;
         private readonly CommentService _commentService;
         private const int MAX_NESTING_LEVEL = 3; // Maximum allowed nesting level
+        private bool _childrenVisible = true; // Track children visibility state
         
         // Event for when reply is submitted
         public event EventHandler<CommentReplyEventArgs> ReplySubmitted;
@@ -53,14 +55,10 @@ namespace Duo.Views.Components
             // Generate the visual indicators for comment level
             var indentationLevels = new List<int>();
             
-            // For each comment, we need to show indentation lines for ALL levels
-            // including its own level if it's not a top-level comment
+            // For each comment, we show indentation lines for all previous levels
             for (int i = 1; i <= comment.Level; i++)
             {
-                if (i < comment.Level || comment.Level == 1)
-                {
-                    indentationLevels.Add(i);
-                }
+                indentationLevels.Add(i);
             }
             
             LevelLinesRepeater.ItemsSource = indentationLevels;
@@ -81,21 +79,52 @@ namespace Duo.Views.Components
                     childCommentControl.CommentLiked += ChildComment_CommentLiked;
                     ChildCommentsPanel.Children.Add(childCommentControl);
                 }
+                
+                // Show the toggle button only if this comment has children
+                ToggleChildrenButton.Visibility = Visibility.Visible;
+                // Set initial icon to minus (collapse) since children are visible by default
+                ToggleIcon.Glyph = "\uE108"; // Minus icon
+            }
+            else
+            {
+                // Hide the toggle button if there are no children
+                ToggleChildrenButton.Visibility = Visibility.Collapsed;
             }
             
             // Hide the reply input if visible
             HideReplyInput();
         }
         
-        private void IndentationLine_Click(object sender, RoutedEventArgs e)
+        /// <summary>
+        /// Sets the collapsed state of child comments programmatically
+        /// </summary>
+        /// <param name="collapsed">True to collapse children, false to expand</param>
+        public void SetChildrenCollapsed(bool collapsed)
         {
-            // Toggle the expanded state of this comment's replies
-            ChildCommentsExpander.IsExpanded = !ChildCommentsExpander.IsExpanded;
-            
-            // If the sender is a button that contains a level value, we can get the level
-            if (sender is Button button && button.DataContext is int level)
+            // Only proceed if we have children
+            if (ChildCommentsPanel.Children.Count > 0)
             {
-                System.Diagnostics.Debug.WriteLine($"Toggled expansion for level {level} comment, ID: {_commentData.Id}");
+                _childrenVisible = !collapsed;
+                ChildCommentsPanel.Visibility = _childrenVisible ? Visibility.Visible : Visibility.Collapsed;
+                ToggleIcon.Glyph = _childrenVisible ? "\uE108" : "\uE109"; // Minus or Plus icon
+            }
+        }
+        
+        private void ToggleChildrenButton_Click(object sender, RoutedEventArgs e)
+        {
+            _childrenVisible = !_childrenVisible;
+            
+            // Update the visibility of child comments
+            ChildCommentsPanel.Visibility = _childrenVisible ? Visibility.Visible : Visibility.Collapsed;
+            
+            // Change the icon based on state
+            ToggleIcon.Glyph = _childrenVisible ? "\uE108" : "\uE109"; // Minus or Plus icon
+            
+            // Track the collapsed state in the PostDetailViewModel
+            if (_commentData != null)
+            {
+                PostDetailViewModel.CollapsedComments[_commentData.Id] = !_childrenVisible;
+                System.Diagnostics.Debug.WriteLine($"Comment {_commentData.Id} collapse state set to {!_childrenVisible}");
             }
         }
         
@@ -103,52 +132,73 @@ namespace Duo.Views.Components
         {
             if (e.TargetType == LikeTargetType.Comment && e.TargetId == _commentData.Id)
             {
-                try
-                {
-                    // Like the comment using the comment service
-                    if (_commentService.LikeComment(_commentData.Id))
-                    {
-                        // Increment the like count in the UI
-                        LikeButton.IncrementLikeCount();
-                        
-                        // Update the model
-                        _commentData.LikeCount++;
-                        
-                        // Raise the CommentLiked event
-                        CommentLiked?.Invoke(this, new CommentLikedEventArgs(_commentData.Id));
-                        
-                        System.Diagnostics.Debug.WriteLine($"Comment liked: ID {_commentData.Id}, new count: {_commentData.LikeCount}");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine($"Error liking comment: {ex.Message}");
-                }
+                // Update the comment like count in the UI
+                LikeButton.LikeCount++;
+                
+                // Notify parent component about the like
+                CommentLiked?.Invoke(this, new CommentLikedEventArgs(_commentData.Id));
             }
         }
         
         private void ChildComment_CommentLiked(object sender, CommentLikedEventArgs e)
         {
-            // Forward the event up
+            // Forward the like event to parent components
             CommentLiked?.Invoke(this, e);
         }
         
         private void CommentReplyButton_Click(object sender, RoutedEventArgs e)
         {
-            // Toggle reply input visibility
-            if (ReplyInputControl.Visibility == Visibility.Visible)
+            ShowReplyInput();
+        }
+        
+        private void ReplyInput_CommentSubmitted(object sender, RoutedEventArgs e)
+        {
+            if (sender is Components.CommentInput commentInput && !string.IsNullOrWhiteSpace(commentInput.CommentText))
             {
+                // Trigger the reply submitted event
+                ReplySubmitted?.Invoke(this, new CommentReplyEventArgs(_commentData.Id, commentInput.CommentText));
+                
+                // Clear the reply input and hide it
+                commentInput.ClearComment();
                 HideReplyInput();
             }
-            else
+        }
+        
+        private void ChildComment_ReplySubmitted(object sender, CommentReplyEventArgs e)
+        {
+            // Forward the reply event to the parent
+            ReplySubmitted?.Invoke(this, e);
+        }
+        
+        public void AddReplyComment(Models.Comment replyComment)
+        {
+            var childCommentControl = new Comment();
+            childCommentControl.SetCommentData(replyComment, _commentsByParent);
+            childCommentControl.ReplySubmitted += ChildComment_ReplySubmitted;
+            childCommentControl.CommentLiked += ChildComment_CommentLiked;
+            ChildCommentsPanel.Children.Add(childCommentControl);
+            
+            // Add the reply to the local comments dictionary
+            if (!_commentsByParent.ContainsKey(_commentData.Id))
             {
-                ShowReplyInput();
+                _commentsByParent[_commentData.Id] = new List<Models.Comment>();
             }
+            
+            _commentsByParent[_commentData.Id].Add(replyComment);
+            
+            // Ensure the toggle button is visible now that we have children
+            ToggleChildrenButton.Visibility = Visibility.Visible;
+            
+            // Set the icon to minus (collapse) and make sure children are visible
+            ToggleIcon.Glyph = "\uE108"; // Minus icon
+            _childrenVisible = true;
+            ChildCommentsPanel.Visibility = Visibility.Visible;
         }
         
         private void ShowReplyInput()
         {
             ReplyInputControl.Visibility = Visibility.Visible;
+            ReplyInputControl.Focus(FocusState.Programmatic);
         }
         
         private void HideReplyInput()
@@ -157,51 +207,41 @@ namespace Duo.Views.Components
             ReplyInputControl.ClearComment();
         }
         
-        private void ReplyInput_CommentSubmitted(object sender, RoutedEventArgs e)
+        private string FormatDate(DateTime dateTime)
         {
-            // Get the comment text from the reply input
-            string replyText = ReplyInputControl.CommentText;
-            
-            if (string.IsNullOrWhiteSpace(replyText))
-                return;
-                
-            // Raise the reply submitted event with the parent comment ID
-            ReplySubmitted?.Invoke(this, new CommentReplyEventArgs(_commentData.Id, replyText));
-            
-            // Hide the reply input after submission
-            HideReplyInput();
-        }
-        
-        private void ChildComment_ReplySubmitted(object sender, CommentReplyEventArgs e)
-        {
-            System.Diagnostics.Debug.WriteLine($"Detected reply to child comment {e.ParentCommentId} in parent comment {_commentData.Id}");
-            
-            ReplySubmitted?.Invoke(this, e);
-            
-            HideReplyInput();
-        }
-
-        private string FormatDate(DateTime date)
-        {
-            // For simplicity, just display the short date
-            return date.ToString("MMM dd");
+            if (dateTime.Date == DateTime.Today)
+            {
+                return "Today";
+            }
+            else if (dateTime.Date == DateTime.Today.AddDays(-1))
+            {
+                return "Yesterday";
+            }
+            else if ((DateTime.Today - dateTime.Date).TotalDays < 7)
+            {
+                return dateTime.ToString("ddd"); // Day of week
+            }
+            else
+            {
+                return dateTime.ToString("MMM d"); // Month and day
+            }
         }
     }
     
-    // Event args class for comment replies
+    // Event args for comment reply events
     public class CommentReplyEventArgs : EventArgs
     {
         public int ParentCommentId { get; private set; }
-        public string CommentText { get; private set; }
+        public string ReplyText { get; private set; }
         
-        public CommentReplyEventArgs(int parentCommentId, string commentText)
+        public CommentReplyEventArgs(int parentCommentId, string replyText)
         {
             ParentCommentId = parentCommentId;
-            CommentText = commentText;
+            ReplyText = replyText;
         }
     }
     
-    // Event args class for comment likes
+    // Event args for comment liked events
     public class CommentLikedEventArgs : EventArgs
     {
         public int CommentId { get; private set; }
