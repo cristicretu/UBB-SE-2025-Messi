@@ -8,18 +8,32 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
     
-    <StackPanel VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Spacing="12">
+    <StackPanel VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Spacing="6">
         <!-- Title Input -->
         <TextBlock Text="Title" Style="{StaticResource SubtitleTextBlockStyle}" Margin="0,0,0,4"/>
         <TextBox x:Name="TitleTextBox" PlaceholderText="Enter post title" 
                  Text="{x:Bind PostTitle, Mode=TwoWay}" 
-                 MaxLength="100" />
+                 MaxLength="100"
+                 LostFocus="TitleTextBox_LostFocus"/>
+        <TextBlock x:Name="TitleErrorTextBlock" 
+                   Foreground="Red" 
+                   Visibility="Collapsed" 
+                   Style="{StaticResource CaptionTextBlockStyle}"
+                   Margin="0,4,0,4"
+                   TextWrapping="Wrap"/>
         
         <!-- Content Input -->
         <TextBlock Text="Content" Style="{StaticResource SubtitleTextBlockStyle}" Margin="0,8,0,4"/>
         <TextBox x:Name="ContentTextBox" PlaceholderText="Enter post content" 
                  Text="{x:Bind PostContent, Mode=TwoWay}" 
-                 TextWrapping="Wrap" MinHeight="100" AcceptsReturn="True" />
+                 TextWrapping="Wrap" MinHeight="100" AcceptsReturn="True"
+                 LostFocus="ContentTextBox_LostFocus"/>
+        <TextBlock x:Name="ContentErrorTextBlock" 
+                   Foreground="Red"
+                   Visibility="Collapsed"
+                   Style="{StaticResource CaptionTextBlockStyle}"
+                   Margin="0,4,0,4"
+                   TextWrapping="Wrap"/>
         
         <!-- Hashtag Input and Add Button -->
         <TextBlock Text="Hashtags" Style="{StaticResource SubtitleTextBlockStyle}" Margin="0,8,0,4"/>
@@ -30,10 +44,17 @@
             </Grid.ColumnDefinitions>
             <TextBox x:Name="HashtagTextBox" PlaceholderText="Enter hashtag" 
                      Text="{x:Bind CurrentHashtag, Mode=TwoWay}" 
-                     KeyDown="HashtagTextBox_KeyDown" />
+                     KeyDown="HashtagTextBox_KeyDown"
+                     LostFocus="HashtagTextBox_LostFocus"/>
             <Button Grid.Column="1" x:Name="AddHashtagButton" Content="Add" 
                     Click="AddHashtagButton_Click" Margin="8,0,0,0" />
         </Grid>
+        <TextBlock x:Name="HashtagErrorTextBlock" 
+                   Foreground="Red"
+                   Visibility="Collapsed"
+                   Style="{StaticResource CaptionTextBlockStyle}"
+                   Margin="0,4,0,4"
+                   TextWrapping="Wrap"/>
         
         <!-- Hashtags List -->
         <TextBlock Text="Added Hashtags:" Margin="0,8,0,4" 

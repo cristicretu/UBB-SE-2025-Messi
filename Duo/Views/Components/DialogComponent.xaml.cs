@@ -43,12 +43,22 @@ namespace Duo.Views.Components
                 Content = dialogContent,
                 PrimaryButtonText = "Create",
                 CloseButtonText = "Cancel",
-                DefaultButton = ContentDialogButton.Primary
+                DefaultButton = ContentDialogButton.Primary,
+                MinWidth = 500,
+                MinHeight = 450
             };
 
             // Apply accent button style to the create button
             dialog.PrimaryButtonStyle = Application.Current.Resources["AccentButtonStyle"] as Style;
-
+            
+            dialog.PrimaryButtonClick += (s, e) => 
+            {
+                if (!dialogContent.IsFormValid())
+                {
+                    e.Cancel = true;
+                }
+            };
+            
             ContentDialogResult result = await dialog.ShowAsync();
             
             if (result == ContentDialogResult.Primary)
