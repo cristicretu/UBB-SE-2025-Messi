@@ -15955,7 +15955,7 @@
 											"top": 1933,
 											"width": 535,
 											"height": 13,
-											"text": "+OnPropertyChanged(string propertyName = null): void",
+											"text": "+OnPropertyChanged(string propertyName): void",
 											"horizontalAlignment": 0
 										}
 									],
@@ -33906,9 +33906,7 @@
 									"_parent": {
 										"$ref": "AAAAAAGVyibKaM5HTLA="
 									},
-									"name": "string propertyName",
-									"type": "",
-									"defaultValue": "null"
+									"name": "string propertyName"
 								},
 								{
 									"_type": "UMLParameter",
