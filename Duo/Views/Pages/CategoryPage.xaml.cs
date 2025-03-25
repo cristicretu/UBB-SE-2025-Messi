@@ -137,5 +137,24 @@ namespace Duo.Views.Pages
                 _viewModel.HandlePostCreation(true);
             }
         }
+
+        public void RefreshCurrentView()
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(_viewModel.CurrentCategoryName))
+                {
+                    contentFrame.Navigate(typeof(PostListPage), _viewModel.CurrentCategoryName);
+                }
+                else
+                {
+                    contentFrame.Navigate(typeof(MainPage));
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Refresh current view failed: {ex.Message}");
+            }
+        }
     }
 }

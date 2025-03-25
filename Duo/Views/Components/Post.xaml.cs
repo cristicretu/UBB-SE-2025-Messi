@@ -417,16 +417,13 @@ namespace Duo.Views.Components
                 this.XamlRoot
             );
                 
-            // if User confirms...
             if (isConfirmed)
             {
-                // Handle the deletion logic here
                 try {
                 _postService.DeletePost(this.PostId);
                 }
                 catch (Exception ex)
                 {
-                    // Handle the error logic here
                     ContentDialog errorDialog = new ContentDialog
                     {
                         XamlRoot = this.XamlRoot,
@@ -446,6 +443,30 @@ namespace Duo.Views.Components
                     CloseButtonText = "OK"
                 };
                 await successDialog.ShowAsync();
+
+                var frame = FindParentFrame();
+                 if (frame != null)
+                 {
+                     if (frame.Content is Duo.Views.Pages.PostDetailPage)
+                     {
+                         if (frame.CanGoBack)
+                         {
+                             frame.GoBack();
+                         }
+                     }
+                     else if (frame.Content is Duo.Views.Pages.PostListPage postListPage)
+                     {
+                         var viewModel = postListPage.DataContext as Duo.ViewModels.PostListViewModel;
+                         if (viewModel != null)
+                         {
+                             viewModel.LoadPosts();
+                         }
+                     }
+                     else if (frame.Content is Duo.Views.Pages.CategoryPage categoryPage)
+                     {
+                         categoryPage.RefreshCurrentView();
+                     }
+                 }
             }
         }
 
