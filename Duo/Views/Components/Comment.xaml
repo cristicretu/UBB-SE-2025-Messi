@@ -7,6 +7,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:controls="using:Microsoft.UI.Xaml.Controls"
+    xmlns:viewmodels="using:Duo.ViewModels"
     mc:Ignorable="d"
     HorizontalAlignment="Stretch"
     Margin="0,0,0,0">
@@ -69,14 +70,14 @@
                     <TextBlock 
                         x:Name="UserTextBlock" 
                         Grid.Column="0"
-                        Text="u/username" 
+                        Text="{x:Bind ViewModel.Username, Mode=OneWay}" 
                         FontSize="12" 
                         FontWeight="SemiBold"/>
 
                     <TextBlock 
                         x:Name="DateTextBlock" 
                         Grid.Column="1"
-                        Text="Mar 14" 
+                        Text="{x:Bind ViewModel.Date, Mode=OneWay}" 
                         FontSize="12" 
                         Opacity="0.7"/>
                 </Grid>
@@ -84,14 +85,26 @@
                 <!-- Comment description -->
                 <TextBlock 
                     x:Name="DescriptionTextBlock" 
-                    Text="This is a comment description." 
+                    Text="{x:Bind ViewModel.Content, Mode=OneWay}" 
                     TextWrapping="Wrap" 
                     FontSize="14"/>
 
                 <!-- Action buttons -->
                 <StackPanel Orientation="Horizontal" Spacing="16">
-                    <local:LikeButton x:Name="LikeButton"/>
+                    <local:LikeButton 
+                        x:Name="LikeButton" 
+                        LikeCount="{x:Bind ViewModel.LikeCount, Mode=OneWay}" 
+                        CommentId="{x:Bind ViewModel.Id, Mode=OneWay}"/>
                     <local:CommentButton x:Name="CommentReplyButton"/>
+                    <Button 
+                        x:Name="DeleteButton" 
+                        Click="DeleteButton_Click"
+                        Content="Delete"
+                        Visibility="Collapsed"
+                        Style="{StaticResource TextBlockButtonStyle}"
+                        Padding="0" 
+                        FontSize="12"
+                        Foreground="{ThemeResource SystemAccentColor}"/>
                 </StackPanel>
 
                 <local:CommentInput 
@@ -100,7 +113,14 @@
                     Visibility="Collapsed"
                     Margin="0,8,0,0"/>
 
-                <!-- Expand/collapse button -->
+                <TextBlock 
+                    x:Name="ErrorMessageBlock"
+                    Text="{x:Bind ReplyInputControl.ErrorMessage, Mode=OneWay}"
+                    Foreground="Red"
+                    FontSize="12"
+                    Visibility="{x:Bind ReplyInputControl.HasError, Mode=OneWay}"
+                    Margin="0,4,0,0"/>
+
                 <Grid HorizontalAlignment="Stretch">
                     <Button 
                         x:Name="ToggleChildrenButton"
@@ -119,9 +139,27 @@
         </Grid>
 
         <!-- Container for child comments -->
+        <ItemsRepeater 
+            x:Name="ChildCommentsRepeater" 
+            ItemsSource="{x:Bind ViewModel.Replies, Mode=OneWay}"
+            HorizontalAlignment="Stretch"
+            Visibility="{x:Bind ViewModel.IsExpanded, Mode=OneWay}">
+            <ItemsRepeater.ItemTemplate>
+                <DataTemplate>
+                    <!-- This is just a placeholder that will be replaced in code -->
+                    <ContentPresenter HorizontalAlignment="Stretch" Margin="0,4,0,0" />
+                </DataTemplate>
+            </ItemsRepeater.ItemTemplate>
+            <ItemsRepeater.Layout>
+                <StackLayout Orientation="Vertical" Spacing="0"/>
+            </ItemsRepeater.Layout>
+        </ItemsRepeater>
+        
+        <!-- Legacy container for backwards compatibility -->
         <StackPanel 
             x:Name="ChildCommentsPanel" 
             HorizontalAlignment="Stretch"
-            Spacing="0"/>
+            Spacing="0"
+            Visibility="Collapsed"/>
     </StackPanel>
 </UserControl> 

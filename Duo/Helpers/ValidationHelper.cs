@@ -108,10 +108,10 @@ namespace Duo.Helpers
             {
                 return (false, "Title should be at least 3 characters long.");
             }
-            
-            if (title.Length > 100)
+
+            if (title.Length > 50)
             {
-                return (false, "Title cannot exceed 100 characters.");
+                return (false, "Title cannot exceed 50 characters.");
             }
             
             return (true, string.Empty);

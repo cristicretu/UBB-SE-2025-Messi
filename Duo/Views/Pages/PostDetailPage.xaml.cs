@@ -38,12 +38,10 @@ namespace Duo.Views.Pages
 
             if (e.Parameter is Models.Post post && post.Id > 0)
             {
-
                 ViewModel.LoadPostDetails(post.Id);
             }
             else
             {
-
                 TextBlock errorText = new TextBlock
                 {
                     Text = "Invalid post data received",
@@ -62,14 +60,13 @@ namespace Duo.Views.Pages
             }
         }
 
-        private void CommentInputControl_CommentSubmitted(object sender, RoutedEventArgs e)
+        private void CommentInputControl_CommentSubmitted(object sender, EventArgs e)
         {
-            if (sender is Components.CommentInput commentInput && commentInput.CommentText != null)
+            if (sender is CommentInput commentInput && !string.IsNullOrWhiteSpace(commentInput.CommentText))
             {
                 if (ViewModel.AddCommentCommand.CanExecute(commentInput.CommentText))
                 {
                     ViewModel.AddCommentCommand.Execute(commentInput.CommentText);
-
                     commentInput.ClearComment();
                 }
             }
@@ -77,89 +74,64 @@ namespace Duo.Views.Pages
 
         private void ViewModel_CommentsLoaded(object sender, EventArgs e)
         {
-            ConnectCommentReplyEvents();
-
-            ConnectCommentLikeEvents();
+            RenderComments();
         }
 
-        private void ConnectCommentReplyEvents()
+        private void RenderComments()
         {
-            DisconnectCommentReplyEvents();
-
-            var commentControls = GetAllChildrenOfType<Components.Comment>(CommentsPanel);
-
-            foreach (var comment in commentControls)
-            {
-                comment.ReplySubmitted += Comment_ReplySubmitted;
-            }
-        }
-
-        private void DisconnectCommentReplyEvents()
-        {
-            var commentControls = GetAllChildrenOfType<Components.Comment>(CommentsPanel);
-            foreach (var comment in commentControls)
-            {
-                comment.ReplySubmitted -= Comment_ReplySubmitted;
-            }
-        }
-
-        private void ConnectCommentLikeEvents()
-        {
-
-            DisconnectCommentLikeEvents();
-
-            var commentControls = GetAllChildrenOfType<Components.Comment>(CommentsPanel);
-
-            foreach (var comment in commentControls)
-            {
-                comment.CommentLiked += Comment_CommentLiked;
-            }
-        }
-
-        private void DisconnectCommentLikeEvents()
-        {
-            var commentControls = GetAllChildrenOfType<Components.Comment>(CommentsPanel);
-            foreach (var comment in commentControls)
-            {
-                comment.CommentLiked -= Comment_CommentLiked;
-            }
-        }
-
-        private void Comment_ReplySubmitted(object sender, CommentReplyEventArgs e)
-        {
-            ViewModel.AddReplyToComment(e.ParentCommentId, e.ReplyText);
-        }
-
-        private void Comment_CommentLiked(object sender, CommentLikedEventArgs e)
-        {
+            CommentsPanel.Children.Clear();
             
+            if (!ViewModel.HasComments)
+            {
+                TextBlock noCommentsText = new TextBlock
+                {
+                    Text = "No comments yet. Be the first to comment!",
+                    Margin = new Thickness(0, 16, 0, 16)
+                };
+                CommentsPanel.Children.Add(noCommentsText);
+                return;
+            }
+            
+            if (!string.IsNullOrEmpty(ViewModel.ErrorMessage))
+            {
+                TextBlock errorText = new TextBlock
+                {
+                    Text = ViewModel.ErrorMessage,
+                    Foreground = new SolidColorBrush(Microsoft.UI.Colors.Red),
+                    Margin = new Thickness(0, 16, 0, 16)
+                };
+                CommentsPanel.Children.Add(errorText);
+                return;
+            }
+            
+            foreach (var commentViewModel in ViewModel.CommentViewModels)
+            {
+                var commentComponent = new Views.Components.Comment();
+                commentComponent.DataContext = commentViewModel;
+                
+                commentComponent.ReplySubmitted += CommentComponent_ReplySubmitted;
+                commentComponent.CommentLiked += CommentComponent_CommentLiked;
+                commentComponent.CommentDeleted += CommentComponent_CommentDeleted;
+                
+                CommentsPanel.Children.Add(commentComponent);
+            }
         }
 
-        private List<T> GetAllChildrenOfType<T>(DependencyObject parent) where T : DependencyObject
+        private void CommentComponent_ReplySubmitted(object sender, CommentReplyEventArgs e)
         {
-            var list = new List<T>();
-            var count = VisualTreeHelper.GetChildrenCount(parent);
+            var parameters = new Tuple<int, string>(e.ParentCommentId, e.ReplyText);
+            ViewModel.AddReplyCommand.Execute(parameters);
+        }
 
-            for (int i = 0; i < count; i++)
-            {
-                var child = VisualTreeHelper.GetChild(parent, i);
+        private void CommentComponent_CommentLiked(object sender, CommentLikedEventArgs e)
+        {
+            // Call the ViewModel method to like the comment and persist it to the database
+            ViewModel.LikeCommentById(e.CommentId);
+        }
 
-                if (child is T childOfType)
-                {
-                    list.Add(childOfType);
-                }
-
-                if (child is FrameworkElement)
-                {
-                    var childrenOfType = GetAllChildrenOfType<T>(child);
-                    if (childrenOfType.Any())
-                    {
-                        list.AddRange(childrenOfType);
-                    }
-                }
-            }
-
-            return list;
+        private void CommentComponent_CommentDeleted(object sender, CommentDeletedEventArgs e)
+        {
+            ViewModel.DeleteComment(e.CommentId);
         }
     }
 }

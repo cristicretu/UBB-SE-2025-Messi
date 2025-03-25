@@ -29,10 +29,10 @@ namespace Duo.ViewModels
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public PostListViewModel(PostService postService = null, CategoryService categoryService = null)
+        public PostListViewModel(PostService? postService = null, CategoryService? categoryService = null)
         {
-            _postService = postService;
-            _categoryService = categoryService;
+            _postService = postService ?? App._postService;
+            _categoryService = categoryService ?? App._categoryService;
             _posts = new ObservableCollection<Post>();
             _currentPage = 1;
             _selectedHashtags.Add("All");

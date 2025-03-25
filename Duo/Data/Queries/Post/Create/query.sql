@@ -1,5 +1,5 @@
 CREATE OR ALTER PROCEDURE CreatePost (
-    @Title VARCHAR (20),
+    @Title NVARCHAR (50),
     @Description VARCHAR (4000),
     @UserID INT,
     @CategoryID INT,

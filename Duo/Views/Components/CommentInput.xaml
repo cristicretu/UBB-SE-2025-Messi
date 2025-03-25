@@ -42,14 +42,26 @@
                     HorizontalAlignment="Stretch"
                     BorderThickness="0"
                     Background="Transparent"
-                    Margin="0,0,8,0"/>
+                    Margin="0,0,8,0"
+                    Text="{x:Bind CommentText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    TextWrapping="Wrap"
+                    AcceptsReturn="True"
+                    MaxHeight="100"/>
 
                 <Button 
                     Grid.Column="1"
                     Content="Post" 
                     Style="{StaticResource BlueButtonStyle}"
-                    Click="PostButton_Click"/>
+                    Click="SubmitButton_Click"/>
             </Grid>
+
+            <TextBlock 
+                x:Name="ErrorMessageBlock"
+                Text="{x:Bind ErrorMessage, Mode=OneWay}"
+                Foreground="Red"
+                FontSize="12"
+                Visibility="{x:Bind HasError, Mode=OneWay}"
+                Margin="0,8,0,0"/>
         </StackPanel>
     </Border>
 </UserControl> 

@@ -64,6 +64,15 @@ namespace Duo.ViewModels
                 if (_title != value)
                 {
                     _title = value;
+                    var (isValid, errorMessage) = ValidationHelper.ValidatePostTitle(value);
+                    if (!isValid)
+                    {
+                        Error = errorMessage;
+                    }
+                    else
+                    {
+                        Error = string.Empty;
+                    }
                     OnPropertyChanged();
                 }
             }
@@ -77,6 +86,15 @@ namespace Duo.ViewModels
                 if (_content != value)
                 {
                     _content = value;
+                    var (isValid, errorMessage) = ValidationHelper.ValidatePostContent(value);
+                    if (!isValid)
+                    {
+                        Error = errorMessage;
+                    }
+                    else
+                    {
+                        Error = string.Empty;
+                    }
                     OnPropertyChanged();
                 }
             }
@@ -164,6 +182,13 @@ namespace Duo.ViewModels
             if (string.IsNullOrWhiteSpace(Title) || string.IsNullOrWhiteSpace(Content))
             {
                 Error = "Title and content are required.";
+                return;
+            }
+
+            var (isTitleValid, titleError) = ValidationHelper.ValidatePostTitle(Title);
+            if (!isTitleValid)
+            {
+                Error = titleError;
                 return;
             }
 
