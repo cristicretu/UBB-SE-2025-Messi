@@ -7,6 +7,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using Duo.Commands;
 using Duo.ViewModels.Base;
+using Duo.Helpers;
 
 namespace Duo.ViewModels
 {
@@ -59,24 +60,13 @@ namespace Duo.ViewModels
             {
                 ErrorMessage = string.Empty;
 
-                if (string.IsNullOrWhiteSpace(Username))
-                {
-                    ErrorMessage = "Username cannot be empty";
-                    return;
-                }
-
-                if (Username.Length < 3)
-                {
-                    ErrorMessage = "Username must be at least 3 characters";
-                    return;
-                }
-
                 try
                 {
+                    ValidationHelper.ValidateUsername(Username);
                     _userService.setUser(Username);
                     LoginSuccessful?.Invoke(this, EventArgs.Empty);
                 }
-                catch (Exception ex)
+                catch (ArgumentException ex)
                 {
                     ErrorMessage = ex.Message;
                 }

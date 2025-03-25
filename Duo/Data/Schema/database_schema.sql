@@ -22,7 +22,7 @@ INSERT INTO Categories (Id, Name) VALUES
 
 CREATE TABLE Posts (
     Id INT IDENTITY(1,1) PRIMARY KEY,
-    Title NVARCHAR(20) NOT NULL,
+    Title NVARCHAR(50) NOT NULL,
     Description NVARCHAR(4000) NOT NULL,		<-- We need to modify in the diagram(can t put 5000) -->
     UserID INT NOT NULL,
     CategoryID INT NOT NULL,
