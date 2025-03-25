@@ -22,7 +22,8 @@ namespace Duo.Views.Components
         public event EventHandler<CommentReplyEventArgs> ReplySubmitted;
         public event EventHandler<CommentLikedEventArgs> CommentLiked;
 
-        // Get the CommentViewModel from the DataContext
+        public event EventHandler<CommentDeletedEventArgs> CommentDeleted;
+
         public CommentViewModel ViewModel => DataContext as CommentViewModel;
 
         public Comment()
@@ -60,7 +61,8 @@ namespace Duo.Views.Components
                     // Wire up events
                     childComment.ReplySubmitted += ChildComment_ReplySubmitted;
                     childComment.CommentLiked += ChildComment_CommentLiked;
-                    
+                    childComment.CommentDeleted += ChildComment_CommentDeleted;
+
                     // Set the content of the presenter
                     presenter.Content = childComment;
                 }
@@ -89,6 +91,19 @@ namespace Duo.Views.Components
                     ? Visibility.Visible
                     : Visibility.Collapsed;
 
+                try
+                {
+                    var currentUser = userService.GetCurrentUser();
+                    if (currentUser != null && currentUser.UserId == ViewModel.UserId)
+                    {
+                        DeleteButton.Visibility = Visibility.Visible;
+                    }
+                }
+                catch (Exception)
+                {
+                    DeleteButton.Visibility = Visibility.Collapsed;
+                }
+
                 // Set initial toggle button state
                 if (ToggleChildrenButton.Visibility == Visibility.Visible)
                 {
@@ -103,15 +118,14 @@ namespace Duo.Views.Components
             _commentData = comment;
             _commentsByParent = commentsByParent;
             
-            // Convert the dictionary to use non-nullable int keys
             var convertedDictionary = commentsByParent.Where(kvp => kvp.Key.HasValue)
                                              .ToDictionary(kvp => kvp.Key.Value, kvp => kvp.Value);
             
-            // Create a CommentViewModel from the Comment model
             var viewModel = new CommentViewModel(comment, convertedDictionary);
             this.DataContext = viewModel;
+
+          
             
-            // For backward compatibility - still populate the child comments panel manually
             if (commentsByParent.ContainsKey(comment.Id))
             {
                 ChildCommentsPanel.Children.Clear();
@@ -181,6 +195,11 @@ namespace Duo.Views.Components
             ReplySubmitted?.Invoke(this, e);
         }
 
+        private void ChildComment_CommentDeleted(object sender, CommentDeletedEventArgs e)
+         {
+             CommentDeleted?.Invoke(this, e);
+         }
+
         private void ShowReplyInput()
         {
             ReplyInputControl.Visibility = Visibility.Visible;
@@ -192,6 +211,53 @@ namespace Duo.Views.Components
             ReplyInputControl.Visibility = Visibility.Collapsed;
             ReplyInputControl.ClearComment();
         }
+
+        private void DeleteButton_Click(object sender, RoutedEventArgs e)
+         {
+             ShowDeleteConfirmation();
+         }
+
+         private async void ShowDeleteConfirmation()
+         {
+             var dialog = new ContentDialog
+             {
+                 Title = "Delete Comment",
+                 Content = "Are you sure you want to delete this comment? This action cannot be undone.",
+                 PrimaryButtonText = "Delete",
+                 CloseButtonText = "Cancel",
+                 DefaultButton = ContentDialogButton.Close
+             };
+
+             dialog.XamlRoot = this.XamlRoot;
+
+             var result = await dialog.ShowAsync();
+
+             if (result == ContentDialogResult.Primary)
+             {
+                 try
+                 {
+                     var currentUser = userService.GetCurrentUser();
+                     if (currentUser != null)
+                     {
+                         // Get comment ID from either ViewModel or _commentData
+                         int commentId = ViewModel != null ? ViewModel.Id : (_commentData != null ? _commentData.Id : -1);
+                         
+                         if (commentId > 0)
+                         {
+                             CommentDeleted?.Invoke(this, new CommentDeletedEventArgs(commentId));
+                         }
+                         else
+                         {
+                             System.Diagnostics.Debug.WriteLine("Error: Could not determine comment ID for deletion");
+                         }
+                     }
+                 }
+                 catch (Exception ex)
+                 {
+                     System.Diagnostics.Debug.WriteLine($"Error deleting comment: {ex.Message}");
+                 }
+             }
+         }
     }
 
     public class CommentReplyEventArgs : EventArgs
@@ -215,4 +281,14 @@ namespace Duo.Views.Components
             CommentId = commentId;
         }
     }
+
+    public class CommentDeletedEventArgs : EventArgs
+     {
+         public int CommentId { get; private set; }
+
+         public CommentDeletedEventArgs(int commentId)
+         {
+             CommentId = commentId;
+         }
+     }
 } 

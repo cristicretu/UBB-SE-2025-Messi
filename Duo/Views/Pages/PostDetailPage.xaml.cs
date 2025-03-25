@@ -111,6 +111,7 @@ namespace Duo.Views.Pages
                 
                 commentComponent.ReplySubmitted += CommentComponent_ReplySubmitted;
                 commentComponent.CommentLiked += CommentComponent_CommentLiked;
+                commentComponent.CommentDeleted += CommentComponent_CommentDeleted;
                 
                 CommentsPanel.Children.Add(commentComponent);
             }
@@ -126,6 +127,11 @@ namespace Duo.Views.Pages
         {
             // Call the ViewModel method to like the comment and persist it to the database
             ViewModel.LikeCommentById(e.CommentId);
+        }
+
+        private void CommentComponent_CommentDeleted(object sender, CommentDeletedEventArgs e)
+        {
+            ViewModel.DeleteComment(e.CommentId);
         }
     }
 }

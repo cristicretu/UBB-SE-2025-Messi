@@ -96,6 +96,15 @@
                         LikeCount="{x:Bind ViewModel.LikeCount, Mode=OneWay}" 
                         CommentId="{x:Bind ViewModel.Id, Mode=OneWay}"/>
                     <local:CommentButton x:Name="CommentReplyButton"/>
+                    <Button 
+                        x:Name="DeleteButton" 
+                        Click="DeleteButton_Click"
+                        Content="Delete"
+                        Visibility="Collapsed"
+                        Style="{StaticResource TextBlockButtonStyle}"
+                        Padding="0" 
+                        FontSize="12"
+                        Foreground="{ThemeResource SystemAccentColor}"/>
                 </StackPanel>
 
                 <local:CommentInput 

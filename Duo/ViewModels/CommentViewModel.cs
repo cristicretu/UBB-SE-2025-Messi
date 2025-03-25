@@ -40,6 +40,7 @@ namespace Duo.ViewModels
         }
 
         public int Id => _comment.Id;
+        public int UserId => _comment.UserId;
         public int? ParentCommentId => _comment.ParentCommentId;
         public string Content => _comment.Content;
         public string Username => _comment.Username;

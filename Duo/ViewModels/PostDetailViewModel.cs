@@ -322,6 +322,34 @@ namespace Duo.ViewModels
             AddReplyToComment(data.Item1, data.Item2);
         }
 
+        public void DeleteComment(int commentId)
+         {
+             if (commentId <= 0 || Post == null || Post.Id <= 0)
+                 return;
+
+             try
+             {
+                 User currentUser = userService.GetCurrentUser();
+                 if (currentUser != null)
+                 {
+                     bool success = _commentService.DeleteComment(commentId, currentUser.UserId);
+                     if (success)
+                     {
+                         if (CollapsedComments.ContainsKey(commentId))
+                         {
+                             CollapsedComments.Remove(commentId);
+                         }
+
+                         LoadComments(Post.Id);
+                     }
+                 }
+             }
+             catch (Exception ex)
+             {
+                 System.Diagnostics.Debug.WriteLine($"Error deleting comment: {ex.Message}");
+             }
+         }
+
         public void AddReplyToComment(int parentCommentId, string replyText)
         {
             if (string.IsNullOrWhiteSpace(replyText) || Post == null || Post.Id <= 0 || parentCommentId <= 0)
