@@ -1,6 +1,7 @@
 ## UBB-SE-2025-Messi (Messi > Ronaldo)
 
-> 🌍 Duolingo-like  Learning App
+![CleanShot 2025-03-25 at 2  02 49@2x](https://github.com/user-attachments/assets/56bb5065-f478-4481-81dd-3cb8ba18745e)
+> Best looking Windows app ^^
 
 ## Dev
 
@@ -19,7 +20,7 @@ SqlLocalDB.exe start
 SqlLocalDB.exe info MSSQLLocalDB
 ```
 
-Go inside `Duo/Data` and from there run the `run_all_procedures.ps1` script to run all stored procedures.
+Go inside `Duo/Data` and from there run the `run_all_procedures.ps1` script to run all stored procedures. You can get mock data from [here](https://github.com/cristicretu/UBB-SE-2025-Messi/blob/main/Duo/Data/mockData.sql).
 
 ## Project Structure
 
