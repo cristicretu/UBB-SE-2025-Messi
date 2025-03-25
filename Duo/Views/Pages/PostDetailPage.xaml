@@ -51,7 +51,7 @@
 
                 <components:Post 
                     x:Name="PostDetail"
-                    Username="{x:Bind ViewModel.Post.Username, Mode=OneWay, FallbackValue='u/Unknown'}"
+                    Username="{x:Bind ViewModel.Post.Username, Mode=OneWay, FallbackValue='Unknown'}"
                     Date="{x:Bind ViewModel.Post.Date, Mode=OneWay, FallbackValue='Unknown date'}"
                     Title="{x:Bind ViewModel.Post.Title, Mode=OneWay, FallbackValue='Loading...'}"
                     Hashtags="{x:Bind ViewModel.Post.Hashtags, Mode=OneWay}"

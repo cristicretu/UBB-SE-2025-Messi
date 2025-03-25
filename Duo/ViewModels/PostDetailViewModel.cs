@@ -160,12 +160,12 @@ namespace Duo.ViewModels
                     try 
                     {
                         var user = _userService.GetUserById(post.UserID);
-                        post.Username = $"u/{user?.Username ?? "Unknown User"}";
+                        post.Username = $"{user?.Username ?? "Unknown User"}";
                     }
                     catch (Exception userEx)
                     {
                         System.Diagnostics.Debug.WriteLine($"Error getting user: {userEx.Message}");
-                        post.Username = "u/Unknown User";
+                        post.Username = "Unknown User";
                     }
 
                     try
