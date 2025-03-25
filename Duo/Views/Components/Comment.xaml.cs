@@ -178,7 +178,7 @@ namespace Duo.Views.Components
             ShowReplyInput();
         }
 
-        private void ReplyInput_CommentSubmitted(object sender, RoutedEventArgs e)
+        private void ReplyInput_CommentSubmitted(object sender, EventArgs e)
         {
             if (ViewModel == null) return;
             

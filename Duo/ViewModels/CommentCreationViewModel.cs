@@ -2,6 +2,7 @@ using System;
 using System.Windows.Input;
 using Duo.Commands;
 using Duo.ViewModels.Base;
+using Duo.Helpers;
 
 namespace Duo.ViewModels
 {
@@ -25,10 +26,23 @@ namespace Duo.ViewModels
             {
                 if (SetProperty(ref _commentText, value))
                 {
-                    // Clear error when text changes
-                    ErrorMessage = string.Empty;
+                    try 
+                    {
+                        if (!string.IsNullOrWhiteSpace(value))
+                        {
+                            ValidationHelper.ValidateComment(value);
+                            ErrorMessage = string.Empty;
+                        }
+                        else
+                        {
+                            ErrorMessage = "Comment cannot be empty.";
+                        }
+                    }
+                    catch (ArgumentException ex)
+                    {
+                        ErrorMessage = ex.Message;
+                    }
                     
-                    // Update command can execute state
                     (SubmitCommentCommand as RelayCommand)?.RaiseCanExecuteChanged();
                 }
             }
@@ -50,7 +64,7 @@ namespace Duo.ViewModels
 
         private bool CanSubmitComment()
         {
-            return !string.IsNullOrWhiteSpace(CommentText) && !IsSubmitting;
+            return !string.IsNullOrWhiteSpace(CommentText) && !IsSubmitting && string.IsNullOrEmpty(ErrorMessage);
         }
 
         private void SubmitComment()
@@ -62,10 +76,13 @@ namespace Duo.ViewModels
             
             try
             {
-                // Validate comment
-                if (CommentText.Length > 500)
+                try
                 {
-                    ErrorMessage = "Comment is too long (max 500 characters)";
+                    ValidationHelper.ValidateComment(CommentText);
+                }
+                catch (ArgumentException ex)
+                {
+                    ErrorMessage = ex.Message;
                     return;
                 }
 

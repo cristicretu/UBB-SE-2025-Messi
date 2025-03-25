@@ -60,9 +60,9 @@ namespace Duo.Views.Pages
             }
         }
 
-        private void CommentInputControl_CommentSubmitted(object sender, RoutedEventArgs e)
+        private void CommentInputControl_CommentSubmitted(object sender, EventArgs e)
         {
-            if (sender is Components.CommentInput commentInput && !string.IsNullOrWhiteSpace(commentInput.CommentText))
+            if (sender is CommentInput commentInput && !string.IsNullOrWhiteSpace(commentInput.CommentText))
             {
                 if (ViewModel.AddCommentCommand.CanExecute(commentInput.CommentText))
                 {

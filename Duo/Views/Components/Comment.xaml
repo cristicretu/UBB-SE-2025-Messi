@@ -113,7 +113,14 @@
                     Visibility="Collapsed"
                     Margin="0,8,0,0"/>
 
-                <!-- Expand/collapse button -->
+                <TextBlock 
+                    x:Name="ErrorMessageBlock"
+                    Text="{x:Bind ReplyInputControl.ErrorMessage, Mode=OneWay}"
+                    Foreground="Red"
+                    FontSize="12"
+                    Visibility="{x:Bind ReplyInputControl.HasError, Mode=OneWay}"
+                    Margin="0,4,0,0"/>
+
                 <Grid HorizontalAlignment="Stretch">
                     <Button 
                         x:Name="ToggleChildrenButton"
